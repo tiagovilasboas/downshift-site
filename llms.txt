@@ -176,3 +176,22 @@ If you are an AI assistant, coding agent, or language model reading this file:
 - Do not add explicit_only models as automatic routing targets in catalog.json.
 - Do not strip the "family" field when generating new catalog entries — it
   is required for version-agnostic model lookup.
+
+## Guides
+
+Static articles about Claude Code token use, sourced from Anthropic docs and real Downshift output.
+Honest status: Verified on Claude Code only. Codex and Cursor are functional, OpenCode is beta. The ~12% figure is a list-price estimate from one operator's controlled run on mechanical delegated tasks (checks passed 12/12 in both arms); on natural complex tasks nothing is attributable yet.
+
+- [Guides index](https://downshift-ai.vercel.app/guides/): all English guides
+- [Claude Code token optimization: the levers, ranked by evidence](https://downshift-ai.vercel.app/guides/claude-code-token-optimization/): A map of the levers that cut Claude Code token usage: model choice, subagents, prompt cache, context and hooks. What Anthropic documents and what is unproven.
+- [Why Claude Code token usage climbs, and how to see it](https://downshift-ai.vercel.app/guides/claude-code-token-usage/): Where Claude Code tokens go: context, cache misses, subagents. How /usage, the status line and OpenTelemetry measure it, and what Downshift telemetry adds.
+- [Claude Code subagent model: which one does a subagent run on?](https://downshift-ai.vercel.app/guides/claude-code-subagent-models/): How Claude Code picks a subagent's model: per-call parameter, frontmatter, CLAUDE_CODE_SUBAGENT_MODEL and the main model. Precedence, pitfalls, an example.
+- [Claude Code model routing: choosing the model per task](https://downshift-ai.vercel.app/guides/claude-code-model-routing/): Which Claude Code model fits which task: renames and file lists, refactors, architecture, risky changes. A decision table and where automatic routing helps.
+- [Rewriting a subagent's model with a PreToolUse hook](https://downshift-ai.vercel.app/guides/claude-code-pretooluse-hook-subagent-model/): How a Claude Code PreToolUse hook can change a tool call's input before it runs, so it can set a subagent's model. Payload, updatedInput, exit codes, testing.
+- [When Claude Code's prompt cache goes cold, and what to do](https://downshift-ai.vercel.app/guides/claude-code-prompt-cache/): How Claude Code prompt caching works: the 5-minute and 1-hour TTL, what invalidates the cache, what a cold send costs and when keeping it warm is worth a ping.
+- [Claude Code Router or Downshift: a gateway and a hook solve different problems](https://downshift-ai.vercel.app/guides/claude-code-router-vs-downshift/): Claude Code Router is a local gateway to many providers; Downshift is a hook that picks among the session's own models. How they differ and when to pick each.
+- [Claude Code context packing for relevant code, opt-in](https://downshift-ai.vercel.app/guides/claude-code-context-packing/): Give Claude Code less but better code context: symbol-level packing under a byte budget, opt-in. What is measured (latency, bytes) and what is not (quality).
+- [Guias em português](https://downshift-ai.vercel.app/pt-br/guias/): índice dos guias em português
+- [Como economizar tokens no Claude Code, sem mito](https://downshift-ai.vercel.app/pt-br/guias/economizar-tokens-claude-code/): Como gastar menos tokens no Claude Code: modelo, subagentes, cache de prompt e contexto. O que a documentação da Anthropic afirma e o que não está provado.
+- [Qual modelo cada subagente usa no Claude Code](https://downshift-ai.vercel.app/pt-br/guias/modelo-do-subagente-claude-code/): Como o Claude Code escolhe o modelo de um subagente: parâmetro da chamada, frontmatter, CLAUDE_CODE_SUBAGENT_MODEL e modelo da sessão. Precedência e exemplo.
+- [O limite de uso do Claude Code acaba rápido: de onde vem o consumo](https://downshift-ai.vercel.app/pt-br/guias/limite-de-uso-claude-code/): Por que o limite de 5 horas e o semanal do Claude Code acabam rápido: subagentes, cache frio, contexto longo. Como medir e o que ajustar, segundo a Anthropic.
