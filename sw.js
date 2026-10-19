@@ -1,4 +1,4 @@
-const V="ds-v7",RT="ds-v3-rt",RT_MAX=40,ASSETS=["/fonts/Geist-Variable.woff2","/favicon.svg","/downshift-logo-dark.svg","/downshift-logo-light.svg","/icon-192.png","/manifest.webmanifest"];
+const V="ds-v8",RT="ds-v4-rt",RT_MAX=40,ASSETS=["/fonts/Geist-Variable.woff2","/favicon.svg","/downshift-logo-dark.svg","/downshift-logo-light.svg","/icon-192.png","/manifest.webmanifest"];
 self.addEventListener("install",e=>{e.waitUntil(caches.open(V).then(c=>c.addAll(ASSETS)).then(()=>self.skipWaiting()))});
 self.addEventListener("activate",e=>{e.waitUntil(caches.keys().then(k=>Promise.all(k.filter(x=>x!==V&&x!==RT).map(x=>caches.delete(x)))).then(()=>self.clients.claim()))});
 // Only same-origin, 200-range, non-opaque responses are ever stored.
@@ -9,6 +9,6 @@ self.addEventListener("fetch",e=>{const r=e.request,u=new URL(r.url);
 if(r.method!=="GET"||u.origin!==location.origin)return;
 // Network-first navigations. Opaque redirects (/ -> /pt-br/ for BR) pass through untouched and are not cached.
 if(r.mode==="navigate"){e.respondWith(fetch(r).then(x=>{if(cacheable(x))e.waitUntil(put(RT,r,x.clone()));return x}).catch(()=>caches.match(r).then(x=>x||new Response("Offline",{status:503,headers:{"Content-Type":"text/plain"}}))));return}
-// Stale-while-revalidate for same-origin assets; slide SVGs (/img/en|pt/*.svg) land in the capped runtime cache, never precached.
+// Stale-while-revalidate for same-origin assets; everything not precached lands in the capped runtime cache.
 const name=ASSETS.includes(u.pathname)?V:RT;
 e.respondWith(caches.match(r).then(h=>{const n=fetch(r).then(x=>{if(cacheable(x))e.waitUntil(put(name,r,x.clone()));return x}).catch(()=>h||new Response("",{status:504}));if(h)e.waitUntil(n.catch(()=>{}));return h||n}))});
