@@ -2,7 +2,7 @@
 <title>Prompt cache hygiene: a cache block cooling from warm to cold over time</title>
 <defs>
 <radialGradient id="bg" cx="50%" cy="40%" r="75%"><stop offset="0" stop-color="#1a1a1a"/><stop offset="1" stop-color="#0a0a0a"/></radialGradient>
-<radialGradient id="gl" cx="15%" cy="40%" r="40%"><stop offset="0" stop-color="#22C55E" stop-opacity=".22"/><stop offset="1" stop-color="#22C55E" stop-opacity="0"/></radialGradient>
+<radialGradient id="gl" cx="15%" cy="40%" r="40%"><stop offset="0" stop-color="#E6E8EB" stop-opacity=".22"/><stop offset="1" stop-color="#E6E8EB" stop-opacity="0"/></radialGradient>
 <pattern id="gr" width="28" height="28" patternUnits="userSpaceOnUse"><path d="M28 0H0V28" fill="none" stroke="#fff" stroke-opacity=".05"/></pattern>
 <linearGradient id="fade" x1="0" y1="0" x2="0" y2="1"><stop offset=".55" stop-color="#fff"/><stop offset=".86" stop-color="#fff" stop-opacity="0"/></linearGradient>
 <mask id="m"><rect width="806" height="560" fill="url(#fade)"/></mask>
@@ -11,22 +11,22 @@
 <rect width="806" height="560" fill="url(#bg)"/>
 <rect width="806" height="560" fill="url(#gr)" mask="url(#m)"/>
 <rect width="806" height="560" fill="url(#gl)"/>
-<defs><linearGradient id="cool" gradientUnits="userSpaceOnUse" x1="80" y1="0" x2="600" y2="0"><stop offset="0" stop-color="#22C55E"/><stop offset=".5" stop-color="#22C55E" stop-opacity=".35"/><stop offset="1" stop-color="#6b7280" stop-opacity=".5"/></linearGradient></defs>
-<rect x="82.0" y="150" width="36.0" height="150" rx="3" fill="#22C55E" fill-opacity="0.45" stroke="#22C55E" stroke-opacity="0.90"/>
-<rect x="122.0" y="150" width="36.0" height="150" rx="3" fill="#22C55E" fill-opacity="0.42" stroke="#22C55E" stroke-opacity="0.84"/>
-<rect x="162.0" y="150" width="36.0" height="150" rx="3" fill="#22C55E" fill-opacity="0.39" stroke="#22C55E" stroke-opacity="0.78"/>
-<rect x="202.0" y="150" width="36.0" height="150" rx="3" fill="#22C55E" fill-opacity="0.36" stroke="#22C55E" stroke-opacity="0.71"/>
-<rect x="242.0" y="150" width="36.0" height="150" rx="3" fill="#22C55E" fill-opacity="0.33" stroke="#22C55E" stroke-opacity="0.65"/>
-<rect x="282.0" y="150" width="36.0" height="150" rx="3" fill="#22C55E" fill-opacity="0.29" stroke="#22C55E" stroke-opacity="0.59"/>
-<rect x="322.0" y="150" width="36.0" height="150" rx="3" fill="#22C55E" fill-opacity="0.26" stroke="#22C55E" stroke-opacity="0.53"/>
-<rect x="362.0" y="150" width="36.0" height="150" rx="3" fill="#22C55E" fill-opacity="0.23" stroke="#22C55E" stroke-opacity="0.46"/>
+<defs><linearGradient id="cool" gradientUnits="userSpaceOnUse" x1="80" y1="0" x2="600" y2="0"><stop offset="0" stop-color="#E6E8EB"/><stop offset=".5" stop-color="#E6E8EB" stop-opacity=".35"/><stop offset="1" stop-color="#6b7280" stop-opacity=".5"/></linearGradient></defs>
+<rect x="82.0" y="150" width="36.0" height="150" rx="3" fill="#E6E8EB" fill-opacity="0.45" stroke="#E6E8EB" stroke-opacity="0.90"/>
+<rect x="122.0" y="150" width="36.0" height="150" rx="3" fill="#E6E8EB" fill-opacity="0.42" stroke="#E6E8EB" stroke-opacity="0.84"/>
+<rect x="162.0" y="150" width="36.0" height="150" rx="3" fill="#E6E8EB" fill-opacity="0.39" stroke="#E6E8EB" stroke-opacity="0.78"/>
+<rect x="202.0" y="150" width="36.0" height="150" rx="3" fill="#E6E8EB" fill-opacity="0.36" stroke="#E6E8EB" stroke-opacity="0.71"/>
+<rect x="242.0" y="150" width="36.0" height="150" rx="3" fill="#E6E8EB" fill-opacity="0.33" stroke="#E6E8EB" stroke-opacity="0.65"/>
+<rect x="282.0" y="150" width="36.0" height="150" rx="3" fill="#E6E8EB" fill-opacity="0.29" stroke="#E6E8EB" stroke-opacity="0.59"/>
+<rect x="322.0" y="150" width="36.0" height="150" rx="3" fill="#E6E8EB" fill-opacity="0.26" stroke="#E6E8EB" stroke-opacity="0.53"/>
+<rect x="362.0" y="150" width="36.0" height="150" rx="3" fill="#E6E8EB" fill-opacity="0.23" stroke="#E6E8EB" stroke-opacity="0.46"/>
 <rect x="402.0" y="150" width="36.0" height="150" rx="3" fill="#9ca3af" fill-opacity="0.20" stroke="#9ca3af" stroke-opacity="0.40"/>
 <rect x="442.0" y="150" width="36.0" height="150" rx="3" fill="#9ca3af" fill-opacity="0.17" stroke="#9ca3af" stroke-opacity="0.34"/>
 <rect x="482.0" y="150" width="36.0" height="150" rx="3" fill="#9ca3af" fill-opacity="0.14" stroke="#9ca3af" stroke-opacity="0.28"/>
 <rect x="522.0" y="150" width="36.0" height="150" rx="3" fill="#9ca3af" fill-opacity="0.11" stroke="#9ca3af" stroke-opacity="0.21"/>
 <rect x="562.0" y="150" width="36.0" height="150" rx="3" fill="#9ca3af" fill-opacity="0.08" stroke="#9ca3af" stroke-opacity="0.15"/>
 <rect x="80" y="150" width="520" height="150" rx="6" fill="#fff" fill-opacity=".04" filter="url(#bl)" opacity="0"/>
-<rect x="50" y="120" width="200" height="210" fill="#22C55E" opacity=".12" filter="url(#bl)"/>
+<rect x="50" y="120" width="200" height="210" fill="#E6E8EB" opacity=".12" filter="url(#bl)"/>
 <line x1="80" y1="328" x2="600" y2="328" stroke="url(#cool)" stroke-width="2"/>
 <line x1="80" y1="322" x2="80" y2="334" stroke="#fff" stroke-opacity=".25"/>
 <line x1="184" y1="322" x2="184" y2="334" stroke="#fff" stroke-opacity=".25"/>
@@ -34,7 +34,7 @@
 <line x1="392" y1="322" x2="392" y2="334" stroke="#fff" stroke-opacity=".25"/>
 <line x1="496" y1="322" x2="496" y2="334" stroke="#fff" stroke-opacity=".25"/>
 <line x1="600" y1="322" x2="600" y2="334" stroke="#fff" stroke-opacity=".25"/>
-<text x="80" y="136" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="10" fill="#22C55E" fill-opacity=".8">cache_read</text>
+<text x="80" y="136" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="10" fill="#E6E8EB" fill-opacity=".8">cache_read</text>
 <text x="600" y="136" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="10" fill="#fff" fill-opacity=".35" text-anchor="end">ttl 5m</text>
 <circle cx="690" cy="225" r="52" stroke="#fff" stroke-opacity=".2" stroke-width="1" fill="none"/>
 <circle cx="690" cy="225" r="66" stroke="#fff" stroke-opacity=".07" fill="none"/>
@@ -50,8 +50,8 @@
 <line x1="644.0" y1="225.0" x2="638.0" y2="225.0" stroke="#fff" stroke-opacity=".3"/>
 <line x1="650.2" y1="202.0" x2="645.0" y2="199.0" stroke="#fff" stroke-opacity=".3"/>
 <line x1="667.0" y1="185.2" x2="664.0" y2="180.0" stroke="#fff" stroke-opacity=".3"/>
-<path d="M690 173 A52 52 0 0 1 735.0 251.0" fill="none" stroke="#22C55E" stroke-width="2"/>
+<path d="M690 173 A52 52 0 0 1 735.0 251.0" fill="none" stroke="#E6E8EB" stroke-width="2"/>
 <line x1="690" y1="225" x2="690" y2="191" stroke="#fff" stroke-opacity=".7" stroke-width="1.5"/>
-<line x1="690" y1="225" x2="712" y2="238" stroke="#22C55E" stroke-width="1.5"/>
-<circle cx="690" cy="225" r="3" fill="#22C55E"/>
+<line x1="690" y1="225" x2="712" y2="238" stroke="#E6E8EB" stroke-width="1.5"/>
+<circle cx="690" cy="225" r="3" fill="#E6E8EB"/>
 </svg>
