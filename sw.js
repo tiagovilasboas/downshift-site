@@ -1,4 +1,4 @@
-const V="ds-v2",RT="ds-v2-rt",RT_MAX=40,ASSETS=["/favicon.svg","/downshift-logo-dark.svg","/downshift-logo-light.svg","/icon-192.png","/manifest.webmanifest"];
+const V="ds-v3",RT="ds-v3-rt",RT_MAX=40,ASSETS=["/fonts/Geist-Variable.woff2","/favicon.svg","/downshift-logo-dark.svg","/downshift-logo-light.svg","/icon-192.png","/manifest.webmanifest"];
 self.addEventListener("install",e=>{e.waitUntil(caches.open(V).then(c=>c.addAll(ASSETS)).then(()=>self.skipWaiting()))});
 self.addEventListener("activate",e=>{e.waitUntil(caches.keys().then(k=>Promise.all(k.filter(x=>x!==V&&x!==RT).map(x=>caches.delete(x)))).then(()=>self.clients.claim()))});
 // Only same-origin, 200-range, non-opaque responses are ever stored.

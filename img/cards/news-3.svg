@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="586" height="310" viewBox="0 0 586 310" role="img">
+<title>Every harness</title>
+<defs>
+<radialGradient id="bg" cx="50%" cy="40%" r="75%"><stop offset="0" stop-color="#1a1a1a"/><stop offset="1" stop-color="#0a0a0a"/></radialGradient>
+<radialGradient id="gl" cx="50%" cy="42%" r="40%"><stop offset="0" stop-color="#22C55E" stop-opacity=".22"/><stop offset="1" stop-color="#22C55E" stop-opacity="0"/></radialGradient>
+<pattern id="gr" width="24" height="24" patternUnits="userSpaceOnUse"><path d="M24 0H0V24" fill="none" stroke="#fff" stroke-opacity=".05"/></pattern>
+<linearGradient id="fade" x1="0" y1="0" x2="0" y2="1"><stop offset=".55" stop-color="#fff"/><stop offset=".86" stop-color="#fff" stop-opacity="0"/></linearGradient>
+<mask id="m"><rect width="586" height="310" fill="url(#fade)"/></mask>
+<filter id="bl" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="6"/></filter>
+</defs>
+<rect width="586" height="310" fill="url(#bg)"/>
+<rect width="586" height="310" fill="url(#gr)" mask="url(#m)"/>
+<rect width="586" height="310" fill="url(#gl)"/>
+<path d="M293 130 C 186.5 130, 186.5 60, 80 60" fill="none" stroke="#fff" stroke-opacity=".45"/>
+<rect x="58" y="46" width="44" height="28" rx="6" fill="#0f0f0f" stroke="#fff" stroke-opacity=".45"/>
+<path d="M293 130 C 201.5 130, 201.5 200, 110 200" fill="none" stroke="#fff" stroke-opacity=".3" stroke-dasharray="4 5"/>
+<rect x="88" y="186" width="44" height="28" rx="6" fill="#0f0f0f" stroke="#fff" stroke-opacity=".3" stroke-dasharray="4 5"/>
+<path d="M293 130 C 251.5 130, 251.5 40, 210 40" fill="none" stroke="#22C55E" stroke-width="1.5"/>
+<rect x="188" y="26" width="44" height="28" rx="6" fill="#0f0f0f" stroke="#22C55E" stroke-width="1.5"/>
+<circle cx="210" cy="40" r="5" fill="#22C55E"/>
+<path d="M293 130 C 334.5 130, 334.5 40, 376 40" fill="none" stroke="#fff" stroke-opacity=".45"/>
+<rect x="354" y="26" width="44" height="28" rx="6" fill="#0f0f0f" stroke="#fff" stroke-opacity=".45"/>
+<path d="M293 130 C 384.5 130, 384.5 200, 476 200" fill="none" stroke="#fff" stroke-opacity=".3" stroke-dasharray="4 5"/>
+<rect x="454" y="186" width="44" height="28" rx="6" fill="#0f0f0f" stroke="#fff" stroke-opacity=".3" stroke-dasharray="4 5"/>
+<path d="M293 130 C 399.5 130, 399.5 60, 506 60" fill="none" stroke="#fff" stroke-opacity=".3" stroke-dasharray="4 5"/>
+<rect x="484" y="46" width="44" height="28" rx="6" fill="#0f0f0f" stroke="#fff" stroke-opacity=".3" stroke-dasharray="4 5"/>
+<circle cx="293" cy="130" r="34" fill="#22C55E" opacity=".3" filter="url(#bl)"/>
+<circle cx="293" cy="130" r="26" fill="#0f0f0f" stroke="#22C55E" stroke-width="1.5"/><circle cx="293" cy="130" r="7" fill="#22C55E"/>
+</svg>
