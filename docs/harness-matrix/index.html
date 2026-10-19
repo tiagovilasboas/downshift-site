@@ -1,0 +1,428 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Downshift harness matrix: Claude Code, Codex, Cursor status</title>
+<meta name="description" content="Which harnesses honor Downshift&#x27;s model rewrite: status per harness, plan limits, and child end and usage observation for Claude Code, Codex and Cursor.">
+<link rel="canonical" href="https://downshift-ai.vercel.app/docs/harness-matrix/">
+<link rel="alternate" hreflang="en" href="https://downshift-ai.vercel.app/docs/harness-matrix/">
+<link rel="alternate" hreflang="x-default" href="https://downshift-ai.vercel.app/docs/harness-matrix/">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/icon-192.png">
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#0a0a0a">
+<meta name="color-scheme" content="dark">
+<meta name="robots" content="index,follow,max-image-preview:large">
+<meta name="author" content="Tiago Vilas Boas">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Downshift">
+<meta property="og:locale" content="en_US">
+<meta property="og:title" content="Downshift harness matrix: Claude Code, Codex, Cursor status">
+<meta property="og:description" content="Which harnesses honor Downshift&#x27;s model rewrite: status per harness, plan limits, and child end and usage observation for Claude Code, Codex and Cursor.">
+<meta property="og:url" content="https://downshift-ai.vercel.app/docs/harness-matrix/">
+<meta property="og:image" content="https://downshift-ai.vercel.app/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Downshift logo with the line: Right model for every subagent. No LLM in the loop.">
+<meta property="article:modified_time" content="2026-10-19">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Downshift harness matrix: Claude Code, Codex, Cursor status">
+<meta name="twitter:description" content="Which harnesses honor Downshift&#x27;s model rewrite: status per harness, plan limits, and child end and usage observation for Claude Code, Codex and Cursor.">
+<meta name="twitter:image" content="https://downshift-ai.vercel.app/og.png">
+<meta name="twitter:image:alt" content="Downshift logo with the line: Right model for every subagent. No LLM in the loop.">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"TechArticle","headline":"Harness x plan x rewrite-honored matrix","description":"Which harnesses honor Downshift's model rewrite: status per harness, plan limits, and child end and usage observation for Claude Code, Codex and Cursor.","inLanguage":"en","dateModified":"2026-10-19","author":{"@type":"Person","name":"Tiago Vilas Boas","url":"https://github.com/tiagovilasboas"},"publisher":{"@type":"Organization","name":"Downshift","url":"https://downshift-ai.vercel.app/","logo":{"@type":"ImageObject","url":"https://downshift-ai.vercel.app/icon-512.png","width":512,"height":512}},"image":"https://downshift-ai.vercel.app/og.png","mainEntityOfPage":{"@type":"WebPage","@id":"https://downshift-ai.vercel.app/docs/harness-matrix/"},"isPartOf":{"@type":"CollectionPage","@id":"https://downshift-ai.vercel.app/docs/"},"isBasedOn":"https://github.com/tiagovilasboas/downshift/blob/main/docs/reference/harness-matrix.md","about":{"@type":"SoftwareApplication","name":"Downshift","url":"https://downshift-ai.vercel.app/","codeRepository":"https://github.com/tiagovilasboas/downshift","applicationCategory":"DeveloperApplication"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://downshift-ai.vercel.app/"},{"@type":"ListItem","position":2,"name":"Docs","item":"https://downshift-ai.vercel.app/docs/"},{"@type":"ListItem","position":3,"name":"Harness x plan x rewrite-honored matrix","item":"https://downshift-ai.vercel.app/docs/harness-matrix/"}]}]}</script>
+<link rel="preload" href="/fonts/Geist-Variable.woff2" as="font" type="font/woff2" crossorigin>
+<style>@font-face{font-family:"Geist";src:url(/fonts/Geist-Variable.woff2) format("woff2");font-weight:100 900;font-style:normal;font-display:swap}@font-face{font-family:"Geist Mono";src:url(/fonts/GeistMono-Variable.woff2) format("woff2");font-weight:100 900;font-style:normal;font-display:swap}@font-face{font-family:"Geist Fallback";src:local("Arial"),local("Helvetica");size-adjust:104.8%;ascent-override:95.9%;descent-override:28.2%;line-gap-override:0%}:root{color-scheme:dark;--b:#0a0a0a;--c:#141414;--l:#1f2329;--f:#d6dae2;--t:#fff;--m:#9a9ea5;--a:#22C55E;--r:#22C55E;--sb:#1f1f1f;--sf:#fff;--pb:#fff;--pf:#000;--cb:#121212;--ct:#e6edf3;--ss:"Geist","Geist Fallback",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;--mo:"Geist Mono",ui-monospace,SFMono-Regular,Menlo,monospace}@media not all{:root{--b:#fafafa;--c:#fff;--l:#d9dde3;--f:#1f2937;--t:#0a0a0a;--m:#4b5563;--a:#166534;--r:#0a0a0a;--sb:#eceff3;--sf:#0a0a0a;--pb:#0a0a0a;--pf:#fff;--cb:#f1f3f6;--ct:#111827}}*{box-sizing:border-box}html{-webkit-text-size-adjust:100%;text-size-adjust:100%;scroll-padding-top:88px}body{margin:0;background:var(--b);color:var(--f);font:16px/1.65 var(--ss);-webkit-font-smoothing:antialiased}::selection{background:color-mix(in srgb,var(--a) 35%,transparent);color:var(--t)}a{color:var(--t);text-underline-offset:3px}a:hover{text-decoration-color:var(--a)}a:focus-visible{outline:2px solid var(--r);outline-offset:3px;border-radius:6px}.w{max-width:1280px;margin:0 auto;padding:0 16px}@media(min-width:1024px){.w{padding:0 24px}}h1,h2,h3{color:var(--t);font-weight:500;letter-spacing:-.025em;margin:0;text-wrap:balance}header{position:sticky;top:0;z-index:10;background:color-mix(in srgb,var(--b) 88%,transparent);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border-bottom:1px solid var(--l)}header nav{display:flex;align-items:center;gap:4px;height:72px}.lg{display:inline-flex;align-items:center;min-height:44px;margin-right:auto}.lg img{display:block;height:40px;width:auto}.nl{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 12px;border-radius:999px;color:var(--m);text-decoration:none;font-size:14px}.nl:hover{color:var(--t);background:var(--sb)}.nl.ds{display:none}@media(min-width:640px){.nl.ds{display:inline-flex}}.nl.lang{min-width:44px;background:var(--sb);color:var(--sf);font-weight:500;font-size:13px}.bc ol{list-style:none;margin:0 auto;padding:16px 0 0;font-size:14px;color:var(--m);max-width:1024px}.bc li{display:inline;margin:0}.bc li+li:before{content:"/";margin:0 8px;color:var(--m)}.bc a{color:var(--m);display:inline-flex;align-items:center;min-height:44px;text-decoration:none}.bc a:hover{color:var(--t)}.bc [aria-current]{color:var(--f);overflow-wrap:anywhere}article{max-width:720px;margin:0 auto;padding:8px 0 96px}article>*{min-width:0}@media(min-width:1100px){.ga{display:grid;max-width:1024px;grid-template-columns:240px minmax(0,720px);column-gap:64px;align-items:start}.ga>.top,.ga>.bd{grid-column:2}.ga>.toc{grid-column:1;grid-row:1/span 2;position:sticky;top:96px;max-height:calc(100vh - 120px);overflow-y:auto}}h1{font-size:34px;line-height:1.12;font-weight:450;margin:16px 0 0}@media(min-width:640px){h1{font-size:46px}}h2{font-size:24px;line-height:1.25;margin:56px 0 16px}@media(min-width:640px){h2{font-size:30px}}h3{font-size:18px;line-height:1.35;margin:32px 0 8px}p{margin:0 0 16px}.by{margin:16px 0 0;color:var(--m);font-size:14px}.by a{color:var(--m)}.dis{margin:8px 0 0;color:var(--m);font-size:14px}.tl{margin:32px 0 0;background:var(--c);border:1px solid var(--l);border-left:2px solid var(--a);border-radius:4px 16px 16px 4px;padding:16px 20px}.tl p{margin:0;color:var(--f)}.lbl{margin:0 0 8px;font:500 12px var(--ss);letter-spacing:.04em;text-transform:uppercase;color:var(--m)}.toc{margin:32px 0 0;border:1px solid var(--l);border-radius:16px;padding:16px 20px;background:var(--c)}@media(min-width:1100px){.toc{margin:24px 0 0 -4px;border:0;padding:0 0 0 4px;background:none}}.toc ol{list-style:none;margin:0;padding:0;font-size:14px}.toc a{display:flex;align-items:center;min-height:44px;color:var(--m);text-decoration:none;line-height:1.35;padding:4px 0}.toc a:hover{color:var(--t)}ul,ol{margin:0 0 16px;padding-left:24px}li{margin:4px 0}li::marker{color:var(--m)}code{font:.88em var(--mo);background:var(--sb);border:1px solid var(--l);border-radius:6px;padding:1px 6px}pre{margin:0 0 16px;background:var(--cb);color:var(--ct);border:1px solid var(--l);border-radius:12px;padding:16px;overflow-x:auto;font:13px/1.6 var(--mo)}pre code{font:inherit;background:none;border:0;padding:0;color:inherit}pre:focus-visible,.tw:focus-visible{outline:2px solid var(--r);outline-offset:2px}.tw{margin:0 0 16px;overflow-x:auto;border:1px solid var(--l);border-radius:12px}table{border-collapse:collapse;width:100%;font-size:14px;line-height:1.5}th,td{text-align:left;vertical-align:top;padding:10px 14px;border-bottom:1px solid var(--l);min-width:120px}th{color:var(--t);font-weight:500;background:var(--c)}tr:last-child td{border-bottom:0}.co{margin:0 0 16px;background:var(--c);border:1px solid var(--l);border-left:2px solid var(--t);border-radius:4px 16px 16px 4px;padding:16px 20px}.co p:last-child{margin:0}.co.warn{border-left-color:var(--a)}.ex{margin:56px 0 0;border:1px solid var(--l);border-radius:16px;padding:0 20px 4px}@media(min-width:640px){.ex{padding:0 28px 8px}}.ex h2{margin-top:24px}.src{color:var(--m);font-size:14px}.faq h3{margin-top:24px}.faq p{color:var(--f)}.cta{margin:56px 0 0;background:var(--c);border:1px solid var(--l);border-radius:16px;padding:24px}@media(min-width:640px){.cta{padding:32px}}.cta h2{margin-top:0}.cta pre{white-space:pre-wrap;overflow-wrap:anywhere}.btns{display:flex;flex-wrap:wrap;gap:12px;margin-top:8px}.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 20px;border-radius:999px;background:var(--sb);color:var(--sf);font-weight:500;font-size:15px;text-decoration:none}.btn:hover{opacity:.86}.btn.p{background:var(--pb);color:var(--pf)}.btn svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}.rel,.srcs,.gl{list-style:none;padding:0;margin:0}.rel li{margin:0;border-top:1px solid var(--l)}.rel li:last-child{border-bottom:1px solid var(--l)}.rel a{display:flex;align-items:center;min-height:56px;padding:8px 0;text-decoration:none;color:var(--t);font-weight:500}.rel a:hover{color:var(--a)}.rel span{color:var(--m);font-weight:400;margin-left:8px;font-size:14px}.srcs li{margin:0;padding:12px 0;border-top:1px solid var(--l);font-size:14px;color:var(--m)}.srcs a{display:inline-flex;align-items:center;min-height:44px;overflow-wrap:anywhere;word-break:break-word}.srcs strong{color:var(--f);font-weight:500}.ev{display:inline-block;margin-left:8px;border:1px solid var(--l);border-radius:999px;padding:0 8px;font-size:12px;color:var(--m)}.gl{margin-top:32px}.gl li{margin:0;padding:24px 0;border-top:1px solid var(--l)}.gl h2{margin:0 0 8px;font-size:22px}.gl h2 a{text-decoration:none;display:inline-flex;min-height:44px;align-items:center}.gl h2 a:hover{color:var(--a)}.gl p{margin:0;color:var(--m)}.lead{margin:16px 0 0;font-size:18px;color:var(--m)}.alt{margin-top:48px;color:var(--m)}footer{border-top:1px solid var(--l);padding:48px 0 32px;color:var(--m);font-size:14px}.fg{display:grid;grid-template-columns:1fr 1fr;gap:24px 48px}@media(min-width:768px){.fg{grid-template-columns:repeat(3,1fr)}}.fg ul{list-style:none;margin:0;padding:0}.fg li{margin:0}.fh{margin:0 0 4px;color:var(--t);font-weight:500}footer a{color:var(--m);text-decoration:none;display:inline-flex;align-items:center;min-height:44px}footer a:hover{color:var(--t)}.legal{margin:32px 0 0;padding-top:24px;border-top:1px solid var(--l);font-size:12px;display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 24px}.legal p{margin:0}.cnpj{opacity:.75;letter-spacing:.02em}@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}</style>
+</head>
+<body>
+<header><div class="w"><nav aria-label="Main"><a class="lg" href="/" aria-label="Downshift"><picture><source srcset="/downshift-logo-dark.svg" media="(prefers-color-scheme:dark)"><img src="/downshift-logo-dark.svg" alt="Downshift" width="258" height="60"></picture></a><a class="nl" href="/guides/">Guides</a><a class="nl ds" href="/docs/">Docs</a><a class="nl ds" href="https://github.com/tiagovilasboas/downshift" rel="noopener">GitHub</a><a class="nl lang" href="/pt-br/guias/" hreflang="pt-BR" lang="pt-BR" aria-label="Guias em português">PT</a></nav></div></header>
+<main class="w"><nav class="bc" aria-label="Breadcrumb"><ol><li><a href="/">Home</a></li><li><a href="/docs/">Docs</a></li><li><span aria-current="page">Harness x plan x rewrite-honored matrix</span></li></ol></nav><article class="ga"><div class="top"><h1>Harness x plan x rewrite-honored matrix</h1><p class="by">Downshift by <a href="https://github.com/tiagovilasboas/downshift" rel="noopener">Tiago Vilas Boas</a>. Updated <time datetime="2026-10-19">19 October 2026</time>. <a href="https://github.com/tiagovilasboas/downshift/blob/main/docs/reference/harness-matrix.md" rel="noopener">Source on GitHub</a></p><p class="dis">Downshift here is a Go tool for AI coding agents, not the React downshift autocomplete library and unrelated to any car transmission.</p></div><nav class="toc" aria-labelledby="toc-h"><p class="lbl" id="toc-h">On this page</p><ol><li><a href="#status-per-harness">Status per harness</a></li><li><a href="#decision-linkage-current-model-and-post-spawn-cost">Decision linkage (current model and post-spawn cost)</a></li><li><a href="#what-each-harness-exposes-for-session-discovery-2026-10-1112">What each harness exposes for session discovery (2026-10-11/12)</a></li><li><a href="#child-end-n5-2026-10-13">Child end (N5, 2026-10-13)</a></li><li><a href="#child-end-line-u2-2026-10-13">Child-end line (U2, 2026-10-13)</a></li><li><a href="#spawn-state-2026-10-19">Spawn state (2026-10-19)</a></li><li><a href="#session-view-u3-2026-10-13">Session view (U3, 2026-10-13)</a></li><li><a href="#public-score-coverage-capability-path">Public score coverage (capability path)</a></li><li><a href="#bundled-and-sibling-mods-2026-10-17">Bundled and sibling mods (2026-10-17)</a></li><li><a href="#answer-when-nothing-is-rewritten-2026-10-19">Answer when nothing is rewritten (2026-10-19)</a></li><li><a href="#revalidation">Revalidation</a></li><li><a href="#sources-readmedocs-only-no-vendor-claims">Sources (README/docs only, no vendor claims)</a></li><li><a href="#more-docs">More docs</a></li></ol></nav><div class="bd"><p>Downshift by Tiago Vilas Boas <a href="https://github.com/tiagovilasboas/downshift" rel="noopener">https://github.com/tiagovilasboas/downshift</a></p>
+<h2 id="status-per-harness">Status per harness</h2>
+<p>Each harness carries exactly one of four status words (owner decision 2026-10-17; Beta added 2026-10-18); the table below it keeps the per-plan facts.</p>
+<ul>
+<li><strong>Completed:</strong> rewrite observed honored on a real child, usage and child end recorded, plugin and session policy.</li>
+<li><strong>Functional:</strong> the hook emits the rewrite on a real spawn and passes the shared conformance suite; observation is partial (honored is inferred or unconfirmed, no child usage).</li>
+<li><strong>Beta:</strong> first-class integration under active development — adapter, route wire and shared conformance in the repository and green; the harness-side plugin and the first live observation are still ahead, so no live spawn is observed yet and there is no production claim (owner decision 2026-10-18).</li>
+<li><strong>Experimental (proof of concept):</strong> policy mode or one observed child on one build; shipped, but no production claim.</li>
+</ul>
+<p><code>cmd/downshift/conformance_test.go</code> drives the same 8 routing scenarios against every registered hook, so each harness below, whatever its status, computes every feature (layering rule); the status says how much has been verified on the real harness, not how much code it runs.</p>
+<div class="tw" role="region" aria-label="harness, status, why, evidence" tabindex="0"><table>
+<thead>
+<tr>
+<th scope="col">harness</th>
+<th scope="col">status</th>
+<th scope="col">why</th>
+<th scope="col">evidence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>claude-code</td>
+<td>Completed</td>
+<td>Rewrite observed honored (2026-10-06, API-reported child model); usage priced from the child transcript at <code>SubagentStop</code>; child end recorded; plugin and session policy ship. Failure payload is still GAP-CHILD-FAILURE (see "Child end" below).</td>
+<td><a href="https://github.com/tiagovilasboas/downshift/blob/main/docs/evidence/claude-code-rewrite-honored-2026-10-06.md" rel="noopener">rewrite honored</a>, <a href="https://github.com/tiagovilasboas/downshift/blob/main/docs/evidence/billing-gap-audit.md" rel="noopener">billing audit</a>, <a href="/docs/subagent-routing-ab-2026-10-15/">routing A/B</a></td>
+</tr>
+<tr>
+<td>codex</td>
+<td>Functional</td>
+<td>Rewrite emitted on a real spawn; honored is inferred from the next spawn, not observed; child end parser unverified, no usage source.</td>
+<td><a href="https://github.com/tiagovilasboas/downshift/blob/main/docs/evidence/codex-rewrite-honored-2026-10-02.md" rel="noopener">codex rewrite</a></td>
+</tr>
+<tr>
+<td>cursor</td>
+<td>Functional</td>
+<td>Rewrite emitted on a real spawn; the child executor model is absent from the transcript, so honored is unconfirmed (discarded on Free and legacy Pro); end parser unverified, no usage; native quota collector blocked on Cursor 3.24.9.</td>
+<td><a href="https://github.com/tiagovilasboas/downshift/blob/main/docs/evidence/cursor-rewrite-honored-2026-10-10.md" rel="noopener">cursor rewrite</a>, <a href="https://github.com/tiagovilasboas/downshift/blob/main/docs/evidence/cursor-gap-diagnostic.md" rel="noopener">gap diagnostic</a></td>
+</tr>
+<tr>
+<td>kirocrew</td>
+<td>Experimental</td>
+<td>Policy mode: block and retry observed once on Kiro CLI 2.29.0, no in-place rewrite; no child end recorded.</td>
+<td><a href="https://github.com/tiagovilasboas/downshift/blob/main/docs/evidence/kirocrew-native-hook-2026-10-10.md" rel="noopener">native hook</a></td>
+</tr>
+<tr>
+<td>antigravity</td>
+<td>Experimental</td>
+<td>One observed child on desktop 2.21.1 (requested <code>pro</code>, executed <code>flash_lite</code>); the <code>overwrite</code> envelope is not a documented vendor field; no child end recorded; quota mapping unresolved.</td>
+<td><a href="https://github.com/tiagovilasboas/downshift/blob/main/docs/evidence/antigravity-executor-ack.md" rel="noopener">executor ack</a>, <a href="https://github.com/tiagovilasboas/downshift/blob/main/docs/evidence/antigravity-runtime-source.md" rel="noopener">runtime source</a></td>
+</tr>
+<tr>
+<td>opencode</td>
+<td>Beta</td>
+<td>First-class integration under active development (owner decision 2026-10-18): adapter, route wire v1 and shared conformance in the repository; the forwarding plugin is in development and no live spawn is observed yet. Route answers, fail-open paths and observation parsing are covered by adapter tests and the shared conformance suite. No child end recorded yet; usage seam not proven.</td>
+<td><a href="https://github.com/tiagovilasboas/downshift/tree/main/internal/adapters/opencode" rel="noopener">adapter tests</a>, <a href="https://github.com/tiagovilasboas/downshift/blob/main/cmd/downshift/conformance_test.go" rel="noopener">conformance</a></td>
+</tr>
+<tr>
+<td>grok</td>
+<td>Config only</td>
+<td>No hook rewrite; reasoning is pinned in <code>config.toml</code>.</td>
+<td><a href="/docs/install/#grok-cli-config-not-hook">install.md</a></td>
+</tr>
+</tbody>
+</table></div>
+<p>"Rewrite honored" means the harness executor applied the hook's model rewrite to the child subagent, not just that downshift emitted one. <code>outcome: "rewrite_emitted"</code> proves emission only (docs/reference/session-models.md:17).</p>
+<div class="tw" role="region" aria-label="harness, plan / build, rewrite honored?, evidence / limit" tabindex="0"><table>
+<thead>
+<tr>
+<th scope="col">harness</th>
+<th scope="col">plan / build</th>
+<th scope="col">rewrite honored?</th>
+<th scope="col">evidence / limit</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>claude-code</td>
+<td>paid: Pro / Max / Teams / API</td>
+<td>Yes, 2026-10-06 (two spawns; API-reported model in the child transcript)</td>
+<td><code>updatedInput.model</code> must be a family name (<code>haiku</code>/<code>sonnet</code>/<code>opus</code>/<code>fable</code>); a full id is rejected and blocks the spawn. The catalog <code>native_name</code> supplies it. Write-up: <code>docs/evidence/claude-code-rewrite-honored-2026-10-06.md</code>. Without <code>session-models.json</code> the session is inferred from the current model (downshift only, never above it); a list is needed only to allow upshifts.</td>
+</tr>
+<tr>
+<td>claude-code</td>
+<td>Free</td>
+<td>No: no real subagents</td>
+<td>Sandboxed, no egress; subagents need paid (README.md:728)</td>
+</tr>
+<tr>
+<td>cursor</td>
+<td>Free</td>
+<td>No: silently discarded</td>
+<td><code>updated_input.model</code> ignored, known issue (README.md:734)</td>
+</tr>
+<tr>
+<td>cursor</td>
+<td>Pro legacy (request-based)</td>
+<td>No: silently dropped</td>
+<td>Task model takes only <code>"fast"</code> (README.md:735)</td>
+</tr>
+<tr>
+<td>cursor</td>
+<td>Pro / Ultra usage-based</td>
+<td>Unconfirmed</td>
+<td>Actual child-model proof remains P1.6. Separately, Cursor 3.24.9 blocks the external native quota collector before transport; see <a href="https://github.com/tiagovilasboas/downshift/blob/main/docs/evidence/cursor-gap-diagnostic.md" rel="noopener">diagnostic</a>.</td>
+</tr>
+<tr>
+<td>codex</td>
+<td>multi_agent_v2 + hooks on</td>
+<td>Yes, inferred (2026-10-02)</td>
+<td>Inferred, not observed: same-session follow-up: spawn requested <code>gpt-5.6-terra</code> after hook emitted Terra (<code>docs/evidence/codex-rewrite-honored-2026-10-02.md</code>). Payload &gt;1MB still fail-open. Schema still evolving upstream.</td>
+</tr>
+<tr>
+<td>kirocrew</td>
+<td>Kiro CLI 2.29 native spec hook; MCP <code>spawn_run</code> with explicit <code>task</code> + <code>model</code></td>
+<td>Policy/block + retry observed 2026-10-10; no in-place rewrite</td>
+<td>Persistent <code>agent.kiro_hooks.preToolUse</code> + executable wrapper; no <code>updated_input</code> channel. Native <code>use_subagent</code> without child model is outside coverage. <code>hooks.json</code> tool-call hooks are informational and do not enforce blocks. <a href="https://github.com/tiagovilasboas/downshift/blob/main/docs/evidence/kirocrew-native-hook-2026-10-10.md" rel="noopener">Native evidence</a>; <a href="/docs/install/#kirocrew-policy-mode-through-the-native-kiro-cli-hook">setup and limits</a>.</td>
+</tr>
+<tr>
+<td>antigravity</td>
+<td>desktop 2.21.1, <code>invoke_subagent</code></td>
+<td>Yes, observed 2026-10-09</td>
+<td>One exact child: original <code>pro</code>, executed <code>flash_lite</code>, native executor/generation model <code>gemini-3.5-flash-lite</code>. <a href="https://github.com/tiagovilasboas/downshift/blob/main/docs/evidence/antigravity-executor-ack.md" rel="noopener">Evidence and QA</a>. Manual read-only, build-specific sensor; quota/picker/alias mapping remains unresolved.</td>
+</tr>
+<tr>
+<td>opencode</td>
+<td>zen models (no published list price)</td>
+<td>Not observed yet</td>
+<td>Adapter and conformance only (the forwarding plugin is phase 2). The route answer carries the target model; the observation side reports a resolved model only from an arrival-ordered switch chain (<code>switch_attempt</code> ok, then <code>model_selected</code>, then the first <code>child_context</code>) compared against the decision target. Usage seam not proven: no cost recorded.</td>
+</tr>
+<tr>
+<td>grok</td>
+<td>any (single model grok-4.6)</td>
+<td>No hook rewrite: config only</td>
+<td>PreToolUse is allow/deny; pin <code>reasoning_effort</code> in config.toml (README.md:520-531)</td>
+</tr>
+</tbody>
+</table></div>
+<p>Packaging note: the plugin (<code>.claude-plugin/</code>, <code>hooks/hooks.json</code>, <code>agents/</code>) loads only on Claude Code. Every other harness gets the same hooks through <code>downshift setup</code> or the manual sections of <a href="/docs/install/">install.md</a>; the skills under <code>skills/</code> are plain SKILL.md files any harness can read.</p>
+<p>"Inferred" means a later spawn in the same session asked for the model the hook had written (<code>rewrite_honored_inferred</code> in <code>stats --export</code>). It is correlation, not a read of the child's actual model. Only applied rewrites (outcome <code>rewrite_emitted</code>, no guardrail correction) count; allow, blocked and held events never do.</p>
+<h2 id="decision-linkage-current-model-and-post-spawn-cost">Decision linkage (current model and post-spawn cost)</h2>
+<p>Observed on claude-code 2026-10-12: the PreToolUse payload carries <code>tool_use_id</code> and <code>transcript_path</code> but no session model.</p>
+<ul>
+<li><strong>Current model.</strong> A Task call without <code>model</code> (agent type empty, <code>general-purpose</code>, <code>claude</code>, and the built-in <code>Explore</code> and <code>Plan</code>) runs on the session model. The adapter reads it from the last assistant message in the tail of <code>transcript_path</code> (1 MiB, model id only). Any other type is decided by its definition (2026-10-19): a built-in that runs on its own model (<code>statusline-setup</code> on Sonnet, <code>claude-code-guide</code> on Haiku) and an agent file whose <code>model:</code> names one are a known baseline that routing leaves alone (<code>AGENT_PINS_MODEL</code>); an agent file with no <code>model:</code> or <code>inherit</code> (project <code>.claude/agents</code>, user <code>agents</code>, or an installed plugin's <code>agents</code>, found through <code>installed_plugins.json</code> for a <code>plugin:agent</code> type) inherits like <code>general-purpose</code>. A type with no definition found stays <code>unknown</code>. <code>Explore</code> also stays <code>unknown</code> when the session model is Fable: Claude Code may run it on Opus (subscription, Console, gateway) or keep it on the main model (cloud providers), and a hook cannot tell which. Until 2026-10-15 <code>Explore</code> and <code>Plan</code> were left out, so every spawn of those types was held as <code>HELD_UNCONFIDENT_UNKNOWN_MID</code> and never routed.</li>
+<li><strong>Claude Code: parallel Agent calls in the first assistant message.</strong> The hook gets the session model from the last assistant message in the transcript, and Claude Code only writes a message to the transcript when it has finished streaming. When one message carries several Agent calls and no earlier assistant message exists (a headless run whose first action is to delegate), the hooks of all but the last call see an empty transcript. Measured in 3 runs of 5 parallel Agent calls: 4 of 5 spawns per run had no baseline and were held (<code>HELD_UNCONFIDENT_UNKNOWN_MID</code>). The 400 ms wait added for the write race does not help, because the message closes only after all its tool-use blocks have streamed, and <code>SessionStart</code> does not carry the model in <code>claude -p</code> either (checked 2026-10-15). Now, for an agent type that inherits the session model, when the transcript has no model the adapter falls back to the model the session is configured to use: <code>ANTHROPIC_MODEL</code>, then <code>model</code> in <code>&lt;cwd&gt;/.claude/settings.local.json</code>, <code>&lt;cwd&gt;/.claude/settings.json</code> and the user <code>settings.json</code> (<code>CLAUDE_CONFIG_DIR</code> honoured), first one that sets it. A full id passes through, <code>opusplan</code> is Opus under <code>permission_mode</code> <code>plan</code> and Sonnet otherwise, <code>sonnet</code>, <code>opus</code>, <code>haiku</code> and <code>fable</code> map to the catalog's model of that family, and <code>default</code> or anything unrecognised stays unknown. The decision carries <code>BASELINE_FROM_SETTINGS</code>. The result is an inference: the <code>--model</code> flag and a mid-session <code>/model</code> are not visible to a hook, so a session started with <code>--model</code> or switched with <code>/model</code> can be routed against the wrong baseline. To keep that guess from turning into a hidden upshift, a downshift on this baseline is written only to the small tier; a downshift to the mid tier is held. A model found in the transcript always wins, <code>Explore</code> under a Fable setting stays unknown, and agent types that do not inherit get no fallback. The native route remains the <code>agent.spawn</code> mod event, which hands over <code>parentModel</code>.</li>
+<li><strong>Baseline still unknown on Antigravity; Cursor <code>inherit</code> uses the parent when present.</strong> A spawn with an explicit model is known. Antigravity's <code>inherit</code> has no parent model in the payload. Cursor sends no transcript path (58 of 144 captured Task payloads, 2026-10-09/10). When a Cursor call has no <code>tool_input.model</code> or it is <code>inherit</code>, the parent's <code>model_id</code> (then payload <code>model</code>) is the baseline, and a downshift on it is written only to the small tier: a child can run on Composer or a fast variant, so a mid target could be an upshift. Without <code>model_id</code>, <code>inherit</code> logs as <code>unknown</code>.</li>
+<li><strong>Upshift ranking, all harnesses.</strong> An upshift ranks the session ids by catalog tier, not list position, and never goes below the current model's tier. A confident upshift lands on the least model at the needed tier; a guessed baseline (Claude Code settings, Cursor parent <code>model_id</code>) or <code>explicit_upshift</code> keeps the strongest tier. Codex, Antigravity and KiroCrew never guess a baseline, so they always take the needed-tier pick. The rule and its fallback are in <a href="/docs/session-models/">session-models.md</a>.</li>
+<li><strong>Cost linkage.</strong> Every decision records <code>tool_use_hash</code>. PostToolUse repeats the id, so <code>resolved</code>, <code>child_ended</code> and, through the agent id, <code>usage</code> attach to the exact decision even with parallel spawns, including held and allow decisions (no <code>rewrite_honored</code> claim for those), and control-group and no-route decisions (<code>outcome: baseline</code>): before 2026-10-19 the linker treated <code>baseline</code> as a cost record and skipped it, so no control spawn ever had an end record. Lines written before this field fall back to the session heuristic.</li>
+<li><strong>One spawn, two harnesses (all harnesses).</strong> Cursor runs the Claude Code hooks in <code>~/.claude/settings.json</code> when its third-party configs are on (<a href="https://cursor.com/docs/reference/third-party-hooks" rel="noopener">Cursor docs</a>), so one Cursor spawn reaches both the cursor hook and the claude-code hook. Each harness declares <code>PayloadMarkers</code> (top-level keys only it sends; Cursor: <code>cursor_version</code>, <code>conversation_id</code>, <code>generation_id</code>, <code>workspace_roots</code>), and the shared hook, honor, usage and end runners leave a payload carrying another harness's marker to that harness's own hook: allowed unchanged, nothing recorded, one stderr line. Before 2026-10-19 the copy was routed and logged as a claude-code decision with Cursor's <code>inherit</code> and lowercase agent types: all 79 claude-code decisions labelled <code>agent_type: custom</code> in the operator's 30-day log were such copies (each within 3 s of a cursor decision; all 33 with a tool-call id shared it). Not verified on a live Cursor build: that the copy carries at least one marker. It is the native Cursor input, and the logged copies match it.</li>
+<li><strong>Custom agent types on Claude Code.</strong> A real custom type (project or user <code>.claude/agents/&lt;name&gt;.md</code>, or a plugin agent <code>plugin:name</code>) still logs an unknown baseline unless the call names a model: the payload carries only the type name, and the model its definition pins (or <code>inherit</code>) is in a file the hook does not read. Reading it is option 2 of <a href="https://github.com/tiagovilasboas/downshift/blob/main/docs/design/subagent-type-signal.md" rel="noopener">subagent-type-signal.md</a>, held back until it is measured. Built-in pinned types (<code>claude-code-guide</code>, <code>statusline-setup</code>) ship no definition on disk, so they stay <code>unknown</code> too.</li>
+<li><strong>Other harnesses.</strong> cursor and codex expose <code>tool_use_id</code> on decisions (documented in their hook payloads). Their end hooks (see "Child end" below) join on it when the end payload repeats the id.</li>
+<li><strong>codex current model.</strong> A <code>spawn_agent</code> call without <code>model</code> runs on the parent's current model: 22 of 24 such spawns in the operator's rollouts (2026-10-12; the other mismatches were Downshift's own rewrites). The adapter reads the last <code>turn_context.payload.model</code> from the tail of <code>transcript_path</code>. <code>gpt-6.1-sol</code> is registered for identity and tier; list prices are absent until a vendor snapshot matches exactly, so cost telemetry stays unknown for that id. <code>gpt-reserve</code> is not in the catalog yet, so they still log as <code>unknown</code> with <code>requested_model_raw</code> set.</li>
+<li><strong>antigravity current model.</strong> <code>Subagents[].Model</code> arrives in the payload (2026-10-09 run asked for <code>pro</code>) but was never exposed to telemetry; it is now, for the subagent whose decision is recorded (the last with a prompt). The documented top-level <code>modelName</code> is not read until a real payload confirms it.</li>
+<li><strong>cursor current model.</strong> In 144 captured Task payloads (2026-10-09/10) the top-level <code>model</code> was always empty; the subagent <code>model</code> was a real id, <code>inherit</code> (28) or absent (30). With <code>model_id</code> on the payload, <code>inherit</code> is resolved like a missing <code>tool_input.model</code> and logged as that parent id; without <code>model_id</code> it logs as <code>unknown</code>.</li>
+<li><strong>Unrecognised models (all harnesses).</strong> When the requested model is non-empty but not in the catalog, the shared runner records it in <code>requested_model_raw</code> if it looks like a model id (64 chars, <code>[A-Za-z0-9._:/-]</code>), else <code>invalid</code>.</li>
+</ul>
+<h2 id="what-each-harness-exposes-for-session-discovery-2026-10-1112">What each harness exposes for session discovery (2026-10-11/12)</h2>
+<p>Findings from the official docs plus local read-only inspection. Rows say what a hook or local source can tell Downshift; anything not listed was not found. <code>InferSession</code> (HarnessCapabilities) is on only where the current model proves access to the tiers below it.</p>
+<div class="tw" role="region" aria-label="harness, current model in hook, available models, quota, session-start hook, InferSession" tabindex="0"><table>
+<thead>
+<tr>
+<th scope="col">harness</th>
+<th scope="col">current model in hook</th>
+<th scope="col">available models</th>
+<th scope="col">quota</th>
+<th scope="col">session-start hook</th>
+<th scope="col">InferSession</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>claude-code</td>
+<td><code>SessionStart.model</code> (optional); the Agent <code>tool_input.model</code> when the parent set it; <code>PostToolUse.tool_response.resolvedModel</code></td>
+<td>No listing for subscriptions; <code>availableModels</code>/<code>deniedModels</code> exist only in managed settings; the Models API needs <code>ANTHROPIC_API_KEY</code></td>
+<td>statusline <code>rate_limits.five_hour</code> / <code>seven_day</code> (global, Pro/Max only, after the first response); not per model</td>
+<td><code>SessionStart</code> (add context, <code>CLAUDE_ENV_FILE</code>)</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>codex</td>
+<td><code>model</code> on every payload; effort only if the parent put <code>reasoning_effort</code> in <code>spawn_agent</code></td>
+<td><code>models_cache.json</code> (offline; <code>hide</code> means not shown in the picker, not unusable); app-server <code>model/list</code> is experimental</td>
+<td>per meter (<code>codex</code>, <code>premium</code>), never per model</td>
+<td><code>SessionStart</code> can only add context</td>
+<td>no</td>
+</tr>
+<tr>
+<td>cursor</td>
+<td><code>model</code>, <code>model_id</code>, <code>model_params</code>; <code>subagent_model</code> on <code>subagentStart</code></td>
+<td><code>cursor-agent models</code> (text, needs login; failed here with "Authentication required"); Cloud <code>/v1/models</code> needs an API key</td>
+<td>Cursor Models vs Other Models pools, UI/dashboard only; CLI <code>/usage</code> is interactive</td>
+<td><code>sessionStart</code> (env reaches later hooks; not for cloud agents)</td>
+<td>no</td>
+</tr>
+<tr>
+<td>antigravity</td>
+<td><code>modelName</code> (parent) and <code>conversationId</code>; the adapter does not read them yet</td>
+<td><code>agy --output-format json models</code> (parent picker); no alias-to-model or pool mapping</td>
+<td><code>agy -p /usage --output-format json</code> per account, group and window; not tied to an alias</td>
+<td>none (Pre/PostToolUse, Pre/PostInvocation, Stop)</td>
+<td>no</td>
+</tr>
+<tr>
+<td>kirocrew</td>
+<td>none in the payload; <code>session_id</code> maps to <code>~/.kiro/sessions/cli/&lt;id&gt;.json</code> (<code>agent_name</code>, <code>model_id</code>, undocumented)</td>
+<td><code>kiro-cli chat --list-models --format json</code> (10 models plus <code>auto</code>, with <code>rate_multiplier</code>)</td>
+<td>no supported non-interactive credit source</td>
+<td><code>agentSpawn</code> (renamed <code>SessionStart</code> in V3); stdout goes to the agent context; any non-zero exit blocks</td>
+<td>no</td>
+</tr>
+</tbody>
+</table></div>
+<p>Consequences: Claude Code is the only harness where the inferred ladder is safe; every other harness needs a real list (hook payload, discovery cache or the operator file). Quota stays <code>unknown</code> everywhere except through the Claude Code statusline bridge and operator imports. Re-verify per release.</p>
+<h2 id="child-end-n5-2026-10-13">Child end (N5, 2026-10-13)</h2>
+<p>One shared recorder (<code>internal/childend</code>) writes <code>resolved</code>, <code>child_ended</code> and <code>usage</code> for any harness from a <code>hookport.ChildEnd</code>. An adapter only parses its payload (<code>ParseChildEnd</code>); the CLI entry is <code>downshift end &lt;harness&gt;</code>, and <code>setup</code> wires it from <code>HarnessCapabilities.ChildEndEvent</code>. <code>downshift report</code> and <code>downshift doctor</code> print, per harness, whether completion is measurable (an end event is declared and at least one end record has been seen; a launch is not an end). Claude Code keeps <code>claude-code-post-tool-use</code> and <code>claude-code-subagent-stop</code> as aliases of the same runner.</p>
+<div class="tw" role="region" aria-label="harness, ChildEndEvent, UsageSource, status" tabindex="0"><table>
+<thead>
+<tr>
+<th scope="col">harness</th>
+<th scope="col"><code>ChildEndEvent</code></th>
+<th scope="col"><code>UsageSource</code></th>
+<th scope="col">status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>claude-code</td>
+<td><code>SubagentStop</code> (launch and failure also on <code>PostToolUse</code> / <code>PostToolUseFailure</code>)</td>
+<td>transcript (<code>agent_transcript_path</code>)</td>
+<td>verified 2026-10-06 (launch payload, SubagentStop transcript); failure payload still GAP-CHILD-FAILURE</td>
+</tr>
+<tr>
+<td>codex</td>
+<td><code>PostToolUse</code> for <code>spawn_agent</code></td>
+<td><strong>none</strong> (<code>UsageSource: none</code>): end and status are recorded, cost is not. A parser for the rollout <code>token_count</code> exists but stays off until a real payload proves <code>transcript_path</code> is the child's rollout</td>
+<td><strong>unverified: needs a real payload.</strong> <code>tool_response.status</code> / <code>model</code> are assumed names; the <code>token_count</code> usage shape is from the Codex rollout format, not from a captured hook. A spawn that reports no status is a launch: it records <code>launched</code>, reads no usage and does not make completion measurable. <code>transcript_path</code> is the parent rollout, so until a real payload shows a child-scoped rollout the tokens may be the parent thread's.</td>
+</tr>
+<tr>
+<td>cursor</td>
+<td><code>subagentStop</code></td>
+<td>none (no usage field is read)</td>
+<td><strong>unverified: needs a real payload.</strong> Linked only when the payload names the spawn tool call (<code>tool_use_id</code> / <code>tool_call_id</code>); Cursor sends no session id, so otherwise nothing is recorded. No model is read.</td>
+</tr>
+<tr>
+<td>antigravity</td>
+<td>none</td>
+<td>none</td>
+<td>no documented subagent-end payload (PostToolUse exists; its result fields are not documented). Nothing recorded.</td>
+</tr>
+<tr>
+<td>kirocrew</td>
+<td>none</td>
+<td>none</td>
+<td>PostToolUse <code>tool_response</code> not confirmed (see <code>evidence/vendor-hook-docs-2026-10-11.md</code>). Nothing recorded.</td>
+</tr>
+<tr>
+<td>opencode</td>
+<td><code>child_done</code> (observation envelope the plugin forwards)</td>
+<td>none (<code>UsageSource: none</code>): the <code>child_done</code> parser reads status and inline usage counts, but nothing is priced.</td>
+<td><strong>unverified: needs a live run.</strong> The envelope shape comes from the phase-0 probes, not from a captured plugin forward. The honor reader reports a resolved model only from the arrival-ordered switch chain; a batch without it records nothing.</td>
+</tr>
+</tbody>
+</table></div>
+<p>Where <code>ChildEndEvent</code> is empty, <code>downshift end &lt;harness&gt;</code> exits 0, records nothing and says so on stderr.</p>
+<h2 id="child-end-line-u2-2026-10-13">Child-end line (U2, 2026-10-13)</h2>
+<p><code>HarnessCapabilities.CanShowChildLine</code> says whether the hook protocol can show one line when a subagent ends. Claude Code: true (<code>systemMessage</code> on PostToolUse and SubagentStop), pending a live check. cursor, codex, antigravity, kirocrew, opencode: false; the line is still computed by <code>telemetry.ChildEndLine</code> (by the shared recorder, for every harness) and no adapter prints it. <code>DOWNSHIFT_QUIET=1</code> turns it off. See <a href="/docs/session-models/#what-downshift-shows-while-it-works">session-models.md</a>.</p>
+<h2 id="spawn-state-2026-10-19">Spawn state (2026-10-19)</h2>
+<p><code>switched</code> / <code>held</code> / <code>observed</code> is computed in <code>telemetry.SpawnStateOf</code> and shown by the shared runner for every harness: one stderr line per spawn, plus <code>live.json</code> for panels. No harness-specific code. Limits: the stderr line only helps where the harness surfaces hook stderr (unverified per harness), and the statusline segment needs a statusline bridge (Claude Code today). Details: <a href="https://github.com/tiagovilasboas/downshift/blob/main/docs/reference/spawn-state.md" rel="noopener">spawn-state.md</a>.</p>
+<h2 id="session-view-u3-2026-10-13">Session view (U3, 2026-10-13)</h2>
+<p><code>downshift session</code> (tree, <code>--why</code>, <code>--pause</code>) is shared code; what differs is whether a harness gives it a session id. <code>HarnessCapabilities.SessionEnv</code> names the variable a harness exports to commands run from it: Claude Code <code>CLAUDE_CODE_SESSION_ID</code> (seen set in a Bash tool call on Claude Code 2.1.289); others declare none and the command uses the latest session in the log. The hook payload carries a session id for Claude Code and Codex only, so only they group in the tree and can be paused per session. Cursor, Antigravity and KiroCrew events carry none: computed and logged, not groupable, not pausable (the global <code>DOWNSHIFT_NO_ROUTE=1</code> still applies). The <code>/downshift</code> slash command is Claude Code only. See <a href="/docs/session-view/">session-view.md</a>.</p>
+<h2 id="public-score-coverage-capability-path">Public score coverage (capability path)</h2>
+<p>Mapped means an entry in <code>internal/scoreindex/idmap.json</code> names the session id. Whether a score row exists at runtime also depends on the public source listing that model at the last refresh; that is not checked here. Live state: <code>downshift models scores --status</code>. Method: <a href="https://github.com/tiagovilasboas/downshift/blob/main/docs/reference/scores.md#the-id-map" rel="noopener">scores.md</a>.</p>
+<div class="tw" role="region" aria-label="harness, session ids with an id-map entry, not mapped (reported uncovered)" tabindex="0"><table>
+<thead>
+<tr>
+<th scope="col">harness</th>
+<th scope="col">session ids with an id-map entry</th>
+<th scope="col">not mapped (reported <code>uncovered</code>)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>claude-code</td>
+<td><code>claude-haiku-4-5</code>, <code>claude-haiku-5-5</code>, <code>claude-sonnet-5-5</code>, <code>claude-opus-5-5</code>, <code>claude-fable-5-1</code>, <code>grok-4.6</code></td>
+<td>any other id</td>
+</tr>
+<tr>
+<td>cursor</td>
+<td><code>claude-sonnet-5-5-high</code>, <code>claude-opus-5-5-medium</code>, <code>claude-fable-5-1-thinking-high</code>, <code>claude-opus-5-thinking-high</code>, <code>claude-4.5-haiku-thinking</code>, <code>claude-4.5-sonnet-thinking</code>, <code>claude-4.5-opus-high-thinking</code>, <code>cursor-grok-4.6-medium</code>, <code>grok-4.7-xhigh</code>, <code>gpt-5.6-sol-high</code>, <code>gemini-3.8-flash-high</code>, <code>glm-5.2-high</code>, <code>muse-spark-1.3-max</code></td>
+<td>any other id, including <code>composer-2.5</code></td>
+</tr>
+<tr>
+<td>kirocrew</td>
+<td><code>claude-sonnet-5-5</code>, <code>claude-opus-5-5</code>, <code>claude-haiku-4-5</code></td>
+<td>any other id</td>
+</tr>
+<tr>
+<td>codex</td>
+<td><code>gpt-6-luna</code>, <code>gpt-6-sol</code>, <code>gpt-6-astra</code>, <code>gpt-5.6-luna</code>, <code>gpt-5.6-terra</code>, <code>gpt-5.6-sol</code></td>
+<td>any other id</td>
+</tr>
+<tr>
+<td>antigravity</td>
+<td><code>flash</code></td>
+<td><code>flash_lite</code>, <code>pro</code> (no entry)</td>
+</tr>
+</tbody>
+</table></div>
+<p><code>composer-2.5</code>, <code>flash_lite</code> and <code>pro</code> have no entry anywhere in <code>idmap.json</code>, so they are reported uncovered rather than guessed. An uncovered candidate makes the capability path abstain for that decision (see <a href="https://github.com/tiagovilasboas/downshift/blob/main/docs/reference/scores.md#when-it-abstains" rel="noopener">scores.md</a>).</p>
+<h2 id="bundled-and-sibling-mods-2026-10-17">Bundled and sibling mods (2026-10-17)</h2>
+<p>The Claude Code plugin's <code>hooks/hooks.json</code> lists one mod module, <a href="https://github.com/tiagovilasboas/downshift/blob/main/hooks/cache-tax/README.md" rel="noopener"><code>hooks/cache-tax/</code></a> (third-party, MIT, vendored and pinned; owner decision 2026-10-17). Two more vendored mods ship in the same marketplace as sibling plugins, one install each, because a plugin loads a single hooks module and the three all hook <code>session.start</code>: <a href="https://github.com/tiagovilasboas/downshift/blob/main/mods/savvy-progress/README.md" rel="noopener"><code>mods/savvy-progress/</code></a> (<code>savvy-progress@downshift</code>) and <a href="https://github.com/tiagovilasboas/downshift/blob/main/mods/filetree/README.md" rel="noopener"><code>mods/filetree/</code></a> (<code>filetree@downshift</code>); see <a href="https://github.com/tiagovilasboas/downshift/blob/main/mods/README.md" rel="noopener"><code>mods/README.md</code></a>. None is a routing feature and nothing in the shared layers computes it: a mod is code Claude Code runs in its own process, so it exists only where mods load.</p>
+<div class="tw" role="region" aria-label="harness, mods, why" tabindex="0"><table>
+<thead>
+<tr>
+<th scope="col">harness</th>
+<th scope="col">mods</th>
+<th scope="col">why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>claude-code</td>
+<td>cache-tax loads with the plugin on 2.1.287+; savvy-progress and filetree are separate plugin installs (CLI, Desktop Code tab, VS Code extension; hooks also run in <code>claude -p</code>, nothing is drawn there)</td>
+<td>mods are a Claude Code plugin feature; <code>setup</code> cannot write one</td>
+</tr>
+<tr>
+<td>codex, cursor, kirocrew, antigravity, grok</td>
+<td>not available</td>
+<td>no mod system; the cold-cache question is the harness's own</td>
+</tr>
+</tbody>
+</table></div>
+<p>What each does is in its README; the one fact that matters here is that the cache-tax warming ping spends usage and is armed by the user (or for three hours after a detected cold write), while the guard itself sends nothing.</p>
+<h2 id="answer-when-nothing-is-rewritten-2026-10-19">Answer when nothing is rewritten (2026-10-19)</h2>
+<p>An allow on an unchanged spawn can override the user's own ask rules, so the shared runner answers neutrally where the host permits it (PR #192) and with the host's required decision where it does not.</p>
+<div class="tw" role="region" aria-label="Harness, Unchanged spawn, Why" tabindex="0"><table>
+<thead>
+<tr>
+<th scope="col">Harness</th>
+<th scope="col">Unchanged spawn</th>
+<th scope="col">Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>claude-code, codex</td>
+<td>neutral <code>{}</code></td>
+<td><code>permissionDecision</code> is optional; <code>updatedInput</code> is only accepted together with <code>allow</code>, so <code>allow</code> is emitted only with a rewrite. Pinned by <code>TestHarnessConformance</code> ("unchanged spawn must emit no permissionDecision").</td>
+</tr>
+<tr>
+<td>antigravity</td>
+<td><code>{"decision":"allow"}</code></td>
+<td>The vendor summary lists <code>decision</code> as <strong>required</strong> output (allow, deny, ask, force_ask, deny_unless_prior_grant) (<a href="https://github.com/tiagovilasboas/downshift/blob/main/docs/evidence/vendor-hook-docs-2026-10-11.md" rel="noopener">vendor-hook-docs</a>). A neutral object would be a missing required field. Not changed.</td>
+</tr>
+<tr>
+<td>cursor</td>
+<td><code>{"permission":"allow"}</code></td>
+<td>The vendor summary documents <code>permission</code> allow/deny and says an invalid response blocks the action; it does not say the field is optional, and no capture of a neutral <code>{}</code> exists. Not changed.</td>
+</tr>
+<tr>
+<td>opencode</td>
+<td><code>{"v":1,"action":"allow",...}</code></td>
+<td>The envelope's <code>action</code> is required by the plugin wire contract.</td>
+</tr>
+<tr>
+<td>kirocrew</td>
+<td>empty stdout, exit 0</td>
+<td>exit-code contract.</td>
+</tr>
+</tbody>
+</table></div>
+<p>Whether cursor or antigravity treat an explicit allow as overriding a user prompt rule has <strong>not</strong> been verified on a live build (no Cursor or Antigravity session was driven). To change either, first capture how the host treats <code>{}</code> for a spawn it has a rule for, then add the harness to the neutral set and extend the conformance decoders. Until then the safe answer is the documented one.</p>
+<h2 id="revalidation">Revalidation</h2>
+<p>Every TBD cell must be re-checked per harness release: hook contracts evolve upstream and a green cell can regress silently. Failing proof, the tool fails open and the spawn runs unchanged (README.md:755).</p>
+<p>A 2026-10-09 sample of Codex <code>spawn_agent</code> inputs recorded key sets only (<code>agent_type</code>, <code>message</code>, <code>task_name</code>, and sometimes <code>fork_turns</code>). It did not include hook stdin, <code>transcript_path</code>, a model field, or executor acknowledgement, so the Codex row above is not refreshed. See <a href="https://github.com/tiagovilasboas/downshift/blob/main/docs/evidence/closeout-recheck-2026-10-09.md" rel="noopener">closeout-recheck-2026-10-09.md</a>.</p>
+<h2 id="sources-readmedocs-only-no-vendor-claims">Sources (README/docs only, no vendor claims)</h2>
+<ul>
+<li>Claude paid: emission only until P1.3 (docs/evidence/rewrite-honored-protocol.md); plan limits: README § Plan compatibility</li>
+<li>Cursor free/legacy discard: README.md:734-735, README.md:738, README.md:1012-1013</li>
+<li>Codex flags + honored: README.md:744, README.md:746; evidence 2026-10-02: docs/evidence/codex-rewrite-honored-2026-10-02.md; evolving schema: README.md:373</li>
+<li>KiroCrew adapter capability and integration limits: <a href="/docs/install/#kirocrew-policy-mode-through-the-native-kiro-cli-hook">native hook setup</a>, <a href="https://github.com/tiagovilasboas/downshift/blob/main/docs/guides/kirocrew-routing-guide.md" rel="noopener">routing guia</a>, <code>internal/adapters/kirocrew/kirocrew.go</code>. A hook invocation counter or direct adapter smoke test does not prove live enforcement or the served child model.</li>
+<li>Vendor hook docs vs adapters (search summaries, 2026-10-11): <a href="https://github.com/tiagovilasboas/downshift/blob/main/docs/evidence/vendor-hook-docs-2026-10-11.md" rel="noopener">vendor-hook-docs</a></li>
+<li>Antigravity observed child, dated build and evidence limits: <a href="https://github.com/tiagovilasboas/downshift/blob/main/docs/evidence/antigravity-executor-ack.md" rel="noopener">native evidence</a> and <a href="https://github.com/tiagovilasboas/downshift/blob/main/docs/evidence/final-gap-qa.md" rel="noopener">final QA</a></li>
+<li>Grok config-only: README.md:520-531, README.md:691, README.md:1236</li>
+<li>Emission vs honored: docs/reference/session-models.md:17; allowlist: docs/reference/session-models.md:34</li>
+</ul>
+<section><h2 id="more-docs">More docs</h2><ul class="rel"><li><a href="/docs/install/">Install Downshift: Claude Code, Codex and Cursor hook setup<span>Guide</span></a></li><li><a href="/docs/config/">Downshift configuration: state directory and local settings<span>Guide</span></a></li><li><a href="/docs/subagents/">Downshift and Claude Code subagents: when routing can act<span>Guide</span></a></li><li><a href="/docs/session-view/">Downshift session view: subagent tree, reasons and pause<span>Guide</span></a></li><li><a href="/docs/report/">Downshift report: measuring routed versus control spawn cost<span>Guide</span></a></li><li><a href="/docs/evidence/">Downshift evidence ladder: what each saving figure means<span>Guide</span></a></li><li><a href="/docs/companions/">Downshift companions: Headroom and Claude Code mods to pair<span>Guide</span></a></li><li><a href="/docs/capability-matrix/">Downshift capability matrix: status and evidence per feature<span>Reference</span></a></li><li><a href="/docs/capability-matrix-part-2/">Downshift capability matrix, part 2: context and packaging<span>Reference</span></a></li><li><a href="/docs/session-models/">Downshift session models: which model IDs a hook may write<span>Reference</span></a></li><li><a href="/docs/complexity-weights/">Downshift complexity weights: how a task becomes a model<span>Reference</span></a></li><li><a href="/docs/architecture/">Downshift architecture: deterministic hook and offline CLI<span>Design</span></a></li><li><a href="/docs/subagent-routing-ab-2026-10-15/">Downshift routed vs control: first Claude Code A/B results<span>Evidence</span></a></li><li><a href="/docs/real-usage-2026-10-19/">Downshift real usage: a Claude Code day and the last 30 days<span>Evidence</span></a></li><li><a href="/docs/dci-mvp-v01/">Downshift Code Intelligence MVP: evidence for Claude Code<span>Evidence</span></a></li></ul></section></div></article></main>
+<footer><div class="w"><div class="fg"><div><p class="fh">Product</p><ul><li><a href="/#start">Get started</a></li><li><a href="/#evidence">Evidence</a></li><li><a href="/#faq">FAQ</a></li><li><a href="/guides/">Guides</a></li></ul></div><div><p class="fh">Docs</p><ul><li><a href="/docs/install/">Install guide</a></li><li><a href="/docs/">Documentation</a></li><li><a href="/docs/capability-matrix/">Capability matrix</a></li><li><a href="/llms.txt">llms.txt</a></li></ul></div><div><p class="fh">Project</p><ul><li><a href="https://github.com/tiagovilasboas/downshift" rel="noopener">GitHub</a></li><li><a href="https://github.com/sponsors/tiagovilasboas" rel="noopener">Sponsor</a></li><li><a href="https://github.com/tiagovilasboas/downshift/blob/main/LICENSE" rel="noopener">Apache-2.0 license</a></li></ul></div></div><div class="legal"><p>Downshift by Tiago Vilas Boas. Downshift here is a Go tool for AI coding agents, not the React downshift autocomplete library and unrelated to any car transmission.</p><p class="cnpj">MONTANHA TECH · CNPJ 60.782.110/0001-84</p></div></div></footer>
+</body>
+</html>

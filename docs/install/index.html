@@ -1,0 +1,460 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Install Downshift: Claude Code, Codex and Cursor hook setup</title>
+<meta name="description" content="Install Downshift and wire its PreToolUse hook into Claude Code, Codex, Cursor and other harnesses: install.sh, setup --dry-run, doctor checks and manual setup.">
+<link rel="canonical" href="https://downshift-ai.vercel.app/docs/install/">
+<link rel="alternate" hreflang="en" href="https://downshift-ai.vercel.app/docs/install/">
+<link rel="alternate" hreflang="x-default" href="https://downshift-ai.vercel.app/docs/install/">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/icon-192.png">
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#0a0a0a">
+<meta name="color-scheme" content="dark">
+<meta name="robots" content="index,follow,max-image-preview:large">
+<meta name="author" content="Tiago Vilas Boas">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Downshift">
+<meta property="og:locale" content="en_US">
+<meta property="og:title" content="Install Downshift: Claude Code, Codex and Cursor hook setup">
+<meta property="og:description" content="Install Downshift and wire its PreToolUse hook into Claude Code, Codex, Cursor and other harnesses: install.sh, setup --dry-run, doctor checks and manual setup.">
+<meta property="og:url" content="https://downshift-ai.vercel.app/docs/install/">
+<meta property="og:image" content="https://downshift-ai.vercel.app/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Downshift logo with the line: Right model for every subagent. No LLM in the loop.">
+<meta property="article:modified_time" content="2026-10-19">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Install Downshift: Claude Code, Codex and Cursor hook setup">
+<meta name="twitter:description" content="Install Downshift and wire its PreToolUse hook into Claude Code, Codex, Cursor and other harnesses: install.sh, setup --dry-run, doctor checks and manual setup.">
+<meta name="twitter:image" content="https://downshift-ai.vercel.app/og.png">
+<meta name="twitter:image:alt" content="Downshift logo with the line: Right model for every subagent. No LLM in the loop.">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"TechArticle","headline":"Installation and harness setup","description":"Install Downshift and wire its PreToolUse hook into Claude Code, Codex, Cursor and other harnesses: install.sh, setup --dry-run, doctor checks and manual setup.","inLanguage":"en","dateModified":"2026-10-19","author":{"@type":"Person","name":"Tiago Vilas Boas","url":"https://github.com/tiagovilasboas"},"publisher":{"@type":"Organization","name":"Downshift","url":"https://downshift-ai.vercel.app/","logo":{"@type":"ImageObject","url":"https://downshift-ai.vercel.app/icon-512.png","width":512,"height":512}},"image":"https://downshift-ai.vercel.app/og.png","mainEntityOfPage":{"@type":"WebPage","@id":"https://downshift-ai.vercel.app/docs/install/"},"isPartOf":{"@type":"CollectionPage","@id":"https://downshift-ai.vercel.app/docs/"},"isBasedOn":"https://github.com/tiagovilasboas/downshift/blob/main/docs/guides/install.md","about":{"@type":"SoftwareApplication","name":"Downshift","url":"https://downshift-ai.vercel.app/","codeRepository":"https://github.com/tiagovilasboas/downshift","applicationCategory":"DeveloperApplication"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://downshift-ai.vercel.app/"},{"@type":"ListItem","position":2,"name":"Docs","item":"https://downshift-ai.vercel.app/docs/"},{"@type":"ListItem","position":3,"name":"Installation and harness setup","item":"https://downshift-ai.vercel.app/docs/install/"}]}]}</script>
+<link rel="preload" href="/fonts/Geist-Variable.woff2" as="font" type="font/woff2" crossorigin>
+<style>@font-face{font-family:"Geist";src:url(/fonts/Geist-Variable.woff2) format("woff2");font-weight:100 900;font-style:normal;font-display:swap}@font-face{font-family:"Geist Mono";src:url(/fonts/GeistMono-Variable.woff2) format("woff2");font-weight:100 900;font-style:normal;font-display:swap}@font-face{font-family:"Geist Fallback";src:local("Arial"),local("Helvetica");size-adjust:104.8%;ascent-override:95.9%;descent-override:28.2%;line-gap-override:0%}:root{color-scheme:dark;--b:#0a0a0a;--c:#141414;--l:#1f2329;--f:#d6dae2;--t:#fff;--m:#9a9ea5;--a:#22C55E;--r:#22C55E;--sb:#1f1f1f;--sf:#fff;--pb:#fff;--pf:#000;--cb:#121212;--ct:#e6edf3;--ss:"Geist","Geist Fallback",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;--mo:"Geist Mono",ui-monospace,SFMono-Regular,Menlo,monospace}@media not all{:root{--b:#fafafa;--c:#fff;--l:#d9dde3;--f:#1f2937;--t:#0a0a0a;--m:#4b5563;--a:#166534;--r:#0a0a0a;--sb:#eceff3;--sf:#0a0a0a;--pb:#0a0a0a;--pf:#fff;--cb:#f1f3f6;--ct:#111827}}*{box-sizing:border-box}html{-webkit-text-size-adjust:100%;text-size-adjust:100%;scroll-padding-top:88px}body{margin:0;background:var(--b);color:var(--f);font:16px/1.65 var(--ss);-webkit-font-smoothing:antialiased}::selection{background:color-mix(in srgb,var(--a) 35%,transparent);color:var(--t)}a{color:var(--t);text-underline-offset:3px}a:hover{text-decoration-color:var(--a)}a:focus-visible{outline:2px solid var(--r);outline-offset:3px;border-radius:6px}.w{max-width:1280px;margin:0 auto;padding:0 16px}@media(min-width:1024px){.w{padding:0 24px}}h1,h2,h3{color:var(--t);font-weight:500;letter-spacing:-.025em;margin:0;text-wrap:balance}header{position:sticky;top:0;z-index:10;background:color-mix(in srgb,var(--b) 88%,transparent);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border-bottom:1px solid var(--l)}header nav{display:flex;align-items:center;gap:4px;height:72px}.lg{display:inline-flex;align-items:center;min-height:44px;margin-right:auto}.lg img{display:block;height:40px;width:auto}.nl{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 12px;border-radius:999px;color:var(--m);text-decoration:none;font-size:14px}.nl:hover{color:var(--t);background:var(--sb)}.nl.ds{display:none}@media(min-width:640px){.nl.ds{display:inline-flex}}.nl.lang{min-width:44px;background:var(--sb);color:var(--sf);font-weight:500;font-size:13px}.bc ol{list-style:none;margin:0 auto;padding:16px 0 0;font-size:14px;color:var(--m);max-width:1024px}.bc li{display:inline;margin:0}.bc li+li:before{content:"/";margin:0 8px;color:var(--m)}.bc a{color:var(--m);display:inline-flex;align-items:center;min-height:44px;text-decoration:none}.bc a:hover{color:var(--t)}.bc [aria-current]{color:var(--f);overflow-wrap:anywhere}article{max-width:720px;margin:0 auto;padding:8px 0 96px}article>*{min-width:0}@media(min-width:1100px){.ga{display:grid;max-width:1024px;grid-template-columns:240px minmax(0,720px);column-gap:64px;align-items:start}.ga>.top,.ga>.bd{grid-column:2}.ga>.toc{grid-column:1;grid-row:1/span 2;position:sticky;top:96px;max-height:calc(100vh - 120px);overflow-y:auto}}h1{font-size:34px;line-height:1.12;font-weight:450;margin:16px 0 0}@media(min-width:640px){h1{font-size:46px}}h2{font-size:24px;line-height:1.25;margin:56px 0 16px}@media(min-width:640px){h2{font-size:30px}}h3{font-size:18px;line-height:1.35;margin:32px 0 8px}p{margin:0 0 16px}.by{margin:16px 0 0;color:var(--m);font-size:14px}.by a{color:var(--m)}.dis{margin:8px 0 0;color:var(--m);font-size:14px}.tl{margin:32px 0 0;background:var(--c);border:1px solid var(--l);border-left:2px solid var(--a);border-radius:4px 16px 16px 4px;padding:16px 20px}.tl p{margin:0;color:var(--f)}.lbl{margin:0 0 8px;font:500 12px var(--ss);letter-spacing:.04em;text-transform:uppercase;color:var(--m)}.toc{margin:32px 0 0;border:1px solid var(--l);border-radius:16px;padding:16px 20px;background:var(--c)}@media(min-width:1100px){.toc{margin:24px 0 0 -4px;border:0;padding:0 0 0 4px;background:none}}.toc ol{list-style:none;margin:0;padding:0;font-size:14px}.toc a{display:flex;align-items:center;min-height:44px;color:var(--m);text-decoration:none;line-height:1.35;padding:4px 0}.toc a:hover{color:var(--t)}ul,ol{margin:0 0 16px;padding-left:24px}li{margin:4px 0}li::marker{color:var(--m)}code{font:.88em var(--mo);background:var(--sb);border:1px solid var(--l);border-radius:6px;padding:1px 6px}pre{margin:0 0 16px;background:var(--cb);color:var(--ct);border:1px solid var(--l);border-radius:12px;padding:16px;overflow-x:auto;font:13px/1.6 var(--mo)}pre code{font:inherit;background:none;border:0;padding:0;color:inherit}pre:focus-visible,.tw:focus-visible{outline:2px solid var(--r);outline-offset:2px}.tw{margin:0 0 16px;overflow-x:auto;border:1px solid var(--l);border-radius:12px}table{border-collapse:collapse;width:100%;font-size:14px;line-height:1.5}th,td{text-align:left;vertical-align:top;padding:10px 14px;border-bottom:1px solid var(--l);min-width:120px}th{color:var(--t);font-weight:500;background:var(--c)}tr:last-child td{border-bottom:0}.co{margin:0 0 16px;background:var(--c);border:1px solid var(--l);border-left:2px solid var(--t);border-radius:4px 16px 16px 4px;padding:16px 20px}.co p:last-child{margin:0}.co.warn{border-left-color:var(--a)}.ex{margin:56px 0 0;border:1px solid var(--l);border-radius:16px;padding:0 20px 4px}@media(min-width:640px){.ex{padding:0 28px 8px}}.ex h2{margin-top:24px}.src{color:var(--m);font-size:14px}.faq h3{margin-top:24px}.faq p{color:var(--f)}.cta{margin:56px 0 0;background:var(--c);border:1px solid var(--l);border-radius:16px;padding:24px}@media(min-width:640px){.cta{padding:32px}}.cta h2{margin-top:0}.cta pre{white-space:pre-wrap;overflow-wrap:anywhere}.btns{display:flex;flex-wrap:wrap;gap:12px;margin-top:8px}.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 20px;border-radius:999px;background:var(--sb);color:var(--sf);font-weight:500;font-size:15px;text-decoration:none}.btn:hover{opacity:.86}.btn.p{background:var(--pb);color:var(--pf)}.btn svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}.rel,.srcs,.gl{list-style:none;padding:0;margin:0}.rel li{margin:0;border-top:1px solid var(--l)}.rel li:last-child{border-bottom:1px solid var(--l)}.rel a{display:flex;align-items:center;min-height:56px;padding:8px 0;text-decoration:none;color:var(--t);font-weight:500}.rel a:hover{color:var(--a)}.rel span{color:var(--m);font-weight:400;margin-left:8px;font-size:14px}.srcs li{margin:0;padding:12px 0;border-top:1px solid var(--l);font-size:14px;color:var(--m)}.srcs a{display:inline-flex;align-items:center;min-height:44px;overflow-wrap:anywhere;word-break:break-word}.srcs strong{color:var(--f);font-weight:500}.ev{display:inline-block;margin-left:8px;border:1px solid var(--l);border-radius:999px;padding:0 8px;font-size:12px;color:var(--m)}.gl{margin-top:32px}.gl li{margin:0;padding:24px 0;border-top:1px solid var(--l)}.gl h2{margin:0 0 8px;font-size:22px}.gl h2 a{text-decoration:none;display:inline-flex;min-height:44px;align-items:center}.gl h2 a:hover{color:var(--a)}.gl p{margin:0;color:var(--m)}.lead{margin:16px 0 0;font-size:18px;color:var(--m)}.alt{margin-top:48px;color:var(--m)}footer{border-top:1px solid var(--l);padding:48px 0 32px;color:var(--m);font-size:14px}.fg{display:grid;grid-template-columns:1fr 1fr;gap:24px 48px}@media(min-width:768px){.fg{grid-template-columns:repeat(3,1fr)}}.fg ul{list-style:none;margin:0;padding:0}.fg li{margin:0}.fh{margin:0 0 4px;color:var(--t);font-weight:500}footer a{color:var(--m);text-decoration:none;display:inline-flex;align-items:center;min-height:44px}footer a:hover{color:var(--t)}.legal{margin:32px 0 0;padding-top:24px;border-top:1px solid var(--l);font-size:12px;display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 24px}.legal p{margin:0}.cnpj{opacity:.75;letter-spacing:.02em}@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}</style>
+</head>
+<body>
+<header><div class="w"><nav aria-label="Main"><a class="lg" href="/" aria-label="Downshift"><picture><source srcset="/downshift-logo-dark.svg" media="(prefers-color-scheme:dark)"><img src="/downshift-logo-dark.svg" alt="Downshift" width="258" height="60"></picture></a><a class="nl" href="/guides/">Guides</a><a class="nl ds" href="/docs/">Docs</a><a class="nl ds" href="https://github.com/tiagovilasboas/downshift" rel="noopener">GitHub</a><a class="nl lang" href="/pt-br/guias/" hreflang="pt-BR" lang="pt-BR" aria-label="Guias em português">PT</a></nav></div></header>
+<main class="w"><nav class="bc" aria-label="Breadcrumb"><ol><li><a href="/">Home</a></li><li><a href="/docs/">Docs</a></li><li><span aria-current="page">Installation and harness setup</span></li></ol></nav><article class="ga"><div class="top"><h1>Installation and harness setup</h1><p class="by">Downshift by <a href="https://github.com/tiagovilasboas/downshift" rel="noopener">Tiago Vilas Boas</a>. Updated <time datetime="2026-10-19">19 October 2026</time>. <a href="https://github.com/tiagovilasboas/downshift/blob/main/docs/guides/install.md" rel="noopener">Source on GitHub</a></p><p class="dis">Downshift here is a Go tool for AI coding agents, not the React downshift autocomplete library and unrelated to any car transmission.</p></div><nav class="toc" aria-labelledby="toc-h"><p class="lbl" id="toc-h">On this page</p><ol><li><a href="#health-check">Health check</a></li><li><a href="#quickstart--zero-to-working-hook-in-2-minutes">Quickstart — zero to working hook in 2 minutes</a></li><li><a href="#testing-locally-before-connecting-the-hook">Testing locally before connecting the hook</a></li><li><a href="#install-claude-code">Install (Claude Code)</a></li><li><a href="#install-cursor">Install (Cursor)</a></li><li><a href="#install-codex">Install (Codex)</a></li><li><a href="#session-allowlist">Session allowlist</a></li><li><a href="#experimental-harnesses">Experimental harnesses</a></li><li><a href="#dsmon--live-monitor-widget">dsmon — live monitor widget</a></li><li><a href="#grok-cli-config-not-hook">Grok CLI (config, not hook)</a></li><li><a href="#plan-compatibility--read-before-installing">Plan compatibility — read before installing</a></li><li><a href="#troubleshooting">Troubleshooting</a></li><li><a href="#more-docs">More docs</a></li></ol></nav><div class="bd"><p>Downshift by Tiago Vilas Boas <a href="https://github.com/tiagovilasboas/downshift" rel="noopener">https://github.com/tiagovilasboas/downshift</a></p>
+<p>Canonical guide for humans and coding agents installing Downshift on a user machine.</p>
+<p><strong>Related:</strong> <a href="/docs/config/">config.md</a> · <a href="/docs/session-models/">session-models.md</a> · <a href="/docs/harness-matrix/">harness-matrix.md</a> · <a href="https://github.com/tiagovilasboas/downshift/blob/main/examples/README.md" rel="noopener">examples/README.md</a> · <a href="https://github.com/tiagovilasboas/downshift/blob/main/docs/pt/README.md" rel="noopener">Portuguese guides</a></p>
+<p><strong>Harness status:</strong> Claude Code is Completed; Codex and Cursor are Functional; Antigravity and KiroCrew are Experimental (see <a href="#experimental-harnesses">Experimental harnesses</a>); OpenCode is Beta (adapter and route wire in this repository, plugin wiring in development). The sections below follow that order. Definitions and evidence: <a href="/docs/harness-matrix/#status-per-harness">harness-matrix.md</a>.</p>
+<h2 id="health-check">Health check</h2>
+<p>After install:</p>
+<pre tabindex="0"><code class="language-bash">downshift doctor          # version, state dir (~/.downshift), catalog source
+downshift try &quot;rename userId in auth.ts&quot; claude-code</code></pre>
+<p>Optional adapter smoke (from a clone of this repo):</p>
+<pre tabindex="0"><code class="language-bash">./examples/run-all.sh</code></pre>
+<p>Availability discovery and usage quota are configured separately. See <a href="https://github.com/tiagovilasboas/downshift/blob/main/docs/reference/session-discovery.md" rel="noopener">session-discovery.md</a> for model listings and <a href="https://github.com/tiagovilasboas/downshift/blob/main/docs/guides/quota.md" rel="noopener">quota.md</a> for the native Claude Code statusline bridge, Codex transcript collection, freshness, and required-quota mode. A successful discovery is not proof of included credit, and installing a bridge is not proof that it has received a live usage observation.</p>
+<h2 id="quickstart--zero-to-working-hook-in-2-minutes">Quickstart — zero to working hook in 2 minutes</h2>
+<p><strong>Step 1 — Install</strong> (macOS / Linux):</p>
+<pre tabindex="0"><code class="language-bash">curl -fsSL https://raw.githubusercontent.com/tiagovilasboas/downshift/main/install.sh | sh</code></pre>
+<p>The installer downloads the release archive and <code>checksums.txt</code> from the same GitHub release and verifies the sha256 before anything is installed; a mismatch or a missing checksum file stops it. <code>DOWNSHIFT_SKIP_CHECKSUM=1</code> installs unverified and says so. Releases are also on the <a href="https://github.com/tiagovilasboas/downshift/releases" rel="noopener">Releases page</a> with the same <code>checksums.txt</code>.</p>
+<p><strong>Build provenance (optional).</strong> Releases built by the <code>release</code> job carry a GitHub build-provenance attestation. After the sha256 check, if the <code>gh</code> CLI is installed, <code>install.sh</code> runs <code>gh attestation verify &lt;archive&gt; --repo tiagovilasboas/downshift</code> and prints <code>Build provenance verified</code>. It never blocks on this by default: with no <code>gh</code>, no <code>gh auth login</code>, or a release older than the attestations, it prints a warning and continues on the sha256 alone. <code>DOWNSHIFT_REQUIRE_ATTESTATION=1</code> makes any outcome other than "verified" an error that installs nothing; <code>DOWNSHIFT_SKIP_ATTESTATION=1</code> skips the check. The installer ends by saying what was proven: "sha256 and GitHub build provenance" or "sha256 only" (an intact download, not proof of who published it). It accepts only a strict <code>vMAJOR.MINOR.PATCH[-prerelease]</code> version, downloads with <code>curl --proto '=https' --tlsv1.2</code>, and installs through a temporary name plus a rename. By hand: <code>gh attestation verify downshift_&lt;ver&gt;_&lt;os&gt;_&lt;arch&gt;.tar.gz --repo tiagovilasboas/downshift</code>.</p>
+<p><code>install.sh</code> still treats a non-flag argument as the release version. <code>--explicit-upshift</code> may come before or after that version. It writes <code>"explicit_upshift": true</code> into <code>session-models.json</code> without dropping harness lists that are already there. The same switch at runtime is <code>DOWNSHIFT_EXPLICIT_UPSHIFT=1</code>. Default is off. See <a href="/docs/session-models/#explicit_upshift">session-models.md</a>.</p>
+<p><strong>Step 2 — Preview, then wire the hooks:</strong></p>
+<pre tabindex="0"><code class="language-bash">downshift setup --dry-run   # prints the diff for each harness found; writes nothing
+downshift setup             # asks first, backs up the files, then merges the hooks</code></pre>
+<p>For Claude Code, <code>setup</code> wires <code>PreToolUse</code> (matcher <code>Agent|Task</code>), <code>PostToolUse</code>, <code>PostToolUseFailure</code> and <code>SubagentStop</code>, sets the statusline when none exists, and sets <code>"model": "opusplan"</code> (Opus in plan mode, Sonnet for execution), <code>"permissions": {"defaultMode": "plan"}</code> (sessions start in plan mode) for keys you have not set; existing values are kept, and <code>--no-session-policy</code> skips both. Claude Code's built-in You should know mod (<code>"enabledPlugins": {"cc-plugin-you-should-know@builtin": true}</code>) is opt-in because each check is a billed background request to the session's model: <code>setup</code> prints a suggestion, and <code>downshift setup --you-should-know</code> writes it (<code>/plugin disable cc-plugin-you-should-know@builtin</code> turns it off) (<a href="/docs/session-models/#main-session-policy-plan-mode-and-opusplan-claude-code">main session policy</a>). It also finds Cursor, Codex and Antigravity, keeps unrelated keys and existing hooks, and is idempotent. <code>downshift setup --undo</code> restores the latest backup. KiroCrew (Experimental) needs its wrapper script and is only reported; see <a href="#kirocrew-policy-mode-through-the-native-kiro-cli-hook">KiroCrew</a>. The manual JSON is in <a href="#manual-setup-claude-code">Manual setup</a> below.</p>
+<p><strong>Step 3 — Check the classifier</strong> on your own prompts:</p>
+<pre tabindex="0"><code class="language-bash">downshift doctor                                          # checklist: binary, hooks per harness, state, scores
+downshift try &quot;rename the userId variable&quot; claude-code    # what would be picked, and why</code></pre>
+<p><strong>Step 4 — Confirm it's working.</strong> Open a new Claude Code session and ask it to spawn a subagent for a trivial task. You'll see a line like this in stderr:</p>
+<pre tabindex="0"><code>downshift: TRIVIAL task → downshift to claude-haiku-4-5</code></pre>
+<p>That line means the hook fired and emitted a rewrite before the subagent started. Whether the harness applied it is a separate fact; <code>downshift stats</code> separates <code>rewrite_emitted</code> from honored, and the matrix says what is verified per plan.</p>
+<p><strong>Verify the rewrite was honored</strong> (important for beta exit validation):</p>
+<ul>
+<li>Ask Claude Code: <em>"spawn a subagent to rename the userId variable in auth.ts"</em></li>
+<li>Open Claude Code's internal logs or monitor (check the subagent's actual model in the UI)</li>
+<li>Confirm it started on haiku, not the session's default frontier model</li>
+<li>This proves the hook's rewrite was not just emitted—it was <strong>actually applied</strong> by the harness</li>
+</ul>
+<p><strong>Step 5 — See what happened.</strong> <code>downshift stats --days=1</code> shows decisions and estimated savings; <code>downshift session --tree</code> shows this session's subagents as a tree. In Claude Code, the plugin exposes <code>/downshift:status</code>; the optional manual alias <code>/downshift</code> is in <a href="#the-downshift-command-claude-code">The /downshift command</a>.</p>
+<p><strong>Step 6 — (Optional) Watch it live.</strong> <code>downshift watch</code> redraws the current session's subagent tree (model, end status, cost, why) every second, for every harness; <code>downshift session --tree</code> prints it once, and <code>/downshift:status</code> or <code>/downshift</code> shows it inside Claude Code. The older floating widget is still available: <a href="#dsmon--live-monitor-widget">dsmon — live monitor widget</a>.</p>
+<h3 id="manual-setup-claude-code">Manual setup (Claude Code)</h3>
+<p>Use this instead of <code>setup</code> if you prefer to edit <code>~/.claude/settings.json</code> yourself. The PreToolUse matcher is <code>Agent|Task</code>. Claude Code's <code>Task</code> schema accepts only family names (<code>haiku</code>, <code>sonnet</code>, <code>opus</code>, <code>fable</code>) in <code>model</code>. Downshift writes the catalog's family name for you and leaves the spawn alone when a model has none.</p>
+<pre tabindex="0"><code class="language-json">{
+  &quot;hooks&quot;: {
+    &quot;PreToolUse&quot;: [
+      { &quot;matcher&quot;: &quot;Agent|Task&quot;, &quot;hooks&quot;: [{ &quot;type&quot;: &quot;command&quot;, &quot;command&quot;: &quot;downshift claude-code&quot; }] }
+    ]
+  }
+}</code></pre>
+<p>For child status and real usage, also add <code>PostToolUse</code> and <code>PostToolUseFailure</code> (<code>downshift claude-code-post-tool-use</code>) and <code>SubagentStop</code> (<code>downshift claude-code-subagent-stop</code>), as <code>setup</code> does.</p>
+<h2 id="testing-locally-before-connecting-the-hook">Testing locally before connecting the hook</h2>
+<p>Before adding the hook to Claude Code, test the classifier and hook logic locally:</p>
+<p><strong>Test 1 — Classifier only (terminal):</strong></p>
+<pre tabindex="0"><code class="language-bash">downshift try &quot;rename the userId variable&quot; claude-code
+downshift try &quot;rearchitect the payment flow&quot; claude-code
+downshift try &quot;implement the CSV export&quot; claude-code</code></pre>
+<p><strong>Test 2 — Full hook (JSON):</strong></p>
+<pre tabindex="0"><code class="language-bash">downshift claude-code &lt; examples/claude-code-pretooluse-session.json</code></pre>
+<p>This mimics exactly what Claude Code will send. The output is the JSON the harness will apply, plus stderr feedback with the decision and a feedback ID for tracking.</p>
+<p>See <a href="https://github.com/tiagovilasboas/downshift/blob/main/examples/README.md" rel="noopener">examples/</a> for sample payloads. <code>claude-code-pretooluse-session.json</code> carries a <code>session_models</code> list, so it shows a real rewrite.</p>
+<blockquote class="co">
+<p><strong>⚠️ Claude Code Pro/Max/Teams/API only.</strong> Free plan has no real subagents and blocks network installs. See <a href="#plan-compatibility--read-before-installing">Plan compatibility</a> before proceeding.</p>
+</blockquote>
+<h2 id="install-claude-code">Install (Claude Code)</h2>
+<p><strong>Status: Completed.</strong> Rewrite observed honored, usage and child end recorded, plugin and session policy (<a href="https://github.com/tiagovilasboas/downshift/blob/main/docs/evidence/claude-code-rewrite-honored-2026-10-06.md" rel="noopener">evidence</a>, <a href="https://github.com/tiagovilasboas/downshift/blob/main/docs/evidence/billing-gap-audit.md" rel="noopener">billing audit</a>).</p>
+<p>Build or install the single binary (no runtime, no dependencies):</p>
+<pre tabindex="0"><code class="language-bash"># Recommended — one-liner installer (macOS / Linux, detects arch automatically)
+# Installs to /usr/local/bin/downshift — no PATH changes needed
+curl -fsSL https://raw.githubusercontent.com/tiagovilasboas/downshift/main/install.sh | sh
+
+# Alternative — Go toolchain (any platform)
+go install github.com/tiagovilasboas/downshift/cmd/downshift@latest</code></pre>
+<blockquote class="co">
+<p><strong>Go toolchain note:</strong> <code>go install</code> places the binary in <code>~/go/bin</code>. If <code>downshift: command not found</code>, add Go's bin to your PATH:</p>
+<pre tabindex="0"><code class="language-bash">export PATH=&quot;$HOME/go/bin:$PATH&quot;   # current session
+echo &#39;export PATH=&quot;$HOME/go/bin:$PATH&quot;&#39; &gt;&gt; ~/.zshrc &amp;&amp; source ~/.zshrc  # permanent</code></pre>
+<p>The <code>curl</code> installer above avoids this by installing directly to <code>/usr/local/bin</code>.</p>
+</blockquote>
+<p>Pre-built binaries for macOS (arm64/amd64), Linux (arm64/amd64), and Windows (amd64) are available on the <a href="https://github.com/tiagovilasboas/downshift/releases" rel="noopener">Releases</a> page.</p>
+<p><strong>Fastest path:</strong> <code>downshift setup</code> finds Claude Code, Cursor, Codex and Antigravity on this machine and merges every hook (plus the Claude Code statusline when none is set) into their hook files, using this binary's absolute path. It keeps unrelated keys and existing hooks, is idempotent, prints a diff, and saves a timestamped backup. <code>--dry-run</code> writes nothing, <code>--yes</code> skips the question, <code>--undo</code> restores the latest backup. KiroCrew needs its wrapper script and is only reported. The manual JSON follows.</p>
+<p>Add the hook to <code>~/.claude/settings.json</code>:</p>
+<pre tabindex="0"><code class="language-json">{
+  &quot;hooks&quot;: {
+    &quot;PreToolUse&quot;: [
+      {
+        &quot;matcher&quot;: &quot;Agent|Task&quot;,
+        &quot;hooks&quot;: [
+          { &quot;type&quot;: &quot;command&quot;, &quot;command&quot;: &quot;downshift claude-code&quot; }
+        ]
+      }
+    ]
+  }
+}</code></pre>
+<p>That is the wiring. From the next session on, every subagent spawn goes through the hook; whether the model is rewritten depends on the task (confident, no risk) and on the plan (<a href="/docs/harness-matrix/">harness matrix</a>). On natural work most spawns are held, and that is by design.</p>
+<h3 id="plugin-install-claude-code">Plugin install (Claude Code)</h3>
+<p>The same four hooks and the <code>/downshift:status</code> command ship as a Claude Code plugin whose root is this repository. It needs the <code>downshift</code> binary on PATH (step 1 above) and replaces step 2 for Claude Code only. <code>downshift setup</code> does this install for you when it can: it runs <code>claude plugin marketplace add</code> and <code>claude plugin install downshift@downshift</code>, then removes the Downshift hooks it wrote earlier into <code>settings.json</code> (the plugin carries them; keeping both would route every spawn twice). It installs the plugin only when <code>claude</code> is on PATH and a login shell resolves <code>downshift</code> to the same binary that runs <code>setup</code>, because the plugin's hooks call <code>downshift</code> by name; otherwise it keeps writing the settings hooks and says why. <code>--no-plugin</code> always keeps them in <code>settings.json</code>. The other harnesses still use <code>downshift setup</code>.</p>
+<pre tabindex="0"><code class="language-text">/plugin install downshift --marketplace tiagovilasboas/downshift      # Claude Code 2.1.275+</code></pre>
+<p>or in two steps, <code>/plugin marketplace add tiagovilasboas/downshift</code> then <code>/plugin install downshift@downshift</code>. The plugin wires <code>PreToolUse</code>, <code>PostToolUse</code>, <code>PostToolUseFailure</code>, <code>SubagentStop</code>, and <code>UserPromptSubmit</code> (for Downshift Code Intelligence) from <a href="https://github.com/tiagovilasboas/downshift/blob/main/hooks/hooks.json" rel="noopener"><code>hooks/hooks.json</code></a> (each entry only calls the binary), adds the <code>downshift-setup</code>, <code>downshift-audit</code> and <code>cost-reducer</code> skills, and the command below as <code>/downshift:status</code>. On Claude Code 2.1.287 or later it also loads the bundled <a href="https://github.com/tiagovilasboas/downshift/blob/main/hooks/cache-tax/README.md" rel="noopener">cache-tax mod</a>: a cold send on a context of 50k tokens or more is dropped once with its estimated rewrite price (resend to pay it, <code>/cache-tax guard warn</code> to only be told), and <code>/keepwarm 90m</code> keeps the cache warm through a break with one small model request per 50 idle minutes, which costs usage. If you already installed <code>cache-tax@claude-code-mods</code>, uninstall one copy; <code>doctor</code> warns. The marketplace also offers savvy-progress and filetree, one install each (<code>downshift setup</code> installs both on Claude Code; by hand: <code>/plugin install savvy-progress@downshift</code>, <code>/plugin install filetree@downshift</code>; see <a href="https://github.com/tiagovilasboas/downshift/blob/main/mods/README.md" rel="noopener">mods/README.md</a>). It does not set <code>opusplan</code>, plan mode, the statusline or the You should know mod: those are settings, not hooks, and <code>downshift setup</code> writes them (You should know only with <code>--you-should-know</code>). Set <code>"model": "opusplan"</code> and <code>"permissions": {"defaultMode": "plan"}</code> in <code>~/.claude/settings.json</code> yourself (or <code>/model opusplan</code> in a session), and <code>/plugin enable cc-plugin-you-should-know@builtin</code> for You should know (a billed request per check), if you want them without <code>setup</code>; see <a href="/docs/session-models/#main-session-policy-plan-mode-and-opusplan-claude-code">main session policy</a>.</p>
+<p>Use one channel. A plugin hook and a settings hook with the same command both run, so a session wired through both routes every spawn twice. <code>downshift setup</code> skips the hooks when it sees the plugin enabled in <code>~/.claude/settings.json</code> (it still applies the session policy and statusline), and <code>downshift doctor</code> warns when it finds both. To switch from <code>setup</code> to the plugin, run <code>downshift setup --undo</code> first. Detection reads the user settings file only; a plugin enabled from a project's <code>.claude/settings.json</code> is not seen.</p>
+<h3 id="the-downshift-command-claude-code">The /downshift command (Claude Code)</h3>
+<p>Optional when installed by hand. A slash command that shows what Downshift did in the current session (a tree of subagents, why the last one ran where it did, pause and resume):</p>
+<pre tabindex="0"><code class="language-bash">mkdir -p ~/.claude/commands
+cp commands/status.md ~/.claude/commands/downshift.md   # from this repository</code></pre>
+<p>With the plugin it is already there as <code>/downshift:status</code>. Then in Claude Code: <code>/downshift:status</code>, <code>/downshift:status --why</code>, <code>/downshift:status --pause</code>, <code>/downshift:status --resume</code>. The optional manual copy above retains <code>/downshift</code> as a local alias. The command only runs <code>downshift session</code> through the Bash tool, which its <code>allowed-tools</code> line limits to that command. The same <code>downshift session</code> works in a terminal for any harness. See <a href="/docs/session-view/">session-view.md</a>.</p>
+<h3 id="downshift-code-intelligence-dci">Downshift Code Intelligence (DCI)</h3>
+<p>Downshift includes an optional code intelligence engine that discovers repository code, extracts Go AST and lexical symbols, scores relevance via BM25, and injects compact structural context (&lt;=3,500 bytes UTF-8) via <code>UserPromptSubmit</code> in Claude Code.</p>
+<p>By default, DCI is <code>off</code>. To enable it in a repository:</p>
+<pre tabindex="0"><code class="language-bash">downshift dci enable active   # Inject context into Claude Code prompts
+downshift dci enable observe  # Observe and record telemetry without injecting
+downshift dci status          # Show active mode and cache statistics
+downshift dci doctor          # Check permissions, discovery, and latencies
+downshift dci benchmark       # Run local performance and relevance benchmarks</code></pre>
+<p>To view DCI telemetry and metrics:</p>
+<pre tabindex="0"><code class="language-bash">downshift stats --dci         # Display DCI-specific prompts, injections, and latencies</code></pre>
+<p>See <a href="https://github.com/tiagovilasboas/downshift/blob/main/docs/design/code-intelligence.md" rel="noopener">code-intelligence.md</a> for full architectural details.</p>
+<h2 id="install-cursor">Install (Cursor)</h2>
+<p><strong>Status: Functional.</strong> The rewrite is emitted on a real spawn; the harness applying it is unconfirmed, and it is discarded on Free and legacy Pro plans (<a href="https://github.com/tiagovilasboas/downshift/blob/main/docs/evidence/cursor-rewrite-honored-2026-10-10.md" rel="noopener">evidence</a>, <a href="https://github.com/tiagovilasboas/downshift/blob/main/docs/evidence/cursor-gap-diagnostic.md" rel="noopener">gap diagnostic</a>).</p>
+<p>Cursor's hook protocol mirrors Claude Code's — same <code>preToolUse</code> interception, <code>updated_input</code> to rewrite the subagent's model. Build the binary, then add the hook to <code>.cursor/hooks.json</code> (project level) or <code>~/.cursor/hooks.json</code> (global):</p>
+<pre tabindex="0"><code class="language-json">{
+  &quot;version&quot;: 1,
+  &quot;hooks&quot;: {
+    &quot;preToolUse&quot;: [
+      { &quot;command&quot;: &quot;downshift cursor&quot;, &quot;matcher&quot;: &quot;Task&quot; }
+    ]
+  }
+}</code></pre>
+<p>The <code>matcher: "Task"</code> scopes the hook to subagent spawns only. Cursor watches the config and reloads it on save.</p>
+<h2 id="install-codex">Install (Codex)</h2>
+<p><strong>Status: Functional.</strong> The rewrite is emitted on a real spawn; the harness applying it is inferred, not observed (<a href="https://github.com/tiagovilasboas/downshift/blob/main/docs/evidence/codex-rewrite-honored-2026-10-02.md" rel="noopener">evidence</a>).</p>
+<p>Codex spawns subagents through a reserved <code>spawn_agent</code> tool under <code>multi_agent_v2</code>. You can't put a model on the provider-visible call, but a <code>PreToolUse</code> hook can inject the model <strong>and</strong> <code>reasoning_effort</code> into the tool input before the child starts — which is exactly where <code>downshift</code> runs.</p>
+<p>Enable the feature flags in <code>config.toml</code>:</p>
+<pre tabindex="0"><code class="language-toml">[features]
+hooks = true
+
+[features.multi_agent_v2]
+enabled = true</code></pre>
+<p>Register the hook in <code>.codex/hooks.json</code> (project) or <code>~/.codex/hooks.json</code> (global). The matcher covers both the <code>Agent</code> and namespaced <code>spawn_agent</code> tool names:</p>
+<pre tabindex="0"><code class="language-json">{
+  &quot;hooks&quot;: {
+    &quot;PreToolUse&quot;: [
+      {
+        &quot;matcher&quot;: &quot;(^Agent$|.*spawn_agent$)&quot;,
+        &quot;hooks&quot;: [
+          { &quot;type&quot;: &quot;command&quot;, &quot;command&quot;: &quot;downshift codex&quot; }
+        ]
+      }
+    ]
+  }
+}</code></pre>
+<h3 id="trust-the-hook-before-testing">Trust the hook before testing</h3>
+<p>Codex does not run newly configured local hooks until you review and trust their exact command. This is a Codex safety control, not a downshift error. After saving the configuration, start Codex and run:</p>
+<pre tabindex="0"><code class="language-text">/hooks</code></pre>
+<p>Review and trust the <code>downshift codex</code> hook, then start a <strong>new session</strong> before asking Codex to spawn a subagent. Until the hook is trusted, Codex skips it and the subagent keeps the session model unchanged.</p>
+<p>On Codex, downshift routes <strong>two axes at once</strong>: the model tier and the reasoning effort (<code>low</code> for trivial work, up to <code>high</code> for frontier work). For a session that offers GPT-6 Sol and Luna, a trivial subagent can route from <code>gpt-6-sol</code> to <code>gpt-6-luna</code> at low effort — subject to the session allowlist and Codex accepting the rewritten input.</p>
+<p>Downshift applies the selected reasoning effort, except when a guardrail holds the decision (the spawn keeps its requested effort) or when the decision is unconfident and does not rewrite the model. A code review is a frontier task, so a <code>gpt-5.6-terra</code> session routes its subagent to <code>gpt-5.6-sol</code> at high effort. <code>gpt-6-astra</code> is marked <code>routing: "explicit_only"</code> in the catalog. With the default <code>explicit_upshift</code> off, downshift does not select it. If the current subagent is already running on Astra, the model is preserved unchanged. Set <code>"explicit_upshift": true</code> in <code>session-models.json</code>, export <code>DOWNSHIFT_EXPLICIT_UPSHIFT=1</code>, or run <code>install.sh --explicit-upshift</code> to let upshift select it when it is inside this harness's credit set (or when this harness reported no credit set). Cursor <code>claude-fable-5-1-thinking-high</code> is the same kind of opt-in. Claude Code <code>claude-fable-5-1</code> is not <code>explicit_only</code>; append that id to the session list to opt in. To mark any other model as explicit-only, add <code>"routing": "explicit_only"</code> to its entry in <code>~/.downshift/catalog.json</code> (the state dir; <code>~/.harness-downshift/</code> is read only when it is the legacy dir in use).</p>
+<p>A purely mechanical prompt such as <code>Use a subagent to only list the .go files</code> is routed to <code>gpt-6-luna</code> at low effort when that exact id is in the session allowlist.</p>
+<blockquote class="co">
+<p>Codex's <code>multi_agent_v2</code> spawn schema is still evolving. downshift preserves the reserved fields and fails open, but pin the exact Codex build you deploy and keep an acceptance test on a real spawn.</p>
+</blockquote>
+<h2 id="session-allowlist">Session allowlist</h2>
+<p>Downshift writes a model id only when that id is in the current session. The catalog supplies tier, cost, family, and effort for ids that are also in the session. It never adds an id the session does not have. If the session list cannot be determined, the hook leaves the current model unchanged.</p>
+<p>Cursor, Claude Code, and Codex hooks send the active model, not the full picker list. Codex also sends a session ID; Downshift validates and hashes that ID before recording it, so local routing decisions can be grouped without persisting the raw session identifier. Record selectable model ids in <code>~/.downshift/session-models.json</code> (legacy: <code>~/.harness-downshift/</code>). A top-level harness list is a fallback; an exact <code>sessions.&lt;harness&gt;.&lt;session_id&gt;</code> list takes precedence. Lists are operator-curated: Downshift does not query the Codex model picker or infer account entitlement. The one exception is Claude Code: with no list from any source it infers the session from the current model (the catalog tier ladder below it, ending at that model), so it can downshift but never upshift past what the session already runs; <code>DOWNSHIFT_INFER_SESSION=off</code> disables this. If a hook payload includes <code>session_models</code> or <code>available_models</code>, that list is used and the file is skipped. Details and evidence: <a href="/docs/session-models/">session-models.md</a>. <a href="https://github.com/tiagovilasboas/downshift/blob/main/docs/examples/session-models.example.json" rel="noopener">session-models.example.json</a> is one Cursor session from 2026-09-27. It is an example, not the default for every user.</p>
+<p>For Cursor quota, the hook can read a complete native export named by <code>DOWNSHIFT_CURSOR_NATIVE_FILE</code> offline before the canonical quota cache. A malformed or stale configured export holds routing. The external experimental extension was tested on Cursor 3.24.9 and could not access the built-in-only <code>cursor</code> API, even with an explicit proposed-API flag; no export was produced. Installing that extension does not currently enable collection on that build. See <a href="https://github.com/tiagovilasboas/downshift/blob/main/docs/evidence/cursor-gap-diagnostic.md" rel="noopener">the runtime diagnostic</a>. Provider membership remains authoritative; do not replace it with a fixed model list.</p>
+<h2 id="experimental-harnesses">Experimental harnesses</h2>
+<blockquote class="co">
+<p><strong>Experimental (proof of concept).</strong> KiroCrew runs in policy mode only (block and retry, no in-place rewrite) and Antigravity's rewrite rides an <code>overwrite</code> envelope that is not a documented vendor field; each has one observed child on one build and neither records a child end. Every feature is still computed for them (layering rule, <code>cmd/downshift/conformance_test.go</code>), and the adapters, tests and hooks stay in the repository, but treat them as proofs of concept, not as supported installs. Install them only if you accept that.</p>
+</blockquote>
+<h3 id="antigravity-google-deepmind">Antigravity (Google DeepMind)</h3>
+<p><strong>Status: Experimental.</strong> One observed child on desktop 2.21.1 (<a href="https://github.com/tiagovilasboas/downshift/blob/main/docs/evidence/antigravity-executor-ack.md" rel="noopener">evidence</a>); no child end recorded.</p>
+<p>Antigravity executes subagents via <code>invoke_subagent</code> and supports arguments modification in its <code>PreToolUse</code> hook protocol via <code>overwrite</code>.</p>
+<p>Register the hook in <code>~/.gemini/config/hooks.json</code>:</p>
+<pre tabindex="0"><code class="language-json">{
+  &quot;PreToolUse&quot;: [
+    {
+      &quot;matcher&quot;: &quot;invoke_subagent&quot;,
+      &quot;command&quot;: &quot;downshift antigravity&quot;
+    }
+  ]
+}</code></pre>
+<p>When Antigravity attempts to spawn a subagent (e.g. inheriting the parent model or requesting <code>pro</code>), <code>downshift antigravity</code> intercepts the tool call, classifies the <strong>last</strong> entry in <code>Subagents</code> that has a non-empty <code>Prompt</code> (not necessarily <code>Subagents[0]</code>; trailing rows without <code>Prompt</code> are skipped), and rewrites <strong>that</strong> subagent's <code>Model</code> (<code>flash_lite</code> for mechanical tasks, <code>flash</code> for the mid tier) through an <code>overwrite</code> envelope that is not a documented vendor field, logging the routing event to <code>~/.downshift/events.jsonl</code>.</p>
+<h3 id="kirocrew-policy-mode-through-the-native-kiro-cli-hook">KiroCrew (policy mode through the native Kiro CLI hook)</h3>
+<p><strong>Status: Experimental.</strong> Block and retry observed once on Kiro CLI 2.29.0; no in-place rewrite (<a href="https://github.com/tiagovilasboas/downshift/blob/main/docs/evidence/kirocrew-native-hook-2026-10-10.md" rel="noopener">evidence</a>).</p>
+<p>For Kiro CLI 2.29, register Downshift through KiroCrew's persistent <code>agent.kiro_hooks</code> configuration. KiroCrew generates the agent spec consumed by Kiro CLI, whose native <code>preToolUse</code> hook runs before the tool: <code>exit 0</code> allows it; <code>exit 2</code> blocks it and returns stderr to the agent. There is no <code>updated_input</code> channel, so the adapter uses <strong>policy mode</strong>. It classifies a pending spawn with an explicit child model and:</p>
+<ul>
+<li><strong>right tier already</strong> → <code>exit 0</code>, allow silently;</li>
+<li><strong>confident tier mismatch</strong> → <code>exit 2</code>, block with a message naming the model to respawn with (and, for a small tier, a reminder to trim context so the child fits the smaller window);</li>
+<li><strong>uncertain downshift, unknown model, or non-subagent tool</strong> → <code>exit 0</code>, fail-open. The router never blocks a spawn on its own doubt.</li>
+</ul>
+<p>Use the <code>kirocrew-core</code> MCP tool <code>spawn_run</code> with explicit <code>task</code> and <code>model</code> arguments. The native <code>use_subagent</code> / crew pipeline can omit the child model; those calls are outside routing coverage. Downshift never infers the child model from the parent's model or a UI title. The classifier is deterministic; the agent must retry a blocked spawn with the recommended model.</p>
+<h4 id="setup">Setup</h4>
+<blockquote class="co">
+<p><strong>Important — two hook paths exist.</strong> <code>~/.kiro/agents/kirocrew.json</code> is <strong>generated</strong> by KiroCrew and overwritten on every restart; edits there are lost. The durable registration path is <code>~/.kiro/crew/config.json</code> via <code>agent.kiro_hooks</code>. <code>~/.kiro/crew/hooks.json</code> is a separate, informational hook registry (growing <code>run_count</code> proves invocation; exit code does not block the tool path). Use <code>config.json</code> for policy enforcement. Confirmed on Kiro CLI 2.29.0, 2026-10-10.</p>
+</blockquote>
+<ol type="1">
+<li>Build the binary:
+<pre tabindex="0"><code class="language-bash">go build -o downshift ./cmd/downshift</code></pre></li>
+<li>Make the checked-in wrapper executable:
+<pre tabindex="0"><code class="language-bash">chmod +x scripts/kirocrew-pre-tool-use.sh</code></pre>
+The wrapper invokes the repository's <code>downshift</code> binary with the <code>kirocrew</code> subcommand. Keep it beside this build in the repository checkout.</li>
+<li>Merge this entry into <code>~/.kiro/crew/config.json</code>, preserving existing configuration and hooks. Replace the example path with the absolute path to the wrapper in your checkout:
+<pre tabindex="0"><code class="language-json">{
+  &quot;agent&quot;: {
+    &quot;kiro_hooks&quot;: {
+      &quot;preToolUse&quot;: [
+        {
+          &quot;matcher&quot;: &quot;*&quot;,
+          &quot;command&quot;: &quot;/absolute/path/to/downshift/scripts/kirocrew-pre-tool-use.sh&quot;
+        }
+      ]
+    }
+  }
+}</code></pre>
+KiroCrew merges <code>kiro_hooks</code> with its bundled hooks when generating the agent spec. It accepts <code>command</code> as an existing absolute executable path, preserves <code>command</code> and <code>matcher</code>, and drops <code>timeout_ms</code>. Commands containing shell arguments are rejected. The wrapper carries the subcommand so it survives generation. <strong>Do not edit <code>~/.kiro/agents/kirocrew.json</code></strong>: KiroCrew regenerates that file and your edits will be lost.</li>
+<li>Populate the <code>kirocrew</code> session model list from the models actually selectable in your installed Kiro CLI. Follow <a href="/docs/session-models/">session-models.md</a> for ordering and discovery precedence. Without a known eligible target, policy mode allows the spawn unchanged.</li>
+<li>Load <a href="https://github.com/tiagovilasboas/downshift/blob/main/docs/guides/kirocrew-routing-guide.md" rel="noopener">kirocrew-routing-guide.md</a> into the agent's instructions and restart KiroCrew so it regenerates its spec. Verify that the generated <code>preToolUse</code> includes the wrapper and existing bundled hooks.</li>
+<li>Smoke-test the adapter with known available models (no spawn needed):
+<pre tabindex="0"><code class="language-bash">printf &#39;%s\n&#39; &#39;{&quot;tool_name&quot;:&quot;spawn_run&quot;,&quot;tool_input&quot;:{&quot;task&quot;:&quot;rename a variable&quot;,&quot;model&quot;:&quot;YOUR_AVAILABLE_FRONTIER_MODEL&quot;}}&#39; \
+  | ./scripts/kirocrew-pre-tool-use.sh
+# A confident mismatch with an eligible target returns exit 2 and model=...</code></pre>
+Replace the placeholder with a real current model. This checks adapter output only; it does not establish that the harness blocks execution.</li>
+</ol>
+<p><code>~/.kiro/crew/hooks.json</code> tool-call hooks are informational: they can execute after the tool starts, and their exit code does not block that path. A growing <code>run_count</code> proves invocation only. Do not use that registration as policy enforcement or keep an informational duplicate of the native policy hook.</p>
+<h4 id="acceptance-evidence-and-coverage">Acceptance evidence and coverage</h4>
+<p>The linked instructions are the <strong>guia inferencial</strong> for the <strong>behaviour</strong> eixo. The native pre-tool policy hook is the <strong>sensor computacional</strong> for that same concern. Check a real <code>spawn_run</code> with a trivial task and an explicit frontier model: prove it is blocked before the child starts, then retry once with the recommended model. Verify the child's actual model in KiroCrew's native subagent record. Missing-model calls must pass through unchanged.</p>
+<p>Spec regeneration and a restart followed by these checks are the <strong>sensor computacional</strong> for <strong>architecture fitness</strong>, paired with this setup guia. Routing decisions in the state directory's <code>events.jsonl</code> provide continuous local observations (default <code>~/.downshift</code>; legacy <code>~/.harness-downshift</code>). A blocked decision proves enforcement only when paired with the native result; it does not prove successful child execution, usage, or savings. A PostToolUse compliance observer remains separate maintainer tooling (DS-04); this setup does not install one. Native block, retry and served-model acknowledgement were observed on 2026-10-10 with Kiro CLI 2.29.0; see <a href="https://github.com/tiagovilasboas/downshift/blob/main/docs/evidence/kirocrew-native-hook-2026-10-10.md" rel="noopener">the build-specific evidence</a>.</p>
+<h2 id="dsmon--live-monitor-widget">dsmon — live monitor widget</h2>
+<blockquote class="co">
+<p><strong>Prefer <code>downshift watch</code>.</strong> The live session tree is built into the <code>downshift</code> binary (no separate build, every harness): see <a href="/docs/session-view/#live-downshift-watch">session-view.md</a>. <code>dsmon</code> stays buildable and is documented below.</p>
+</blockquote>
+<p><code>cmd/dsmon</code> is a separate command inside this repo — a floating terminal widget that shows model switches, harness, tier distribution and estimated cost savings in real time. It reads <code>~/.downshift/events.jsonl</code> and refreshes every 800 ms. Zero external dependencies; pure stdlib Go.</p>
+<pre tabindex="0"><code>╭──────────────────────────────────────────────────────╮
+│  dsmon  downshift monitor                            │
+│  harness  kirocrew        ◉ live                     │
+│ switches today ────────────────────────────────────  │
+│  04:03  opus   → haiku   trivial  -75%               │
+│  04:02  haiku  → opus    complex  ↑                  │
+│  04:01  opus   → sonnet  medium   -50%               │
+│ stats ──────────────────────────────────────────────  │
+│  35 events   22↓  2↑  8✓                             │
+│  est. saved  $0.18  ~7K tokens ¹                     │
+│  ¹ estimated · actual tokens not yet tracked         │
+╰──────────────────────────────────────────────────────╯
+  04:03:51 · ctrl+c to quit</code></pre>
+<h3 id="build-and-run">Build and run</h3>
+<pre tabindex="0"><code class="language-bash"># Build the monitor binary (separate from the hook binary `downshift`)
+go build -o dsmon ./cmd/dsmon
+
+# Run in the current terminal
+./dsmon
+
+# Open a floating terminal window (auto-detects iTerm2 / kitty / Ghostty / Terminal.app)
+./cmd/dsmon/launch.sh</code></pre>
+<h3 id="what-it-shows">What it shows</h3>
+<div class="tw" role="region" aria-label="Field, Source, Notes" tabindex="0"><table>
+<thead>
+<tr>
+<th scope="col">Field</th>
+<th scope="col">Source</th>
+<th scope="col">Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Harness</td>
+<td><code>events.jsonl</code> → <code>harness</code> field</td>
+<td>Last harness seen today</td>
+</tr>
+<tr>
+<td>Switches</td>
+<td><code>events.jsonl</code> → <code>verdict</code> + model fields</td>
+<td>Last 7 routing decisions</td>
+</tr>
+<tr>
+<td>Events / ↓ ↑ ✓</td>
+<td><code>events.jsonl</code></td>
+<td>Today's counts by verdict</td>
+</tr>
+<tr>
+<td>Est. saved ($)</td>
+<td><code>estimated_savings</code> × $0.01 avg spawn cost</td>
+<td>Rough estimate, not actual billing</td>
+</tr>
+<tr>
+<td>Est. tokens</td>
+<td>Derived from $ saved ÷ frontier output cost</td>
+<td>Estimated, not from provider</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Token consumption note.</strong> The router has no access to provider-reported token counts — it only sees what the harness passes to the preToolUse hook, which does not include usage data. The estimates are directionally correct (more downshifts = more savings) but not a substitute for your provider's billing dashboard. On Claude Code, real token counts come from a <code>SubagentStop</code> hook (<code>downshift claude-code-subagent-stop</code>), which prices the subagent from its own transcript once it finishes; see <a href="/docs/session-models/#claude-code-real-usage">session-models.md</a>.</p>
+<h2 id="grok-cli-config-not-hook">Grok CLI (config, not hook)</h2>
+<p>Grok CLI is the honest exception, and it's worth being precise about why.</p>
+<p>Grok has subagents (<code>spawn_subagent</code>, up to ~8 in parallel) and it reads Claude Code / Cursor hook files. But its <code>PreToolUse</code> hook contract is <strong>allow-or-deny only</strong> — <code>{ "decision": "deny", "reason": "…" }</code>. There is no documented <code>updatedInput</code>, so a hook <strong>cannot rewrite a subagent's model</strong> the way it can on Claude Code, Cursor, and Codex. A downshift hook on Grok could only <em>block</em> a spawn, which isn't the job.</p>
+<p>There's a second wrinkle: as of this writing Grok Build ships <strong>one coding model</strong> (<code>grok-4.6</code>, with <em>configurable reasoning</em>), not a small/mid/frontier model ladder. So on Grok the routing isn't "swap the model" — it's <strong>dial the reasoning effort</strong>. Cheap work runs <code>grok-4.6</code> at low effort; the hard tasks run it at high effort. Same principle, different knob.</p>
+<p>Grok exposes both as <strong>first-class config</strong>, which is more robust than a runtime rewrite. Set reasoning per subagent role in <code>~/.grok/config.toml</code>:</p>
+<pre tabindex="0"><code class="language-toml"># Built-in read-only types → low reasoning (cheap, fast).
+[subagents.personas.explore]
+reasoning_effort = &quot;low&quot;
+
+# Custom roles carry their own reasoning default.
+[subagents.roles.reviewer]
+description = &quot;Reviews generated changes before commit&quot;
+default_capability_mode = &quot;read-only&quot;
+reasoning_effort = &quot;low&quot;
+
+[subagents.roles.architect]
+description = &quot;Cross-cutting design and migrations&quot;
+reasoning_effort = &quot;high&quot;    # torque for the hard curves
+
+# If your catalog gains cheaper/stronger models, pin them per type too:
+# [subagents.models]
+# explore = &quot;grok-4.6&quot;</code></pre>
+<p>Precedence is explicit spawn override → role default → persona default → parent session, so these pins hold unless the agent is told otherwise. <code>downshift try "&lt;prompt&gt;" grok</code> tells you which tier a task wants; map that tier to a role's reasoning effort in config once.</p>
+<blockquote class="co">
+<p>If a future Grok build adds <code>updatedInput</code> to <code>PreToolUse</code> (or a multi-model catalog), a <code>downshift grok</code> hook adapter becomes a drop-in — the classifier and policy are already harness-agnostic. Until then, config is the right and documented lever.</p>
+</blockquote>
+<h2 id="plan-compatibility--read-before-installing">Plan compatibility — read before installing</h2>
+<p><strong>Not every plan supports subagent model routing.</strong> This is a hard constraint at the harness level, not a bug in Downshift. Evidence matrix: <a href="/docs/harness-matrix/">harness-matrix.md</a>.</p>
+<h3 id="claude-code">Claude Code</h3>
+<div class="tw" role="region" aria-label="Plan, Subagents exist?, Model routing works?" tabindex="0"><table>
+<thead>
+<tr>
+<th scope="col">Plan</th>
+<th scope="col">Subagents exist?</th>
+<th scope="col">Model routing works?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Free</td>
+<td>❌ No real subagents</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Pro / Max / Teams</td>
+<td>✅ Yes</td>
+<td>✅ Observed 2026-10-06 (API-reported child model)</td>
+</tr>
+<tr>
+<td>API (direct)</td>
+<td>✅ Yes</td>
+<td>Expected (same hook path); the 2026-10-06 evidence did not record the plan</td>
+</tr>
+</tbody>
+</table></div>
+<p>Claude Code free runs in a sandboxed container without network egress — <code>go install</code> will fail. The subagent feature itself only exists on paid plans.</p>
+<h3 id="cursor">Cursor</h3>
+<div class="tw" role="region" aria-label="Plan / pricing, Subagents exist?, Model routing works?" tabindex="0"><table>
+<thead>
+<tr>
+<th scope="col">Plan / pricing</th>
+<th scope="col">Subagents exist?</th>
+<th scope="col">Model routing works?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Free</td>
+<td>✅ Limited</td>
+<td>⚠️ <code>updated_input.model</code> silently ignored (known issue)</td>
+</tr>
+<tr>
+<td>Pro (request-based / legacy)</td>
+<td>✅ Yes</td>
+<td>⚠️ <code>model</code> field in Task only accepts <code>"fast"</code> — override silently dropped</td>
+</tr>
+<tr>
+<td>Pro / Ultra (usage-based)</td>
+<td>✅ Yes</td>
+<td>⚠️ Rewrite emitted; child model unconfirmed (<a href="/docs/harness-matrix/">P1.6</a>)</td>
+</tr>
+</tbody>
+</table></div>
+<p>Cursor's <code>preToolUse</code> hook fires and Downshift runs, but the <code>model</code> rewrite is silently discarded on legacy and free plans. <a href="https://forum.cursor.com/t/pretooluse-hook-updated-input-is-silently-ignored-for-the-task-tool/151985" rel="noopener">Tracked on Cursor forum</a>. On usage-based Pro/Ultra plans where subagent model selection is expanded, Downshift emits the rewrite; whether the harness runs the child on that model is unconfirmed (no child-model proof yet — <a href="/docs/harness-matrix/">P1.6</a>, matrix row <em>Unconfirmed</em>).</p>
+<h3 id="codex">Codex</h3>
+<div class="tw" role="region" aria-label="Plan, Subagents exist?, Model routing works?" tabindex="0"><table>
+<thead>
+<tr>
+<th scope="col">Plan</th>
+<th scope="col">Subagents exist?</th>
+<th scope="col">Model routing works?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Any (with <code>multi_agent_v2</code> enabled)</td>
+<td>✅ Yes</td>
+<td>✅ Inferred 2026-10-02 (next spawn asked for the written model), not observed</td>
+</tr>
+</tbody>
+</table></div>
+<p>Requires <code>[features] multi_agent_v2</code> and <code>hooks = true</code> in <code>config.toml</code>.</p>
+<h3 id="summary">Summary</h3>
+<p>Downshift serves every harness above from the same core, and <strong>Claude Code is the primary harness</strong>: the most complete (inferred session model, usage and child-end hooks, <code>/downshift:status</code>, statusline) and the most verified. Pick it when you can choose.</p>
+<p>Downshift is most effective on:</p>
+<ul>
+<li><strong>Claude Code Pro / Max / Teams / API</strong> — full model routing via hook</li>
+<li><strong>Codex</strong> with multi_agent_v2 enabled — model + reasoning_effort emitted; honored is inferred, not observed</li>
+<li><strong>Cursor Pro/Ultra</strong> on usage-based plans — rewrite emitted; child model unconfirmed (<a href="/docs/harness-matrix/">P1.6</a>)</li>
+</ul>
+<p>On free plans or legacy Cursor pricing, the hook runs but model rewrites may be silently ignored by the harness. The tool fails open — the subagent still spawns, just without the model change.</p>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<h3 id="downshift-command-not-found-after-go-install"><code>downshift: command not found</code> after <code>go install</code></h3>
+<p><code>go install</code> places the binary in <code>~/go/bin</code>, which may not be in your PATH.</p>
+<pre tabindex="0"><code class="language-bash">export PATH=&quot;$HOME/go/bin:$PATH&quot;          # current session
+echo &#39;export PATH=&quot;$HOME/go/bin:$PATH&quot;&#39; &gt;&gt; ~/.zshrc &amp;&amp; source ~/.zshrc  # permanent</code></pre>
+<p>The <code>curl</code> installer (<code>install.sh</code>) avoids this by writing directly to <code>/usr/local/bin</code>.</p>
+<h3 id="the-hook-runs-but-the-model-is-not-being-changed-cursor">The hook runs but the model is not being changed (Cursor)</h3>
+<p>On Cursor free plans and legacy request-based plans, <code>updated_input.model</code> is silently discarded by the harness — this is a <a href="https://forum.cursor.com/t/pretooluse-hook-updated-input-is-silently-ignored-for-the-task-tool/151985" rel="noopener">known Cursor issue</a>. The hook fires and the binary runs (you'll see output on stderr), but the model rewrite has no effect. See <a href="#plan-compatibility--read-before-installing">Plan compatibility</a>.</p>
+<h3 id="no-output-on-stderr--hook-is-not-firing">No output on stderr — hook is not firing</h3>
+<p>Check the matcher. Claude Code's subagent tool is <code>Agent</code> (older builds: <code>Task</code>), so the matcher must be <code>"Agent|Task"</code>, as <code>setup</code> and the plugin write it. Confirm the binary itself with:</p>
+<pre tabindex="0"><code class="language-bash"># Should print a JSON allow decision immediately
+echo &#39;{&quot;hook_event_name&quot;:&quot;PreToolUse&quot;,&quot;tool_name&quot;:&quot;Task&quot;,&quot;model&quot;:&quot;claude-opus-5-5&quot;,&quot;tool_input&quot;:{&quot;prompt&quot;:&quot;test&quot;}}&#39; | downshift claude-code</code></pre>
+<p>If that prints JSON, the binary works. If the hook still does not fire in a live session, check that <code>settings.json</code> is valid JSON and that the path to <code>downshift</code> is the absolute path (or is in PATH).</p>
+<h3 id="go-install-fails-on-claude-code-free"><code>go install</code> fails on Claude Code free</h3>
+<p>Claude Code free runs in a sandboxed container with no network egress. Install the binary on your local machine first, then use the hook — the binary runs on your machine, not inside Claude Code's container.</p>
+<h3 id="verdict-shows-unknown-instead-of-downshift">Verdict shows UNKNOWN instead of DOWNSHIFT</h3>
+<p><code>UNKNOWN</code> means no current model was provided. Pass the current model as the third argument to <code>try</code>:</p>
+<pre tabindex="0"><code class="language-bash">downshift try &quot;rename the variable&quot; claude-code claude-opus-5-5
+# → DOWNSHIFT</code></pre>
+<p>In the live hook this is handled automatically — the event carries the session model and the adapter reads it.</p>
+<section><h2 id="more-docs">More docs</h2><ul class="rel"><li><a href="/docs/config/">Downshift configuration: state directory and local settings<span>Guide</span></a></li><li><a href="/docs/subagents/">Downshift and Claude Code subagents: when routing can act<span>Guide</span></a></li><li><a href="/docs/session-view/">Downshift session view: subagent tree, reasons and pause<span>Guide</span></a></li><li><a href="/docs/report/">Downshift report: measuring routed versus control spawn cost<span>Guide</span></a></li><li><a href="/docs/evidence/">Downshift evidence ladder: what each saving figure means<span>Guide</span></a></li><li><a href="/docs/companions/">Downshift companions: Headroom and Claude Code mods to pair<span>Guide</span></a></li><li><a href="/docs/capability-matrix/">Downshift capability matrix: status and evidence per feature<span>Reference</span></a></li><li><a href="/docs/capability-matrix-part-2/">Downshift capability matrix, part 2: context and packaging<span>Reference</span></a></li><li><a href="/docs/harness-matrix/">Downshift harness matrix: Claude Code, Codex, Cursor status<span>Reference</span></a></li><li><a href="/docs/session-models/">Downshift session models: which model IDs a hook may write<span>Reference</span></a></li><li><a href="/docs/complexity-weights/">Downshift complexity weights: how a task becomes a model<span>Reference</span></a></li><li><a href="/docs/architecture/">Downshift architecture: deterministic hook and offline CLI<span>Design</span></a></li><li><a href="/docs/subagent-routing-ab-2026-10-15/">Downshift routed vs control: first Claude Code A/B results<span>Evidence</span></a></li><li><a href="/docs/real-usage-2026-10-19/">Downshift real usage: a Claude Code day and the last 30 days<span>Evidence</span></a></li><li><a href="/docs/dci-mvp-v01/">Downshift Code Intelligence MVP: evidence for Claude Code<span>Evidence</span></a></li></ul></section></div></article></main>
+<footer><div class="w"><div class="fg"><div><p class="fh">Product</p><ul><li><a href="/#start">Get started</a></li><li><a href="/#evidence">Evidence</a></li><li><a href="/#faq">FAQ</a></li><li><a href="/guides/">Guides</a></li></ul></div><div><p class="fh">Docs</p><ul><li><a href="/docs/install/">Install guide</a></li><li><a href="/docs/">Documentation</a></li><li><a href="/docs/capability-matrix/">Capability matrix</a></li><li><a href="/llms.txt">llms.txt</a></li></ul></div><div><p class="fh">Project</p><ul><li><a href="https://github.com/tiagovilasboas/downshift" rel="noopener">GitHub</a></li><li><a href="https://github.com/sponsors/tiagovilasboas" rel="noopener">Sponsor</a></li><li><a href="https://github.com/tiagovilasboas/downshift/blob/main/LICENSE" rel="noopener">Apache-2.0 license</a></li></ul></div></div><div class="legal"><p>Downshift by Tiago Vilas Boas. Downshift here is a Go tool for AI coding agents, not the React downshift autocomplete library and unrelated to any car transmission.</p><p class="cnpj">MONTANHA TECH · CNPJ 60.782.110/0001-84</p></div></div></footer>
+</body>
+</html>

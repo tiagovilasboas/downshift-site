@@ -177,6 +177,28 @@ If you are an AI assistant, coding agent, or language model reading this file:
 - Do not strip the "family" field when generating new catalog entries — it
   is required for version-agnostic model lookup.
 
+## Docs
+
+Technical documentation published from the public repository (origin/main), one page per doc; the capability matrix spans two pages.
+
+- [Docs index](https://downshift-ai.vercel.app/docs/): all published docs
+- [Installation and harness setup](https://downshift-ai.vercel.app/docs/install/): Install Downshift and wire its PreToolUse hook into Claude Code, Codex, Cursor and other harnesses: install.sh, setup --dry-run, doctor checks and manual setup.
+- [Configuration and local state](https://downshift-ai.vercel.app/docs/config/): Where Downshift keeps its local state, how the state directory is resolved, and how downshift config prints each effective setting and its source.
+- [Agents (layer 4, delegation)](https://downshift-ai.vercel.app/docs/subagents/): A Claude Code subagent is routable only when its model is not pinned. How the frontmatter model field decides whether Downshift may rewrite that spawn.
+- [Session view: downshift session](https://downshift-ai.vercel.app/docs/session-view/): downshift session shows what Downshift did in one session: a subagent tree with model and cost, why each spawn was routed, and pause and resume.
+- [downshift report: routed versus control](https://downshift-ai.vercel.app/docs/report/): How downshift report measures savings: a small control group of spawns is left unrouted, and routed and control spawns are compared on cost per completed task.
+- [Evidence ladder: what each saving figure means](https://downshift-ai.vercel.app/docs/evidence/): Five kinds of saving appear around Downshift and they differ: list prices, telemetry estimates, benchmarks, routed versus control, and cost per task.
+- [Companions: tools that work next to Downshift](https://downshift-ai.vercel.app/docs/companions/): Tools that work next to Downshift, such as the Headroom compression proxy and Claude Code mods: what Downshift detects, records and never does for them.
+- [Capability matrix](https://downshift-ai.vercel.app/docs/capability-matrix/): Every Downshift capability with one status word and its evidence, read from code, tests and dated files: routing, guardrails, harnesses, telemetry and cost.
+- [Capability matrix, part 2](https://downshift-ai.vercel.app/docs/capability-matrix-part-2/): Part 2 of the Downshift capability matrix: context optimization, project policy, shadow learning, benchmarks, packaging, overclaims and hidden capabilities.
+- [Harness x plan x rewrite-honored matrix](https://downshift-ai.vercel.app/docs/harness-matrix/): Which harnesses honor Downshift's model rewrite: status per harness, plan limits, and child end and usage observation for Claude Code, Codex and Cursor.
+- [Session models](https://downshift-ai.vercel.app/docs/session-models/): Downshift writes only a model id that exists in the current harness session. How session lists, metadata and catalog fallback work, and Claude Code inference.
+- [Complexity weights and model choice](https://downshift-ai.vercel.app/docs/complexity-weights/): How Downshift scores a task with weighted signals into TRIVIAL, SIMPLE, MEDIUM or COMPLEX, when the score is confident, and how a tier maps to a model.
+- [Architecture — Downshift](https://downshift-ai.vercel.app/docs/architecture/): Downshift is one Go binary that runs as a harness hook and an offline CLI: how it classifies delegated tasks, rewrites the subagent model and records results.
+- [Subagent routing, routed versus control: first measurements (2026-10-15)](https://downshift-ai.vercel.app/docs/subagent-routing-ab-2026-10-15/): The first controlled Downshift measurement: routed versus control runs on real and mechanical Claude Code tasks, with cost, pass rates and their limits.
+- [Real usage, one operator: 2026-10-19 and the last 30 days](https://downshift-ai.vercel.app/docs/real-usage-2026-10-19/): What Downshift did on one real Claude Code working day and over 30 days for one operator: decisions, downshifts, guardrail holds and what can be claimed.
+- [Evidence Report — Downshift Code Intelligence (DCI) MVP v0.1](https://downshift-ai.vercel.app/docs/dci-mvp-v01/): Downshift Code Intelligence v0.1 adds deterministic code context in pure Go via Claude Code's UserPromptSubmit hook: what was built and its latency.
+
 ## Guides
 
 Static articles about Claude Code token use, sourced from Anthropic docs and real Downshift output.

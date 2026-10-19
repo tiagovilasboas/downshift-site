@@ -1,0 +1,348 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Downshift complexity weights: how a task becomes a model</title>
+<meta name="description" content="How Downshift scores a task with weighted signals into TRIVIAL, SIMPLE, MEDIUM or COMPLEX, when the score is confident, and how a tier maps to a model.">
+<link rel="canonical" href="https://downshift-ai.vercel.app/docs/complexity-weights/">
+<link rel="alternate" hreflang="en" href="https://downshift-ai.vercel.app/docs/complexity-weights/">
+<link rel="alternate" hreflang="x-default" href="https://downshift-ai.vercel.app/docs/complexity-weights/">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/icon-192.png">
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#0a0a0a">
+<meta name="color-scheme" content="dark">
+<meta name="robots" content="index,follow,max-image-preview:large">
+<meta name="author" content="Tiago Vilas Boas">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Downshift">
+<meta property="og:locale" content="en_US">
+<meta property="og:title" content="Downshift complexity weights: how a task becomes a model">
+<meta property="og:description" content="How Downshift scores a task with weighted signals into TRIVIAL, SIMPLE, MEDIUM or COMPLEX, when the score is confident, and how a tier maps to a model.">
+<meta property="og:url" content="https://downshift-ai.vercel.app/docs/complexity-weights/">
+<meta property="og:image" content="https://downshift-ai.vercel.app/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Downshift logo with the line: Right model for every subagent. No LLM in the loop.">
+<meta property="article:modified_time" content="2026-10-19">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Downshift complexity weights: how a task becomes a model">
+<meta name="twitter:description" content="How Downshift scores a task with weighted signals into TRIVIAL, SIMPLE, MEDIUM or COMPLEX, when the score is confident, and how a tier maps to a model.">
+<meta name="twitter:image" content="https://downshift-ai.vercel.app/og.png">
+<meta name="twitter:image:alt" content="Downshift logo with the line: Right model for every subagent. No LLM in the loop.">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"TechArticle","headline":"Complexity weights and model choice","description":"How Downshift scores a task with weighted signals into TRIVIAL, SIMPLE, MEDIUM or COMPLEX, when the score is confident, and how a tier maps to a model.","inLanguage":"en","dateModified":"2026-10-19","author":{"@type":"Person","name":"Tiago Vilas Boas","url":"https://github.com/tiagovilasboas"},"publisher":{"@type":"Organization","name":"Downshift","url":"https://downshift-ai.vercel.app/","logo":{"@type":"ImageObject","url":"https://downshift-ai.vercel.app/icon-512.png","width":512,"height":512}},"image":"https://downshift-ai.vercel.app/og.png","mainEntityOfPage":{"@type":"WebPage","@id":"https://downshift-ai.vercel.app/docs/complexity-weights/"},"isPartOf":{"@type":"CollectionPage","@id":"https://downshift-ai.vercel.app/docs/"},"isBasedOn":"https://github.com/tiagovilasboas/downshift/blob/main/docs/reference/complexity-weights.md","about":{"@type":"SoftwareApplication","name":"Downshift","url":"https://downshift-ai.vercel.app/","codeRepository":"https://github.com/tiagovilasboas/downshift","applicationCategory":"DeveloperApplication"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://downshift-ai.vercel.app/"},{"@type":"ListItem","position":2,"name":"Docs","item":"https://downshift-ai.vercel.app/docs/"},{"@type":"ListItem","position":3,"name":"Complexity weights and model choice","item":"https://downshift-ai.vercel.app/docs/complexity-weights/"}]}]}</script>
+<link rel="preload" href="/fonts/Geist-Variable.woff2" as="font" type="font/woff2" crossorigin>
+<style>@font-face{font-family:"Geist";src:url(/fonts/Geist-Variable.woff2) format("woff2");font-weight:100 900;font-style:normal;font-display:swap}@font-face{font-family:"Geist Mono";src:url(/fonts/GeistMono-Variable.woff2) format("woff2");font-weight:100 900;font-style:normal;font-display:swap}@font-face{font-family:"Geist Fallback";src:local("Arial"),local("Helvetica");size-adjust:104.8%;ascent-override:95.9%;descent-override:28.2%;line-gap-override:0%}:root{color-scheme:dark;--b:#0a0a0a;--c:#141414;--l:#1f2329;--f:#d6dae2;--t:#fff;--m:#9a9ea5;--a:#22C55E;--r:#22C55E;--sb:#1f1f1f;--sf:#fff;--pb:#fff;--pf:#000;--cb:#121212;--ct:#e6edf3;--ss:"Geist","Geist Fallback",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;--mo:"Geist Mono",ui-monospace,SFMono-Regular,Menlo,monospace}@media not all{:root{--b:#fafafa;--c:#fff;--l:#d9dde3;--f:#1f2937;--t:#0a0a0a;--m:#4b5563;--a:#166534;--r:#0a0a0a;--sb:#eceff3;--sf:#0a0a0a;--pb:#0a0a0a;--pf:#fff;--cb:#f1f3f6;--ct:#111827}}*{box-sizing:border-box}html{-webkit-text-size-adjust:100%;text-size-adjust:100%;scroll-padding-top:88px}body{margin:0;background:var(--b);color:var(--f);font:16px/1.65 var(--ss);-webkit-font-smoothing:antialiased}::selection{background:color-mix(in srgb,var(--a) 35%,transparent);color:var(--t)}a{color:var(--t);text-underline-offset:3px}a:hover{text-decoration-color:var(--a)}a:focus-visible{outline:2px solid var(--r);outline-offset:3px;border-radius:6px}.w{max-width:1280px;margin:0 auto;padding:0 16px}@media(min-width:1024px){.w{padding:0 24px}}h1,h2,h3{color:var(--t);font-weight:500;letter-spacing:-.025em;margin:0;text-wrap:balance}header{position:sticky;top:0;z-index:10;background:color-mix(in srgb,var(--b) 88%,transparent);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border-bottom:1px solid var(--l)}header nav{display:flex;align-items:center;gap:4px;height:72px}.lg{display:inline-flex;align-items:center;min-height:44px;margin-right:auto}.lg img{display:block;height:40px;width:auto}.nl{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 12px;border-radius:999px;color:var(--m);text-decoration:none;font-size:14px}.nl:hover{color:var(--t);background:var(--sb)}.nl.ds{display:none}@media(min-width:640px){.nl.ds{display:inline-flex}}.nl.lang{min-width:44px;background:var(--sb);color:var(--sf);font-weight:500;font-size:13px}.bc ol{list-style:none;margin:0 auto;padding:16px 0 0;font-size:14px;color:var(--m);max-width:1024px}.bc li{display:inline;margin:0}.bc li+li:before{content:"/";margin:0 8px;color:var(--m)}.bc a{color:var(--m);display:inline-flex;align-items:center;min-height:44px;text-decoration:none}.bc a:hover{color:var(--t)}.bc [aria-current]{color:var(--f);overflow-wrap:anywhere}article{max-width:720px;margin:0 auto;padding:8px 0 96px}article>*{min-width:0}@media(min-width:1100px){.ga{display:grid;max-width:1024px;grid-template-columns:240px minmax(0,720px);column-gap:64px;align-items:start}.ga>.top,.ga>.bd{grid-column:2}.ga>.toc{grid-column:1;grid-row:1/span 2;position:sticky;top:96px;max-height:calc(100vh - 120px);overflow-y:auto}}h1{font-size:34px;line-height:1.12;font-weight:450;margin:16px 0 0}@media(min-width:640px){h1{font-size:46px}}h2{font-size:24px;line-height:1.25;margin:56px 0 16px}@media(min-width:640px){h2{font-size:30px}}h3{font-size:18px;line-height:1.35;margin:32px 0 8px}p{margin:0 0 16px}.by{margin:16px 0 0;color:var(--m);font-size:14px}.by a{color:var(--m)}.dis{margin:8px 0 0;color:var(--m);font-size:14px}.tl{margin:32px 0 0;background:var(--c);border:1px solid var(--l);border-left:2px solid var(--a);border-radius:4px 16px 16px 4px;padding:16px 20px}.tl p{margin:0;color:var(--f)}.lbl{margin:0 0 8px;font:500 12px var(--ss);letter-spacing:.04em;text-transform:uppercase;color:var(--m)}.toc{margin:32px 0 0;border:1px solid var(--l);border-radius:16px;padding:16px 20px;background:var(--c)}@media(min-width:1100px){.toc{margin:24px 0 0 -4px;border:0;padding:0 0 0 4px;background:none}}.toc ol{list-style:none;margin:0;padding:0;font-size:14px}.toc a{display:flex;align-items:center;min-height:44px;color:var(--m);text-decoration:none;line-height:1.35;padding:4px 0}.toc a:hover{color:var(--t)}ul,ol{margin:0 0 16px;padding-left:24px}li{margin:4px 0}li::marker{color:var(--m)}code{font:.88em var(--mo);background:var(--sb);border:1px solid var(--l);border-radius:6px;padding:1px 6px}pre{margin:0 0 16px;background:var(--cb);color:var(--ct);border:1px solid var(--l);border-radius:12px;padding:16px;overflow-x:auto;font:13px/1.6 var(--mo)}pre code{font:inherit;background:none;border:0;padding:0;color:inherit}pre:focus-visible,.tw:focus-visible{outline:2px solid var(--r);outline-offset:2px}.tw{margin:0 0 16px;overflow-x:auto;border:1px solid var(--l);border-radius:12px}table{border-collapse:collapse;width:100%;font-size:14px;line-height:1.5}th,td{text-align:left;vertical-align:top;padding:10px 14px;border-bottom:1px solid var(--l);min-width:120px}th{color:var(--t);font-weight:500;background:var(--c)}tr:last-child td{border-bottom:0}.co{margin:0 0 16px;background:var(--c);border:1px solid var(--l);border-left:2px solid var(--t);border-radius:4px 16px 16px 4px;padding:16px 20px}.co p:last-child{margin:0}.co.warn{border-left-color:var(--a)}.ex{margin:56px 0 0;border:1px solid var(--l);border-radius:16px;padding:0 20px 4px}@media(min-width:640px){.ex{padding:0 28px 8px}}.ex h2{margin-top:24px}.src{color:var(--m);font-size:14px}.faq h3{margin-top:24px}.faq p{color:var(--f)}.cta{margin:56px 0 0;background:var(--c);border:1px solid var(--l);border-radius:16px;padding:24px}@media(min-width:640px){.cta{padding:32px}}.cta h2{margin-top:0}.cta pre{white-space:pre-wrap;overflow-wrap:anywhere}.btns{display:flex;flex-wrap:wrap;gap:12px;margin-top:8px}.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 20px;border-radius:999px;background:var(--sb);color:var(--sf);font-weight:500;font-size:15px;text-decoration:none}.btn:hover{opacity:.86}.btn.p{background:var(--pb);color:var(--pf)}.btn svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}.rel,.srcs,.gl{list-style:none;padding:0;margin:0}.rel li{margin:0;border-top:1px solid var(--l)}.rel li:last-child{border-bottom:1px solid var(--l)}.rel a{display:flex;align-items:center;min-height:56px;padding:8px 0;text-decoration:none;color:var(--t);font-weight:500}.rel a:hover{color:var(--a)}.rel span{color:var(--m);font-weight:400;margin-left:8px;font-size:14px}.srcs li{margin:0;padding:12px 0;border-top:1px solid var(--l);font-size:14px;color:var(--m)}.srcs a{display:inline-flex;align-items:center;min-height:44px;overflow-wrap:anywhere;word-break:break-word}.srcs strong{color:var(--f);font-weight:500}.ev{display:inline-block;margin-left:8px;border:1px solid var(--l);border-radius:999px;padding:0 8px;font-size:12px;color:var(--m)}.gl{margin-top:32px}.gl li{margin:0;padding:24px 0;border-top:1px solid var(--l)}.gl h2{margin:0 0 8px;font-size:22px}.gl h2 a{text-decoration:none;display:inline-flex;min-height:44px;align-items:center}.gl h2 a:hover{color:var(--a)}.gl p{margin:0;color:var(--m)}.lead{margin:16px 0 0;font-size:18px;color:var(--m)}.alt{margin-top:48px;color:var(--m)}footer{border-top:1px solid var(--l);padding:48px 0 32px;color:var(--m);font-size:14px}.fg{display:grid;grid-template-columns:1fr 1fr;gap:24px 48px}@media(min-width:768px){.fg{grid-template-columns:repeat(3,1fr)}}.fg ul{list-style:none;margin:0;padding:0}.fg li{margin:0}.fh{margin:0 0 4px;color:var(--t);font-weight:500}footer a{color:var(--m);text-decoration:none;display:inline-flex;align-items:center;min-height:44px}footer a:hover{color:var(--t)}.legal{margin:32px 0 0;padding-top:24px;border-top:1px solid var(--l);font-size:12px;display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 24px}.legal p{margin:0}.cnpj{opacity:.75;letter-spacing:.02em}@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}</style>
+</head>
+<body>
+<header><div class="w"><nav aria-label="Main"><a class="lg" href="/" aria-label="Downshift"><picture><source srcset="/downshift-logo-dark.svg" media="(prefers-color-scheme:dark)"><img src="/downshift-logo-dark.svg" alt="Downshift" width="258" height="60"></picture></a><a class="nl" href="/guides/">Guides</a><a class="nl ds" href="/docs/">Docs</a><a class="nl ds" href="https://github.com/tiagovilasboas/downshift" rel="noopener">GitHub</a><a class="nl lang" href="/pt-br/guias/" hreflang="pt-BR" lang="pt-BR" aria-label="Guias em português">PT</a></nav></div></header>
+<main class="w"><nav class="bc" aria-label="Breadcrumb"><ol><li><a href="/">Home</a></li><li><a href="/docs/">Docs</a></li><li><span aria-current="page">Complexity weights and model choice</span></li></ol></nav><article class="ga"><div class="top"><h1>Complexity weights and model choice</h1><p class="by">Downshift by <a href="https://github.com/tiagovilasboas/downshift" rel="noopener">Tiago Vilas Boas</a>. Updated <time datetime="2026-10-19">19 October 2026</time>. <a href="https://github.com/tiagovilasboas/downshift/blob/main/docs/reference/complexity-weights.md" rel="noopener">Source on GitHub</a></p><p class="dis">Downshift here is a Go tool for AI coding agents, not the React downshift autocomplete library and unrelated to any car transmission.</p></div><nav class="toc" aria-labelledby="toc-h"><p class="lbl" id="toc-h">On this page</p><ol><li><a href="#scoring">Scoring</a></li><li><a href="#language-coverage">Language coverage</a></li><li><a href="#weights">Weights</a></li><li><a href="#from-class-to-tier">From class to tier</a></li><li><a href="#how-the-harness-picks-the-model">How the harness picks the model</a></li><li><a href="#more-docs">More docs</a></li></ol></nav><div class="bd"><p>How Downshift scores a task and turns that score into a model. The weights are harness-agnostic. The harness only chooses which model id represents the tier, and whether the rewrite is applied.</p>
+<p>Source of truth: <code>internal/classify/signals.go</code>, <code>internal/classify/classifier.go</code>, <code>internal/classify/brief_task.go</code>, <code>internal/core/policy.go</code>, <code>internal/classify/risk.go</code>, <code>internal/core/models.go</code>. Session lists: <a href="/docs/session-models/">session-models.md</a>. What each harness does with the rewrite: <a href="/docs/harness-matrix/">harness-matrix.md</a>.</p>
+<h2 id="scoring">Scoring</h2>
+<p>Every matching pattern adds its weight to one class: TRIVIAL, SIMPLE, MEDIUM, or COMPLEX. The class with the highest sum wins. A tie goes to the higher class, so the task is not under-powered.</p>
+<p>Confidence is a margin, not a fifth class. The winner is confident only when it leads the runner-up by <strong>2 or more</strong>. Below that, a downshift or a weak upshift is not applied. The spawn stays on the model it already had.</p>
+<p>No pattern at all scores <strong>MEDIUM</strong>, and that result is not confident.</p>
+<p>Extra points, applied after the regex table:</p>
+<div class="tw" role="region" aria-label="Condition, Points" tabindex="0"><table>
+<thead>
+<tr>
+<th scope="col">Condition</th>
+<th scope="col">Points</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>No regex matched, the prompt is <code>add Name(</code> with one call and at most 25 words</td>
+<td>+2 SIMPLE</td>
+</tr>
+<tr>
+<td>The prompt contains <code>implement</code> and at least three exported calls <code>Name(</code></td>
+<td>+2 COMPLEX</td>
+</tr>
+<tr>
+<td>Some signal already matched and the prompt has at most 6 words</td>
+<td>+1 TRIVIAL</td>
+</tr>
+<tr>
+<td>Some signal already matched, the prompt has at least 80 words and is not a bounded brief</td>
+<td>+1 COMPLEX</td>
+</tr>
+<tr>
+<td>Bounded brief: at least 80 words and two of three limits (scope limit such as <code>read-only</code> or <code>edit only</code>, a test command such as <code>go test</code>, a reply budget such as <code>reply &lt;= 150 words</code>)</td>
+<td>TRIVIAL votes dropped; a single COMPLEX row (other than review or retry wording) dropped; +2 MEDIUM</td>
+</tr>
+<tr>
+<td>Long brief (80+ words) that is not bounded</td>
+<td>A TRIVIAL keyword does not vote when it sits inside a backtick command quote, is negated (<code>do not git commit</code>, <code>never push</code>), is a <code>git branch</code> label, or is a path segment such as <code>mech-rename</code></td>
+</tr>
+<tr>
+<td>Any prompt: a negated scope word</td>
+<td>A COMPLEX match on architecture, re-architect, redesign, rewrite, migrate or entire codebase/system does not vote when its own clause negates it: <code>do not touch the architecture</code>, <code>don't redesign</code>, <code>without migrating</code>, <code>não mexa na arquitetura</code>, <code>sem migrar</code>. The negation may be followed only by a change verb (touch, change, modify, edit, alter, mexer, mudar, alterar, tocar) and at most three filler words. A phenomenon (race condition, deadlock, leak) is never negated: <code>make sure it does not deadlock</code> still asks for hard work</td>
+</tr>
+<tr>
+<td>Long brief (80+ words) that is not bounded and states its task</td>
+<td>Task focus, below</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="task-focus-long-briefs">Task focus (long briefs)</h3>
+<p>A long parent brief wraps a short task in context: what the project is, what was tried, what must not change. Context words such as <code>architecture</code> or <code>consensus</code> describe the project, not the work, yet each scores COMPLEX 3. On real use (2026-10-19) this kept mechanical subagent work unconfident, so it stayed on the expensive model. Task focus scores the task with the rest of the brief weighed as context (<code>internal/classify/brief_task.go</code>).</p>
+<p>The task is:</p>
+<ol type="1">
+<li>the section after an explicit <code>Task:</code> / <code>Your task:</code> / <code>Tarefa:</code> marker (a heading or bold form works too). It runs to the end of the brief or to the next context section (<code>Background:</code>, <code>Context:</code>, <code>Notes:</code>, <code>History:</code>, <code>Reply:</code> and Portuguese forms). Requirements, constraints and "done means" sections stay in the task, because they shape the work.</li>
+<li>otherwise, every sentence that opens with a work verb (rename, fix, add, migrate, implement, review, … and Portuguese imperatives). Reading, running checks, replying and negated sentences (<code>Do not …</code>) are not the task.</li>
+<li>otherwise, nothing: the brief is scored as before.</li>
+</ol>
+<p>The focused tally, used only when the task itself matched a signal:</p>
+<div class="tw" role="region" aria-label="Signal, Inside the task, Outside the task" tabindex="0"><table>
+<thead>
+<tr>
+<th scope="col">Signal</th>
+<th scope="col">Inside the task</th>
+<th scope="col">Outside the task</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>TRIVIAL, SIMPLE</td>
+<td>full weight</td>
+<td>does not vote (side steps and constraints)</td>
+</tr>
+<tr>
+<td>MEDIUM</td>
+<td>full weight</td>
+<td>full weight</td>
+</tr>
+<tr>
+<td>COMPLEX, review or retry wording</td>
+<td>full weight</td>
+<td>full weight</td>
+</tr>
+<tr>
+<td>COMPLEX, any other row</td>
+<td>full weight</td>
+<td>1 per row; under an explicit <code>Task:</code> section all of them together count 1</td>
+</tr>
+<tr>
+<td>Length nudge (+1 COMPLEX)</td>
+<td>applies when the task itself has 80+ words, or when the task was found by imperative sentences (the other sentences may describe the work)</td>
+<td></td>
+</tr>
+</tbody>
+</table></div>
+<p>The focused result replaces the whole-brief result only in the safe direction. It never raises the class, and never makes a COMPLEX result confident. An unconfident lower class does not lower anything: it only clears confidence on the whole-brief class, so the spawn keeps its model. The risk floor still reads the whole brief, context included. A rename under a <code>Context:</code> that mentions JWTs or refunds stays MEDIUM and unconfident. Bounded briefs keep their own rule above. A decision shaped by the focus carries the reason code <code>TASK_FOCUS</code>.</p>
+<p>Examples (80+ word briefs):</p>
+<div class="tw" role="region" aria-label="Brief, Before, After" tabindex="0"><table>
+<thead>
+<tr>
+<th scope="col">Brief</th>
+<th scope="col">Before</th>
+<th scope="col">After</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Background names the architecture and a consensus protocol; <code>Task: rename cnt to count in summary.go</code></td>
+<td>COMPLEX, confident</td>
+<td>TRIVIAL, confident (downshift applied)</td>
+</tr>
+<tr>
+<td>Same background; <code>Task: add a verbose flag to the stats command</code></td>
+<td>COMPLEX, confident</td>
+<td>COMPLEX, unconfident (held)</td>
+</tr>
+<tr>
+<td>Background names JWTs and refresh tokens; <code>Task: rename fmtTok to formatToken</code></td>
+<td>COMPLEX, unconfident</td>
+<td>MEDIUM, unconfident (risk floor; no write below the requested model)</td>
+</tr>
+<tr>
+<td><code>Task: rewrite the replication layer and migrate the slots</code></td>
+<td>COMPLEX, confident</td>
+<td>unchanged</td>
+</tr>
+<tr>
+<td>No marker; one sentence names the architecture, then <code>Rename the field amount to amountCents …</code></td>
+<td>COMPLEX, unconfident</td>
+<td>unchanged (imperative extraction keeps the nudge: 3 against 2)</td>
+</tr>
+</tbody>
+</table></div>
+<p>Measured on 2026-10-19 against every labelled set in the maintainers' eval repository (the five frozen benchmark splits, M3 multilingual and two development sets, 1074 items): no item changed class or confidence. None of them is a long brief with a stated task. The gain is pinned by the table-driven tests in <code>internal/classify/classifier_edge_test.go</code> and <code>internal/core/task_focus_test.go</code>.</p>
+<p>A TRIVIAL or SIMPLE task that touches risk (secret, auth, crypto, payment, vulnerability, PII, destructive command, prompt injection, or concurrency) is lifted to MEDIUM. MEDIUM and COMPLEX are not lifted further by risk. The risk table is <code>internal/classify/risk.go</code>. It sets a floor. It does not add to the vote.</p>
+<p><strong>Input cap.</strong> The scoring regex table and the structural scoring rules read at most the first 32 KB of the prompt (cut on a rune boundary), so cost stays flat for the 1 MiB the hook accepts. A signal past byte 32 768 is ignored by design. Risk and language checks inspect the full input, so a risky or unsupported-language tail cannot bypass them. The word-count rules (6 and 80 words, the <code>add Name(</code> stub, the doc-edit damper) still count words over the full prompt.</p>
+<p>Task focus and negated scope words only remove votes; they are part of the regex scoring, not a later step. An optional later step can only raise the class: the in-process word-hash semantic boost. It never lowers a class, is ignored for no-signal prompts, and cannot create COMPLEX without regex evidence. Turn it off with <code>DOWNSHIFT_MINILM=0</code>.</p>
+<h2 id="language-coverage">Language coverage</h2>
+<p>English and Portuguese are covered by the signal and risk rules. Portuguese risk terms include permission, privilege, security, injection and personal-data terms; the risk floor is shared by every harness.</p>
+<p>The language guard (<code>internal/core/lang_guard.go</code>) detects unsupported-language indications before a confident routing change can be applied. It looks for distinct Spanish, French or German function words, selected foreign Latin letters, or at least four non-Latin letters. <strong>Mixed English helper briefs</strong> (<code>fix|rename|format|move|add this helper;</code> plus foreign prose) set <code>UnsupportedLanguage</code> so a confident trivial downshift cannot slip through (M3 / H14). Other mixed-language instructions can trigger the same guard even when an English verb matches a cheap-task signal. Detection drops confidence without changing the scored class; uncertain changes preserve the requested model. Existing deterministic safety floors can still raise an undersized model. A prompt with no matching signal also abstains.</p>
+<p><strong>Risk abstention (H14):</strong> when risk categories match and the class stays Medium (or Simple), <code>applyRiskFloor</code> may set <code>RiskAbstain</code> and clear confidence without changing complexity: long <strong>bounded delegation briefs</strong> (scope + verify cues such as “stay within these modules” and “run the relevant tests”), and narrow <strong>high-stakes</strong> phrases from the M3 parallel bucket (for example idempotent payment/refund wording or “Revise as permissões…”). <code>RiskAbstain</code> counts as a deterministic lift for guardrails R7/R9. Generic short “implement … auth” tasks stay confident Medium when the pattern does not match.</p>
+<p>This is a conservative heuristic, not a complete language detector. Short foreign phrases may escape detection, while identifiers or quoted text may trigger it. Scoring inspects a rune-aligned prefix of at most 32 KB; risk and language checks inspect the full input. Do not interpret English and Portuguese coverage as calibrated accuracy or support for all multilingual prompts.</p>
+<p>English and Portuguese coverage is the shipped language contract. Multilingual E5 and external MiniLM were removed on 2026-10-17; they do not extend coverage. The archived initiative note is multilingual semantic intelligence.</p>
+<h2 id="weights">Weights</h2>
+<p>Weight is the integer added when the pattern matches. Patterns are regular expressions, case-insensitive. Several matches in the same class add up.</p>
+<h3 id="complex">COMPLEX</h3>
+<div class="tw" role="region" aria-label="Weight, Matches" tabindex="0"><table>
+<thead>
+<tr>
+<th scope="col">Weight</th>
+<th scope="col">Matches</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>3</td>
+<td>architect, re-architect, migrate, redesign, security audit/review, code review, cross-system, etcd/raft/consensus, race condition, deadlock, multi-system/service/region/tenant, entire codebase/system/platform, design doc, RFC, service mesh, event sourcing, CQRS, chaos engineering, end-to-end encryption, data lineage, cross-cluster, memory leak, cascading failure, streaming pipeline, model serving, key management, recursive-descent, longest common subsequence, operator precedence, postfix operator, backtracking, cron, <code>fn func(</code>, previous attempt / tentativa anterior, compilation failed, subagent failed / tests failed, fix the build</td>
+</tr>
+<tr>
+<td>2</td>
+<td>rewrite, distributed, trade-off, think through, why … fail/crash/hang/break/regress, directed graph, binary heap, concurrent/goroutine, a fixed-size grid such as <code>[9][9]</code></td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="medium">MEDIUM</h3>
+<div class="tw" role="region" aria-label="Weight, Matches" tabindex="0"><table>
+<thead>
+<tr>
+<th scope="col">Weight</th>
+<th scope="col">Matches</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>3</td>
+<td>zero-downtime / online schema change</td>
+</tr>
+<tr>
+<td>2</td>
+<td>refactor, implement, integrate, feature, across N files, debug, revisar/revisão</td>
+</tr>
+<tr>
+<td>1</td>
+<td>endpoint, module</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="simple">SIMPLE</h3>
+<div class="tw" role="region" aria-label="Weight, Matches" tabindex="0"><table>
+<thead>
+<tr>
+<th scope="col">Weight</th>
+<th scope="col">Matches</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>3</td>
+<td>rotating cube, three.js scene, hello world, landing page, one file, one function, one component</td>
+</tr>
+<tr>
+<td>2</td>
+<td>add field/param/flag/property/column/argument/method/function, fix the bug, write a function/test/helper, explain (only at the start), single file/function</td>
+</tr>
+<tr>
+<td>1</td>
+<td>what is / what does / what are</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="trivial">TRIVIAL</h3>
+<div class="tw" role="region" aria-label="Weight, Matches" tabindex="0"><table>
+<thead>
+<tr>
+<th scope="col">Weight</th>
+<th scope="col">Matches</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>3</td>
+<td>rename, renomear, format, indent, prettier, eslint, git commit/push/pull/status/add/stash/log/diff/checkout/branch, fix a typo, add a comment, move the file, delete the file, bump the version, listar arquivos</td>
+</tr>
+<tr>
+<td>2</td>
+<td>lint, boilerplate, remove unused/dead</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="from-class-to-tier">From class to tier</h2>
+<p>The tier does not depend on the harness.</p>
+<div class="tw" role="region" aria-label="Class, Tier, Effort" tabindex="0"><table>
+<thead>
+<tr>
+<th scope="col">Class</th>
+<th scope="col">Tier</th>
+<th scope="col">Effort</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>TRIVIAL</td>
+<td>small</td>
+<td>low</td>
+</tr>
+<tr>
+<td>SIMPLE</td>
+<td>small</td>
+<td>low</td>
+</tr>
+<tr>
+<td>MEDIUM</td>
+<td>mid</td>
+<td>mid</td>
+</tr>
+<tr>
+<td>COMPLEX</td>
+<td>frontier</td>
+<td>high</td>
+</tr>
+<tr>
+<td>anything else</td>
+<td>mid</td>
+<td>mid</td>
+</tr>
+</tbody>
+</table></div>
+<p>Effort is written only on harnesses that accept it (Codex <code>reasoning_effort</code>, Grok config). It is the same mapping everywhere.</p>
+<h2 id="how-the-harness-picks-the-model">How the harness picks the model</h2>
+<p>The weights stop at the tier. The model id comes from the operator's session list for that harness, ordered from least to most capable (<code>~/.downshift/session-models.json</code>). Downshift picks the listed model whose catalog tier matches the decision. It does not invent an id that is not on the list, so an expensive frontier model stays out until it is appended.</p>
+<p>What changes per harness is the wire format and whether the executor honors the rewrite, not the score:</p>
+<div class="tw" role="region" aria-label="Harness, What the hook can do" tabindex="0"><table>
+<thead>
+<tr>
+<th scope="col">Harness</th>
+<th scope="col">What the hook can do</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Claude Code</td>
+<td>Writes the family name (<code>haiku</code>, <code>sonnet</code>, <code>opus</code>, <code>fable</code>) into <code>updatedInput.model</code>. A full id is rejected.</td>
+</tr>
+<tr>
+<td>Codex</td>
+<td>Writes the model id and <code>reasoning_effort</code>. A held decision writes neither; an unconfident one changes effort only together with a model rewrite.</td>
+</tr>
+<tr>
+<td>Cursor</td>
+<td>Writes <code>updated_input.model</code>. Free and legacy Pro plans discard it. Usage-based plans are not yet proven.</td>
+</tr>
+<tr>
+<td>Antigravity</td>
+<td>Overwrites the subagent model. Observed on desktop 2.21.1 only.</td>
+</tr>
+<tr>
+<td>KiroCrew</td>
+<td>No rewrite channel. Exit 0 allows, exit 2 blocks and asks for the cheaper model.</td>
+</tr>
+<tr>
+<td>Grok CLI</td>
+<td>No hook rewrite. Effort is pinned in <code>config.toml</code>.</td>
+</tr>
+</tbody>
+</table></div>
+<p>Local tier memory (<code>internal/adapt</code>) runs after this score. It does not add weight. It can move the tier only when a reviewed outcome already recorded a hit or a miss for the same task shape. No memory file means the table above is the whole decision.</p>
+<section><h2 id="more-docs">More docs</h2><ul class="rel"><li><a href="/docs/install/">Install Downshift: Claude Code, Codex and Cursor hook setup<span>Guide</span></a></li><li><a href="/docs/config/">Downshift configuration: state directory and local settings<span>Guide</span></a></li><li><a href="/docs/subagents/">Downshift and Claude Code subagents: when routing can act<span>Guide</span></a></li><li><a href="/docs/session-view/">Downshift session view: subagent tree, reasons and pause<span>Guide</span></a></li><li><a href="/docs/report/">Downshift report: measuring routed versus control spawn cost<span>Guide</span></a></li><li><a href="/docs/evidence/">Downshift evidence ladder: what each saving figure means<span>Guide</span></a></li><li><a href="/docs/companions/">Downshift companions: Headroom and Claude Code mods to pair<span>Guide</span></a></li><li><a href="/docs/capability-matrix/">Downshift capability matrix: status and evidence per feature<span>Reference</span></a></li><li><a href="/docs/capability-matrix-part-2/">Downshift capability matrix, part 2: context and packaging<span>Reference</span></a></li><li><a href="/docs/harness-matrix/">Downshift harness matrix: Claude Code, Codex, Cursor status<span>Reference</span></a></li><li><a href="/docs/session-models/">Downshift session models: which model IDs a hook may write<span>Reference</span></a></li><li><a href="/docs/architecture/">Downshift architecture: deterministic hook and offline CLI<span>Design</span></a></li><li><a href="/docs/subagent-routing-ab-2026-10-15/">Downshift routed vs control: first Claude Code A/B results<span>Evidence</span></a></li><li><a href="/docs/real-usage-2026-10-19/">Downshift real usage: a Claude Code day and the last 30 days<span>Evidence</span></a></li><li><a href="/docs/dci-mvp-v01/">Downshift Code Intelligence MVP: evidence for Claude Code<span>Evidence</span></a></li></ul></section></div></article></main>
+<footer><div class="w"><div class="fg"><div><p class="fh">Product</p><ul><li><a href="/#start">Get started</a></li><li><a href="/#evidence">Evidence</a></li><li><a href="/#faq">FAQ</a></li><li><a href="/guides/">Guides</a></li></ul></div><div><p class="fh">Docs</p><ul><li><a href="/docs/install/">Install guide</a></li><li><a href="/docs/">Documentation</a></li><li><a href="/docs/capability-matrix/">Capability matrix</a></li><li><a href="/llms.txt">llms.txt</a></li></ul></div><div><p class="fh">Project</p><ul><li><a href="https://github.com/tiagovilasboas/downshift" rel="noopener">GitHub</a></li><li><a href="https://github.com/sponsors/tiagovilasboas" rel="noopener">Sponsor</a></li><li><a href="https://github.com/tiagovilasboas/downshift/blob/main/LICENSE" rel="noopener">Apache-2.0 license</a></li></ul></div></div><div class="legal"><p>Downshift by Tiago Vilas Boas. Downshift here is a Go tool for AI coding agents, not the React downshift autocomplete library and unrelated to any car transmission.</p><p class="cnpj">MONTANHA TECH · CNPJ 60.782.110/0001-84</p></div></div></footer>
+</body>
+</html>

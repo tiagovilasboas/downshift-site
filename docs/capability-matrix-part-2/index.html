@@ -1,0 +1,392 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Downshift capability matrix, part 2: context and packaging</title>
+<meta name="description" content="Part 2 of the Downshift capability matrix: context optimization, project policy, shadow learning, benchmarks, packaging, overclaims and hidden capabilities.">
+<link rel="canonical" href="https://downshift-ai.vercel.app/docs/capability-matrix-part-2/">
+<link rel="alternate" hreflang="en" href="https://downshift-ai.vercel.app/docs/capability-matrix-part-2/">
+<link rel="alternate" hreflang="x-default" href="https://downshift-ai.vercel.app/docs/capability-matrix-part-2/">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/icon-192.png">
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#0a0a0a">
+<meta name="color-scheme" content="dark">
+<meta name="robots" content="index,follow,max-image-preview:large">
+<meta name="author" content="Tiago Vilas Boas">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Downshift">
+<meta property="og:locale" content="en_US">
+<meta property="og:title" content="Downshift capability matrix, part 2: context and packaging">
+<meta property="og:description" content="Part 2 of the Downshift capability matrix: context optimization, project policy, shadow learning, benchmarks, packaging, overclaims and hidden capabilities.">
+<meta property="og:url" content="https://downshift-ai.vercel.app/docs/capability-matrix-part-2/">
+<meta property="og:image" content="https://downshift-ai.vercel.app/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Downshift logo with the line: Right model for every subagent. No LLM in the loop.">
+<meta property="article:modified_time" content="2026-10-19">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Downshift capability matrix, part 2: context and packaging">
+<meta name="twitter:description" content="Part 2 of the Downshift capability matrix: context optimization, project policy, shadow learning, benchmarks, packaging, overclaims and hidden capabilities.">
+<meta name="twitter:image" content="https://downshift-ai.vercel.app/og.png">
+<meta name="twitter:image:alt" content="Downshift logo with the line: Right model for every subagent. No LLM in the loop.">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"TechArticle","headline":"Capability matrix, part 2","description":"Part 2 of the Downshift capability matrix: context optimization, project policy, shadow learning, benchmarks, packaging, overclaims and hidden capabilities.","inLanguage":"en","dateModified":"2026-10-19","author":{"@type":"Person","name":"Tiago Vilas Boas","url":"https://github.com/tiagovilasboas"},"publisher":{"@type":"Organization","name":"Downshift","url":"https://downshift-ai.vercel.app/","logo":{"@type":"ImageObject","url":"https://downshift-ai.vercel.app/icon-512.png","width":512,"height":512}},"image":"https://downshift-ai.vercel.app/og.png","mainEntityOfPage":{"@type":"WebPage","@id":"https://downshift-ai.vercel.app/docs/capability-matrix-part-2/"},"isPartOf":{"@type":"CollectionPage","@id":"https://downshift-ai.vercel.app/docs/"},"isBasedOn":"https://github.com/tiagovilasboas/downshift/blob/main/docs/reference/capability-matrix.md","about":{"@type":"SoftwareApplication","name":"Downshift","url":"https://downshift-ai.vercel.app/","codeRepository":"https://github.com/tiagovilasboas/downshift","applicationCategory":"DeveloperApplication"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://downshift-ai.vercel.app/"},{"@type":"ListItem","position":2,"name":"Docs","item":"https://downshift-ai.vercel.app/docs/"},{"@type":"ListItem","position":3,"name":"Capability matrix, part 2","item":"https://downshift-ai.vercel.app/docs/capability-matrix-part-2/"}]}]}</script>
+<link rel="preload" href="/fonts/Geist-Variable.woff2" as="font" type="font/woff2" crossorigin>
+<style>@font-face{font-family:"Geist";src:url(/fonts/Geist-Variable.woff2) format("woff2");font-weight:100 900;font-style:normal;font-display:swap}@font-face{font-family:"Geist Mono";src:url(/fonts/GeistMono-Variable.woff2) format("woff2");font-weight:100 900;font-style:normal;font-display:swap}@font-face{font-family:"Geist Fallback";src:local("Arial"),local("Helvetica");size-adjust:104.8%;ascent-override:95.9%;descent-override:28.2%;line-gap-override:0%}:root{color-scheme:dark;--b:#0a0a0a;--c:#141414;--l:#1f2329;--f:#d6dae2;--t:#fff;--m:#9a9ea5;--a:#22C55E;--r:#22C55E;--sb:#1f1f1f;--sf:#fff;--pb:#fff;--pf:#000;--cb:#121212;--ct:#e6edf3;--ss:"Geist","Geist Fallback",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;--mo:"Geist Mono",ui-monospace,SFMono-Regular,Menlo,monospace}@media not all{:root{--b:#fafafa;--c:#fff;--l:#d9dde3;--f:#1f2937;--t:#0a0a0a;--m:#4b5563;--a:#166534;--r:#0a0a0a;--sb:#eceff3;--sf:#0a0a0a;--pb:#0a0a0a;--pf:#fff;--cb:#f1f3f6;--ct:#111827}}*{box-sizing:border-box}html{-webkit-text-size-adjust:100%;text-size-adjust:100%;scroll-padding-top:88px}body{margin:0;background:var(--b);color:var(--f);font:16px/1.65 var(--ss);-webkit-font-smoothing:antialiased}::selection{background:color-mix(in srgb,var(--a) 35%,transparent);color:var(--t)}a{color:var(--t);text-underline-offset:3px}a:hover{text-decoration-color:var(--a)}a:focus-visible{outline:2px solid var(--r);outline-offset:3px;border-radius:6px}.w{max-width:1280px;margin:0 auto;padding:0 16px}@media(min-width:1024px){.w{padding:0 24px}}h1,h2,h3{color:var(--t);font-weight:500;letter-spacing:-.025em;margin:0;text-wrap:balance}header{position:sticky;top:0;z-index:10;background:color-mix(in srgb,var(--b) 88%,transparent);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border-bottom:1px solid var(--l)}header nav{display:flex;align-items:center;gap:4px;height:72px}.lg{display:inline-flex;align-items:center;min-height:44px;margin-right:auto}.lg img{display:block;height:40px;width:auto}.nl{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 12px;border-radius:999px;color:var(--m);text-decoration:none;font-size:14px}.nl:hover{color:var(--t);background:var(--sb)}.nl.ds{display:none}@media(min-width:640px){.nl.ds{display:inline-flex}}.nl.lang{min-width:44px;background:var(--sb);color:var(--sf);font-weight:500;font-size:13px}.bc ol{list-style:none;margin:0 auto;padding:16px 0 0;font-size:14px;color:var(--m);max-width:1024px}.bc li{display:inline;margin:0}.bc li+li:before{content:"/";margin:0 8px;color:var(--m)}.bc a{color:var(--m);display:inline-flex;align-items:center;min-height:44px;text-decoration:none}.bc a:hover{color:var(--t)}.bc [aria-current]{color:var(--f);overflow-wrap:anywhere}article{max-width:720px;margin:0 auto;padding:8px 0 96px}article>*{min-width:0}@media(min-width:1100px){.ga{display:grid;max-width:1024px;grid-template-columns:240px minmax(0,720px);column-gap:64px;align-items:start}.ga>.top,.ga>.bd{grid-column:2}.ga>.toc{grid-column:1;grid-row:1/span 2;position:sticky;top:96px;max-height:calc(100vh - 120px);overflow-y:auto}}h1{font-size:34px;line-height:1.12;font-weight:450;margin:16px 0 0}@media(min-width:640px){h1{font-size:46px}}h2{font-size:24px;line-height:1.25;margin:56px 0 16px}@media(min-width:640px){h2{font-size:30px}}h3{font-size:18px;line-height:1.35;margin:32px 0 8px}p{margin:0 0 16px}.by{margin:16px 0 0;color:var(--m);font-size:14px}.by a{color:var(--m)}.dis{margin:8px 0 0;color:var(--m);font-size:14px}.tl{margin:32px 0 0;background:var(--c);border:1px solid var(--l);border-left:2px solid var(--a);border-radius:4px 16px 16px 4px;padding:16px 20px}.tl p{margin:0;color:var(--f)}.lbl{margin:0 0 8px;font:500 12px var(--ss);letter-spacing:.04em;text-transform:uppercase;color:var(--m)}.toc{margin:32px 0 0;border:1px solid var(--l);border-radius:16px;padding:16px 20px;background:var(--c)}@media(min-width:1100px){.toc{margin:24px 0 0 -4px;border:0;padding:0 0 0 4px;background:none}}.toc ol{list-style:none;margin:0;padding:0;font-size:14px}.toc a{display:flex;align-items:center;min-height:44px;color:var(--m);text-decoration:none;line-height:1.35;padding:4px 0}.toc a:hover{color:var(--t)}ul,ol{margin:0 0 16px;padding-left:24px}li{margin:4px 0}li::marker{color:var(--m)}code{font:.88em var(--mo);background:var(--sb);border:1px solid var(--l);border-radius:6px;padding:1px 6px}pre{margin:0 0 16px;background:var(--cb);color:var(--ct);border:1px solid var(--l);border-radius:12px;padding:16px;overflow-x:auto;font:13px/1.6 var(--mo)}pre code{font:inherit;background:none;border:0;padding:0;color:inherit}pre:focus-visible,.tw:focus-visible{outline:2px solid var(--r);outline-offset:2px}.tw{margin:0 0 16px;overflow-x:auto;border:1px solid var(--l);border-radius:12px}table{border-collapse:collapse;width:100%;font-size:14px;line-height:1.5}th,td{text-align:left;vertical-align:top;padding:10px 14px;border-bottom:1px solid var(--l);min-width:120px}th{color:var(--t);font-weight:500;background:var(--c)}tr:last-child td{border-bottom:0}.co{margin:0 0 16px;background:var(--c);border:1px solid var(--l);border-left:2px solid var(--t);border-radius:4px 16px 16px 4px;padding:16px 20px}.co p:last-child{margin:0}.co.warn{border-left-color:var(--a)}.ex{margin:56px 0 0;border:1px solid var(--l);border-radius:16px;padding:0 20px 4px}@media(min-width:640px){.ex{padding:0 28px 8px}}.ex h2{margin-top:24px}.src{color:var(--m);font-size:14px}.faq h3{margin-top:24px}.faq p{color:var(--f)}.cta{margin:56px 0 0;background:var(--c);border:1px solid var(--l);border-radius:16px;padding:24px}@media(min-width:640px){.cta{padding:32px}}.cta h2{margin-top:0}.cta pre{white-space:pre-wrap;overflow-wrap:anywhere}.btns{display:flex;flex-wrap:wrap;gap:12px;margin-top:8px}.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 20px;border-radius:999px;background:var(--sb);color:var(--sf);font-weight:500;font-size:15px;text-decoration:none}.btn:hover{opacity:.86}.btn.p{background:var(--pb);color:var(--pf)}.btn svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}.rel,.srcs,.gl{list-style:none;padding:0;margin:0}.rel li{margin:0;border-top:1px solid var(--l)}.rel li:last-child{border-bottom:1px solid var(--l)}.rel a{display:flex;align-items:center;min-height:56px;padding:8px 0;text-decoration:none;color:var(--t);font-weight:500}.rel a:hover{color:var(--a)}.rel span{color:var(--m);font-weight:400;margin-left:8px;font-size:14px}.srcs li{margin:0;padding:12px 0;border-top:1px solid var(--l);font-size:14px;color:var(--m)}.srcs a{display:inline-flex;align-items:center;min-height:44px;overflow-wrap:anywhere;word-break:break-word}.srcs strong{color:var(--f);font-weight:500}.ev{display:inline-block;margin-left:8px;border:1px solid var(--l);border-radius:999px;padding:0 8px;font-size:12px;color:var(--m)}.gl{margin-top:32px}.gl li{margin:0;padding:24px 0;border-top:1px solid var(--l)}.gl h2{margin:0 0 8px;font-size:22px}.gl h2 a{text-decoration:none;display:inline-flex;min-height:44px;align-items:center}.gl h2 a:hover{color:var(--a)}.gl p{margin:0;color:var(--m)}.lead{margin:16px 0 0;font-size:18px;color:var(--m)}.alt{margin-top:48px;color:var(--m)}footer{border-top:1px solid var(--l);padding:48px 0 32px;color:var(--m);font-size:14px}.fg{display:grid;grid-template-columns:1fr 1fr;gap:24px 48px}@media(min-width:768px){.fg{grid-template-columns:repeat(3,1fr)}}.fg ul{list-style:none;margin:0;padding:0}.fg li{margin:0}.fh{margin:0 0 4px;color:var(--t);font-weight:500}footer a{color:var(--m);text-decoration:none;display:inline-flex;align-items:center;min-height:44px}footer a:hover{color:var(--t)}.legal{margin:32px 0 0;padding-top:24px;border-top:1px solid var(--l);font-size:12px;display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 24px}.legal p{margin:0}.cnpj{opacity:.75;letter-spacing:.02em}@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}</style>
+</head>
+<body>
+<header><div class="w"><nav aria-label="Main"><a class="lg" href="/" aria-label="Downshift"><picture><source srcset="/downshift-logo-dark.svg" media="(prefers-color-scheme:dark)"><img src="/downshift-logo-dark.svg" alt="Downshift" width="258" height="60"></picture></a><a class="nl" href="/guides/">Guides</a><a class="nl ds" href="/docs/">Docs</a><a class="nl ds" href="https://github.com/tiagovilasboas/downshift" rel="noopener">GitHub</a><a class="nl lang" href="/pt-br/guias/" hreflang="pt-BR" lang="pt-BR" aria-label="Guias em português">PT</a></nav></div></header>
+<main class="w"><nav class="bc" aria-label="Breadcrumb"><ol><li><a href="/">Home</a></li><li><a href="/docs/">Docs</a></li><li><span aria-current="page">Capability matrix, part 2</span></li></ol></nav><article class="ga"><div class="top"><h1>Capability matrix, part 2</h1><p class="by">Downshift by <a href="https://github.com/tiagovilasboas/downshift" rel="noopener">Tiago Vilas Boas</a>. Updated <time datetime="2026-10-19">19 October 2026</time>. <a href="https://github.com/tiagovilasboas/downshift/blob/main/docs/reference/capability-matrix.md" rel="noopener">Source on GitHub</a></p><p class="dis">Downshift here is a Go tool for AI coding agents, not the React downshift autocomplete library and unrelated to any car transmission.</p></div><nav class="toc" aria-labelledby="toc-h"><p class="lbl" id="toc-h">On this page</p><ol><li><a href="#9-context-optimization">9. Context optimization</a></li><li><a href="#10-project-policy">10. Project policy</a></li><li><a href="#11-learning-and-shadow-all-shadow-or-opt-in-none-changes-a-spawn-by-default">11. Learning and shadow (all shadow or opt-in; none changes a spawn by default)</a></li><li><a href="#12-benchmarks">12. Benchmarks</a></li><li><a href="#13-packaging">13. Packaging</a></li><li><a href="#contradictions-and-overclaims-found">Contradictions and overclaims found</a></li><li><a href="#hidden-capabilities">Hidden capabilities</a></li><li><a href="#more-docs">More docs</a></li></ol></nav><div class="bd"><aside class="co"><p class="lbl">Part 2</p><p>This page continues <a href="/docs/capability-matrix/">part 1</a>, which holds the introduction, the status vocabulary and the earlier sections.</p></aside><h2 id="9-context-optimization">9. Context optimization</h2>
+<div class="tw" role="region" aria-label="Capability, Status, Where, Evidence, Limits, Docs" tabindex="0"><table>
+<thead>
+<tr>
+<th scope="col">Capability</th>
+<th scope="col">Status</th>
+<th scope="col">Where</th>
+<th scope="col">Evidence</th>
+<th scope="col">Limits</th>
+<th scope="col">Docs</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Native compressor (<code>off</code>, <code>observe</code>, <code>safe</code>): compacts an all-<code>ok</code> <code>go test</code>, a clean <code>git status</code>, repeated logs; preserves failures, non-zero exit, search hits, file lists, <code>git log</code></td>
+<td>Implemented</td>
+<td><code>internal/compressor</code>, <code>downshift context compress</code></td>
+<td><code>compressor_test.go</code> (<code>TestCompress_GoTest_FailPreservesRaw</code>), <code>benchmark_test.go</code></td>
+<td>Transforms bytes only in a shell pipe with <code>safe --exit 0</code>; the hook cannot replace tool output on any harness; prompts never compressed</td>
+<td><code>docs/design/context-optimization.md</code>, <code>skills/cost-reducer/references/compress-output.md</code></td>
+</tr>
+<tr>
+<td>Context sensor (observe-only byte counts per session hash and format; <code>context-sensor.json</code>, <code>context-compactions.jsonl</code>)</td>
+<td>Implemented, not validated everywhere</td>
+<td><code>internal/sensor</code>, Claude Code <code>PostToolUse</code> (<code>recordSensorToolObservation</code>)</td>
+<td><code>sensor_test.go</code>, <code>TestPostToolUse_CompressExitFollowsNativeFlag</code>, <code>TestPostHooks_PostToolUseBoundedWhenSensorLockHeld</code> (500 ms lock)</td>
+<td>Claude Code <code>PostToolUse</code> only; tokens <code>unavailable</code>; <code>context-sensor.json</code> never pruned (audit)</td>
+<td><code>docs/design/context-optimization.md</code></td>
+</tr>
+<tr>
+<td><code>downshift context benchmark</code> (four scenarios printed <code>not measured</code>; byte table from four checked-in fixtures)</td>
+<td>Implemented (bytes only)</td>
+<td><code>internal/benchmark/context_benchmark.go</code>, <code>fixtures/</code></td>
+<td><code>compressor_benchmark_test.go</code></td>
+<td>Not tokens, not dollars, no cost or accuracy</td>
+<td>README, <code>docs/design/context-optimization.md</code></td>
+</tr>
+<tr>
+<td>Headroom companion: detected on PATH, recorded by <code>context enable</code>, <code>doctor</code> row, wrap hints per harness</td>
+<td>Implemented</td>
+<td><code>internal/contextopt/providers/headroom</code>, <code>cmd/context.go</code></td>
+<td><code>context_companion_test.go</code>, <code>headroom_test.go</code></td>
+<td>Never installed, launched or wrapped; metrics <code>unavailable</code>; Antigravity and KiroCrew not in Headroom's list (2026-10-17); a companion's savings are not routing savings</td>
+<td><code>docs/guides/companions.md</code></td>
+</tr>
+<tr>
+<td>Gateway-prefixed ids (OpenRouter rule: first <code>provider/</code> segment stripped; ids outside the catalog stay unknown)</td>
+<td>Implemented, not validated everywhere</td>
+<td><code>internal/catalog/catalog.go</code></td>
+<td><code>catalog_test.go</code> prefix-normalisation tests</td>
+<td>Not verified against a live gateway (2026-10-17)</td>
+<td><code>docs/reference/session-models.md</code></td>
+</tr>
+<tr>
+<td>Context compression in the request path</td>
+<td>Not supported</td>
+<td>—</td>
+<td>—</td>
+<td>A hook cannot change what the model sees; that is a proxy's job</td>
+<td><code>docs/guides/when-to-use.md</code></td>
+</tr>
+<tr>
+<td>Downshift Code Intelligence (DCI): Git discovery, multi-language structural symbol extraction (Go AST, TypeScript/JavaScript, Python, Rust, PHP, Java, C#), outgoing calls &amp; package imports, reverse call-graph index (<em>Blast Radius</em> / <code>InvertedIndex.Callers</code>), Production-First BM25 ranking &amp; Call-Graph Co-Reference boost (+2.0), conversational chatter abstention, structural context packaging (default 3,500 bytes UTF-8, configurable 512–16,384 via <code>--budget</code>) with prompt-injection defense delimiters, multi-harness hooks (<code>claude-code</code>, <code>cursor</code>, <code>opencode</code>, <code>codex</code>, <code>generic</code>), and <code>downshift dci impact</code></td>
+<td>Implemented (v0.4)</td>
+<td><code>internal/codeintel</code>, <code>cmd/downshift/dci.go</code>, <code>cmd/downshift/dci_hook.go</code>, <code>hooks/hooks.json</code></td>
+<td><code>dci_test.go</code>, <code>dci_stats_test.go</code>, <code>internal/codeintel/*_test.go</code>, benchmark 2026-10-19 (<code>cold=295ms</code>, <code>warm=18µs</code>, <code>p95=5.64ms</code>, <code>pack=568-2801B</code>, <code>impact</code> callers index)</td>
+<td>Cold build &lt;= 2500ms, warm retrieval p95 &lt;= 300ms, 2000 files / 512 KiB cap, 1 MiB hook stdin cap; callers capped at 32 per symbol, calls capped at 16, imports capped at 32; zero prompts or source code stored to disk</td>
+<td><code>docs/design/code-intelligence.md</code>, <code>docs/evidence/dci-mvp-v01.md</code>, <code>README.md</code></td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="10-project-policy">10. Project policy</h2>
+<div class="tw" role="region" aria-label="Capability, Status, Where, Evidence, Limits, Docs" tabindex="0"><table>
+<thead>
+<tr>
+<th scope="col">Capability</th>
+<th scope="col">Status</th>
+<th scope="col">Where</th>
+<th scope="col">Evidence</th>
+<th scope="col">Limits</th>
+<th scope="col">Docs</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>.downshift/policy.json</code> tier floor (<code>min_tier</code>, <code>min_tier_by_class</code>, <code>min_tier_by_risk</code>; nearest file within 8 levels; 64 KB; invalid file ignored)</td>
+<td>Implemented</td>
+<td><code>internal/policyfile</code>, <code>core/tier_floor.go</code> (<code>TierFloorHook</code>), <code>hookctx.ProjectDir</code></td>
+<td><code>policyfile_test.go</code>, <code>TestHookE2E_ProjectFloorThroughSharedRunner</code>, <code>TestRunKiroCrewHook_ProjectFloorApplies</code>; counted as <code>policy_floor</code></td>
+<td>Raises only; passes the session allowlist and quota gates; project dir is vendor-documented for Claude Code only (others from third-party reports or the process cwd); cannot force a model where rewrites are not honored; <code>try</code> and <code>benchmark</code> never read it</td>
+<td><code>docs/guides/config.md#project-tier-floor-optional</code>, <code>skills/cost-reducer/references/project-policy.md</code></td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="11-learning-and-shadow-all-shadow-or-opt-in-none-changes-a-spawn-by-default">11. Learning and shadow (all shadow or opt-in; none changes a spawn by default)</h2>
+<div class="tw" role="region" aria-label="Capability, Status, Where, Evidence, Limits, Docs" tabindex="0"><table>
+<thead>
+<tr>
+<th scope="col">Capability</th>
+<th scope="col">Status</th>
+<th scope="col">Where</th>
+<th scope="col">Evidence</th>
+<th scope="col">Limits</th>
+<th scope="col">Docs</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Adapt tier memory (<code>adapt-memory.json</code>, per <code>&lt;class&gt;:&lt;feature&gt;</code> hit/miss sets) recorded as <code>AdaptWould</code></td>
+<td>Shadow (Experimental)</td>
+<td><code>internal/adapt</code>, <code>internal/routeadapt</code>, <code>downshift eval-adapt</code></td>
+<td><code>TestApply_ShadowDoesNotChangeTier</code>; <code>benchmark/report.md</code> 2026-10-15: shared-shape memory 37/40 = classifier (0.0 pp), per-task upper bound 40/40</td>
+<td>Promotion blocked on an independent outcome suite and a cost per completed task (GAP-SUITE); count-based variant 29/40 LOO, not promotable</td>
+<td><code>docs/reference/beta-exit.md</code>, <code>docs/design/engineering-loop.md</code></td>
+</tr>
+<tr>
+<td>Naive-Bayes second opinion: upshift (<code>DOWNSHIFT_NB_UPSHIFT=1</code>) and TRIVIAL downshift (<code>DOWNSHIFT_NB_DOWNSHIFT=1</code>)</td>
+<td>Shadow by default, opt-in</td>
+<td><code>core/nb_upshift.go</code>, <code>core/nb_downshift.go</code>, <code>internal/nbtier</code></td>
+<td><code>nb_downshift_test.go</code> (<code>TestNBDownshift_R1HoldsWithFlagOn</code>), <code>nb_upshift_test.go</code></td>
+<td>Margin frozen on seed and holdout 2026-10-03; even when on, R1 holds an NB downshift with no baseline</td>
+<td><code>docs/design/router-generalization.md</code>, <code>docs/reference/stats-export.md</code></td>
+</tr>
+<tr>
+<td>Capability scores (Epoch AI ECI, Artificial Analysis via OpenRouter): local cache, daily detached refresh from hooks, 6 h backoff; score-based pick recorded as <code>score_would</code></td>
+<td>Shadow by default; live with <code>DOWNSHIFT_SCORE_ROUTING=1</code></td>
+<td><code>internal/scoreindex</code>, <code>core/score_select.go</code>, <code>cmd/scorerefresh.go</code>, <code>downshift models scores</code></td>
+<td><code>TestScoreTier_ScoreRoutingNeverBelowDecisionTier</code> (audit), <code>scorerefresh_test.go</code></td>
+<td>The only network call on the hook path (opt out <code>DOWNSHIFT_SCORES=off</code>); abstains on COMPLEX, any risk, any deterministic lift or an uncovered candidate (<code>composer-2.5</code>, <code>flash_lite</code>, <code>pro</code>)</td>
+<td><code>docs/reference/scores.md</code>, matrix "Public score coverage"</td>
+</tr>
+<tr>
+<td>Routing v2 softmax candidate (<code>DOWNSHIFT_SHADOW_WEIGHTS</code>, <code>downshift train</code>, <code>benchmark --compare</code>, <code>shadow-report</code>)</td>
+<td>Experimental</td>
+<td><code>internal/routingv2/*</code></td>
+<td><code>shadow_test.go</code>, <code>train_test.go</code></td>
+<td>Never changes hook output; trains only on reviewed <code>required_tier</code> labels</td>
+<td><code>docs/design/capability-router-v2.md</code>, <code>docs/design/classifier-shadow.md</code></td>
+</tr>
+<tr>
+<td>Multilingual E5 shadow/fuse and external MiniLM embed</td>
+<td>Removed 2026-10-17</td>
+<td>—</td>
+<td>Historical evaluation: <a href="https://github.com/tiagovilasboas/downshift/blob/main/docs/evidence/e5-int8-evaluation-2026-10-17.md" rel="noopener">e5-int8-evaluation-2026-10-17.md</a></td>
+<td>Not in the binary. Old logs may still show <code>E5_*</code> or <code>GRAPH_ESCALATION</code></td>
+<td>CHANGELOG</td>
+</tr>
+<tr>
+<td>Learned complexity scorer for EN and PT-BR</td>
+<td>Planned</td>
+<td>—</td>
+<td>ROADMAP "Next"</td>
+<td>Needs about 2,400 labelled prompts</td>
+<td><code>ROADMAP.md</code></td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="12-benchmarks">12. Benchmarks</h2>
+<div class="tw" role="region" aria-label="Capability, Status, Where, Evidence, Limits, Docs" tabindex="0"><table>
+<thead>
+<tr>
+<th scope="col">Capability</th>
+<th scope="col">Status</th>
+<th scope="col">Where</th>
+<th scope="col">Evidence</th>
+<th scope="col">Limits</th>
+<th scope="col">Docs</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Classifier regression nets: seed 200 and holdout 300 (<strong>burned</strong>: tuned against, holdout 100.0%)</td>
+<td>Implemented (maintainer)</td>
+<td><code>downshift benchmark &lt;file&gt; [--report] [--gate]</code>, <code>internal/benchmark</code></td>
+<td><code>benchmark/report.md</code> 2026-10-17: seed 73.5% (67.0–79.1%); <a href="https://github.com/tiagovilasboas/downshift/blob/main/docs/evidence/baseline-freeze-2026-10-17.md" rel="noopener">baseline-freeze-2026-10-17.md</a> names the retired 69.0% (<code>be1054ac</code>) versus the current classifier (<code>236c057</code> onward, measured at <code>2c8f3f4</code>); gates <code>FRONTIER→SMALL = 0</code>, <code>FRONTIER→MID ≤ 0.70</code>, tier accuracy ≥ 0.60 (<code>gates_test.go</code>)</td>
+<td>Datasets live in private downshift-labs; gates protect the burned net, not unseen traffic</td>
+<td><code>benchmark/README.md</code>, <code>docs/design/router-generalization.md</code></td>
+</tr>
+<tr>
+<td>Eval-only splits: <code>fresh</code> 100 and <code>heldout2</code> 120 (<strong>blind</strong>), <code>blind-vitrine</code> 60</td>
+<td>Implemented (maintainer)</td>
+<td>same</td>
+<td><code>fresh</code> 50.0% (40.0–60.0%) and <code>heldout2</code> 40.0% (31.7–49.2%) at <code>5a888e7</code>; 53.0% / 41.7% at <code>3067340</code>; <code>blind-vitrine</code> 46.7% (audit); confident and wrong: 2 of 37, 6 of 28, 8 of 23</td>
+<td>Classifier only (no router, guardrails or quota); no new blind set of 200+ (P4 open)</td>
+<td><code>benchmark/report.md</code>, audit</td>
+</tr>
+<tr>
+<td>Executable outcome suite, 40 Go tasks, one fixed model per tier (2026-10-03)</td>
+<td>Implemented (maintainer)</td>
+<td><code>downshift eval-outcome --verify|--report</code>, <code>internal/outcome</code></td>
+<td>frontier <code>claude-opus-5.5</code> 40/40, mid <code>deepseek-v4-flash</code> 31/40, small <code>qwen3-coder-30b</code> 27/40; TRIVIAL+SIMPLE 20/20, 17/20, 16/20; classifier routing 37/40 at the picked tier (recomputed 2026-10-15)</td>
+<td>No token, retry or USD fields (<code>run.json</code>, issue #100); small minus frontier is −20 pp on TRIVIAL+SIMPLE; independent 6-task held-out smoke only (GAP-SUITE)</td>
+<td><code>benchmark/report.md</code>, <code>docs/internal/gap-tasks.md</code></td>
+</tr>
+<tr>
+<td>Routed versus control A/B on real and mechanical tasks (2026-10-15)</td>
+<td>Implemented once (one operator)</td>
+<td>private runner in downshift-labs; <code>DOWNSHIFT_NO_ROUTE=1</code> control arm</td>
+<td>b2 7/8 vs 7/8, $0.65 vs $0.77, 0 downshifts; b5 12/12 vs 12/12, $0.59 vs $0.67 (−12%), 19 of 56 (34%) rewritten down, <code>mech-rename</code> −33%; b6 8/12 vs 9/12, $0.75 vs $0.92, 3 of 34 (9%)</td>
+<td>Three runs per cell; Claude Code only; checks verify structure, not quality; natural-use saving not shown</td>
+<td>A/B, <code>docs/guides/evidence.md</code></td>
+</tr>
+<tr>
+<td>Context benchmark (four fixtures, bytes)</td>
+<td>Implemented</td>
+<td><code>downshift context benchmark</code></td>
+<td><code>compressor_benchmark_test.go</code></td>
+<td>Bytes; scenarios A–D <code>not measured</code></td>
+<td><code>docs/design/context-optimization.md</code></td>
+</tr>
+<tr>
+<td>Multilingual M3 frozen set (170 rows)</td>
+<td>Implemented (maintainer)</td>
+<td>labs</td>
+<td>CHANGELOG: unsafe confident recommendations 0</td>
+<td>Private; aggregate only</td>
+<td>CHANGELOG</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="13-packaging">13. Packaging</h2>
+<div class="tw" role="region" aria-label="Capability, Status, Where, Evidence, Limits, Docs" tabindex="0"><table>
+<thead>
+<tr>
+<th scope="col">Capability</th>
+<th scope="col">Status</th>
+<th scope="col">Where</th>
+<th scope="col">Evidence</th>
+<th scope="col">Limits</th>
+<th scope="col">Docs</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Claude Code plugin: <code>.claude-plugin/plugin.json</code>, <code>marketplace.json</code>, <code>hooks/hooks.json</code> (four hooks and one mod module), <code>commands/status.md</code>, skills, <code>agents/mechanical-worker.md</code></td>
+<td>Implemented</td>
+<td>repository root</td>
+<td><code>TestPluginHooksMatchSetupTarget</code>; <code>doctor</code> warns when plugin and settings hooks both run</td>
+<td>Claude Code only; binary still required; plugin does not set <code>opusplan</code>, plan mode, You should know or the statusline; plugin detection reads the user settings file only</td>
+<td><code>docs/guides/install.md#plugin-install-claude-code</code>, <code>hooks/README.md</code></td>
+</tr>
+<tr>
+<td>Bundled mod cache-tax (<code>hooks/cache-tax/</code>, MIT, vendored v2.2.1): priced cold-send guard, <code>/keepwarm</code>, <code>/cache-tax</code>, band above the prompt</td>
+<td>Implemented (third-party, pinned)</td>
+<td><code>hooks/cache-tax/register.ts</code>, loaded by <code>hooks/hooks.json</code> <code>modules</code></td>
+<td>upstream suite vendored, <code>claude plugin test .</code> 56 pass on 2.1.302; <code>claude plugin validate .</code> lists its calls; <code>doctor</code> warns when <code>cache-tax@claude-code-mods</code> is also enabled</td>
+<td>Claude Code 2.1.287+ only (mods); arrives with the plugin that <code>setup</code> installs, never written into a settings file; the warming ping spends usage and is armed by the user or after a detected cold write; prices are the mod's own list table, not the catalog; owner decision 2026-10-17</td>
+<td><code>hooks/cache-tax/README.md</code></td>
+</tr>
+<tr>
+<td>Sibling mod savvy-progress (<code>mods/savvy-progress/</code>, MIT, vendored v1.2.1, plugin <code>savvy-progress@downshift</code>): progress bar above the prompt, <code>/agents-info</code> panel of subagents</td>
+<td>Implemented (third-party, pinned)</td>
+<td><code>mods/savvy-progress/hooks/register.tsx</code>, own <code>hooks.json</code></td>
+<td>upstream suite vendored, <code>claude plugin test mods/savvy-progress</code>; <code>claude plugin validate mods/savvy-progress</code></td>
+<td>Claude Code 2.1.287+ only (mods); separate plugin because a plugin loads one hooks module; <code>setup</code> installs it with <code>claude plugin install</code> (<code>--no-plugin</code> skips); owner decision 2026-10-17</td>
+<td><code>mods/savvy-progress/README.md</code></td>
+</tr>
+<tr>
+<td>Sibling mod filetree (<code>mods/filetree/</code>, MIT, vendored v0.2.26, plugin <code>filetree@downshift</code>): file tree pane highlighting what Claude reads, writes and commits</td>
+<td>Implemented (third-party, pinned)</td>
+<td><code>mods/filetree/hooks/</code>, own <code>hooks.json</code></td>
+<td>upstream suite vendored, <code>claude plugin test mods/filetree</code>; <code>claude plugin validate mods/filetree</code></td>
+<td>Claude Code 2.1.287+ only (mods); separate plugin; <code>setup</code> installs it with <code>claude plugin install</code> (<code>--no-plugin</code> skips); owner decision 2026-10-17</td>
+<td><code>mods/filetree/README.md</code></td>
+</tr>
+<tr>
+<td>Sibling mod downshift-dock (<code>mods/downshift-dock/</code>, Apache-2.0, original, plugin <code>downshift-dock@downshift</code>): band above the prompt with Files and Agents buttons that run <code>/filetree</code> and <code>/agents-info open</code></td>
+<td>Implemented (unit-tested against the mock engine; real UI unverified)</td>
+<td><code>mods/downshift-dock/hooks/register.tsx</code>, own <code>hooks.json</code></td>
+<td><code>claude plugin test mods/downshift-dock</code> 6 pass; <code>claude plugin validate mods/downshift-dock</code></td>
+<td>Claude Code 2.1.287+ only (mods); depends on the filetree and savvy-progress commands existing, shows a button only when <code>$.command.list()</code> reports it; a press is queued until the session is idle; installed by <code>setup</code> (<code>--no-plugin</code> skips)</td>
+<td><code>mods/downshift-dock/README.md</code></td>
+</tr>
+<tr>
+<td><code>downshift setup</code> (per-harness targets as data, diff, backup, <code>--dry-run</code>, <code>--yes</code>, <code>--undo</code>, <code>--no-session-policy</code>)</td>
+<td>Implemented</td>
+<td><code>cmd/setup.go</code>, <code>setup_targets.go</code></td>
+<td><code>setup_test.go</code></td>
+<td>KiroCrew is reported only (needs the wrapper script); Codex still needs <code>config.toml</code> flags and <code>/hooks</code> trust</td>
+<td><code>docs/guides/install.md</code></td>
+</tr>
+<tr>
+<td><code>install.sh</code> with sha256 verification against the release <code>checksums.txt</code></td>
+<td>Implemented (Unreleased)</td>
+<td><code>install.sh</code></td>
+<td><code>install_test.go</code></td>
+<td><code>DOWNSHIFT_SKIP_CHECKSUM=1</code> opts out loudly</td>
+<td><code>docs/guides/install.md</code></td>
+</tr>
+<tr>
+<td>Example subagent with no pinned model</td>
+<td>Implemented</td>
+<td><code>agents/mechanical-worker.md</code></td>
+<td>plugin loads it as <code>downshift:mechanical-worker</code></td>
+<td>Claude Code agent format; the rule (omit <code>model</code>) applies everywhere</td>
+<td><code>docs/guides/subagents.md</code></td>
+</tr>
+<tr>
+<td>Always-loaded memory file capped at 200 lines; doc names lowercase kebab-case and relative links checked</td>
+<td>Implemented as a rule</td>
+<td><code>AGENTS.md</code> (<code>CLAUDE.md</code> points to it); <code>internal/docscheck</code></td>
+<td><code>TestMarkdownNames</code>, <code>TestRelativeLinksResolve</code> (no test enforces the 200-line cap)</td>
+<td>Contributor skill <code>downshift-layering</code> stays out of the plugin</td>
+<td><code>docs/design/architecture.md</code></td>
+</tr>
+<tr>
+<td>Claude Code mod <code>downshift-router</code> (standalone plugin, own manifest, not loaded by the root plugin): routes the subagent model from the in-process <code>agent.spawn</code> event by running <code>downshift claude-code</code> over the stdin contract and returning <code>next({ ...e, model })</code>; applies spawn-time <code>reasoning_effort</code> on <code>turn.step</code> via <code>next({ ...e, effort })</code>; off unless <code>userConfig.enabled</code> or <code>DOWNSHIFT_MOD_ROUTER=1</code></td>
+<td>Experimental</td>
+<td><code>mods/downshift-router/.claude-plugin/plugin.json</code>, <code>hooks/hooks.json</code> (<code>modules</code>), <code>hooks/register.ts</code>; Claude Code adapter <code>parent_model</code>, mod-only <code>updatedInput.reasoning_effort</code>, runner <code>entry</code>, SubagentStop inline usage; <code>core.ClaudeCodeCaps.HookEntries</code></td>
+<td><code>hooks/register.test.ts</code> (spawn, turn.step, turn.complete); Go: <code>parent_model_test.go</code>, <code>mod_effort_test.go</code>, <code>entry_e2e_test.go</code>, <code>TestSubagentStop_PricesFromInlineUsage</code>, <code>entry_test.go</code>, <code>TestDoctorDuplicateEntry</code></td>
+<td>Claude Code 2.1.287+ only; no drawing under <code>claude -p</code>; phase 2b done (honored observation for mod-written models still open); running both paths still routes every spawn twice (doctor warns)</td>
+<td><code>docs/design/mod-router.md</code>, <code>mods/downshift-router/README.md</code></td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="contradictions-and-overclaims-found">Contradictions and overclaims found</h2>
+<p>Each line: file:line, the sentence (abridged where long), and what the evidence supports.</p>
+<ol type="1">
+<li><del><code>README.md:253</code> "event-driven <strong>Context Sensor</strong> to govern context token volume".</del> <strong>RESOLVED (2026-10-17):</strong> <code>README.md:325</code> now says the sensor "observes context volume (byte counts, never a rewrite)"; no "govern" on the Context Sensor (only <code>GOVERNANCE</code> in the project links).</li>
+<li>Semantic boost is the in-process FNV hash (<code>hashembed.go</code>). External MiniLM and E5 were removed 2026-10-17. See <code>docs/design/minilm-semantic.md</code>.</li>
+<li><code>docs/pt/README.md:23</code> "decide em menos de 2 milissegundos". Holds for short prompts (0.10 ms) only; the audit measured 0.23 s on a typical 1 MiB prompt and 275 ms with the catalog resolver after the prefilter (<code>hardening-audit-2026-10-15.md</code> performance note). Unqualified claim.</li>
+<li><code>docs/guides/install.md:573</code> "API (direct) | ✅ Yes | ✅ Yes". No evidence file covers an API-key session; the 2026-10-06 write-up records "Plan tier: not recorded".</li>
+<li><del><code>docs/guides/install.md:585</code> "On usage-based Pro/Ultra plans where subagent model selection is expanded, routing works."</del> <strong>RESOLVED (2026-10-17):</strong> install table and prose say rewrite is emitted and child model is unconfirmed (<a href="/docs/harness-matrix/">P1.6</a>); matrix row stays <em>Unconfirmed</em>.</li>
+<li><del><code>docs/guides/install.md:349</code> "inspects the prompt inside <code>Subagents[0].Prompt</code> ... rewrites <code>Subagents[0].Model</code>".</del> <strong>RESOLVED (2026-10-17):</strong> install describes the <strong>last</strong> <code>Subagents</code> entry with a non-empty <code>Prompt</code>, <code>flash_lite</code> / <code>flash</code>, and the undocumented <code>overwrite</code> envelope.</li>
+<li>Graphify integration doc removed 2026-10-17; graph escalation is no longer part of the product.</li>
+<li><del><code>docs/reference/session-models.md:57-63</code> stale 2026-09-27 field table.</del> <strong>RESOLVED (2026-10-17):</strong> table rechecked <strong>2026-10-17</strong> with optional <code>session_id</code>, <code>cwd</code>, <code>transcript_path</code>, <code>tool_use_id</code>, <code>permission_mode</code>, <code>workspace_roots</code>; usage via SubagentStop transcript, not async PostToolUse tokens.</li>
+<li><code>docs/pt/README.md:26</code> "Métricas em dólares reais dependem do reporte de tokens retornado pelo harness no hook posterior (<code>PostToolUse</code>)". On Claude Code the <code>PostToolUse</code> payload of an async subagent carries no tokens (<code>posttooluse.go</code> header, <code>beta-exit.md</code> P3 note); usage comes from the <code>SubagentStop</code> transcript.</li>
+<li><del><code>skills/downshift-audit/SKILL.md:12</code> "[doctor covers] whether a rewrite was honored".</del> <strong>RESOLVED (2026-10-17):</strong> skill states doctor <code>rewrite honored</code> is <strong>inferred honor only</strong> and points to <a href="https://github.com/tiagovilasboas/downshift/blob/main/docs/guides/daily-truth.md" rel="noopener">daily-truth.md</a> and <a href="/docs/harness-matrix/">harness-matrix.md</a> for observed honor; code behaviour unchanged (<code>CountInferredHonored</code>).</li>
+<li><del><code>benchmark/report.md:18</code> seed tier accuracy 69.0% versus audit 73.5%.</del> <strong>RESOLVED (2026-10-17):</strong> <code>benchmark/report.md</code> publishes seed <strong>73.5% (67.0–79.1%)</strong> and <a href="https://github.com/tiagovilasboas/downshift/blob/main/docs/evidence/baseline-freeze-2026-10-17.md" rel="noopener">baseline-freeze-2026-10-17.md</a> documents the superseded 69.0% at <code>be1054ac</code>; matrix rows §1 and §12 cite the same figure.</li>
+<li><code>README.md:36</code> "Implemented on Claude Code (usage from the child transcript); partial elsewhere." Elsewhere is weaker than partial: Codex and Cursor end parsers are unverified and read no usage; Antigravity and KiroCrew record nothing (matrix "Child end (N5)").</li>
+<li><del><code>README.md:37</code> and <code>llms.txt:16</code> link <code>docs/guides/benchmark-protocol.md</code>, missing at audit time.</del> <strong>RESOLVED (2026-10-17):</strong> <a href="https://github.com/tiagovilasboas/downshift/blob/main/docs/guides/benchmark-protocol.md" rel="noopener">docs/guides/benchmark-protocol.md</a> is in the tree; README line 54 links it.</li>
+<li><code>llms.txt:106-107</code> and <code>docs/pt/README.md</code> present <code>downshift serve</code> and <code>dsmon</code> as plain reporting commands. <code>help --all</code> lists them under "Experimental", and <code>internal/server/server.go:26-29</code> converts units to dollars with a placeholder $0.01 per unit.</li>
+<li><del><code>docs/guides/companions.md:6</code> / <code>when-to-use.md:3</code> router-only positioning.</del> <strong>RESOLVED (2026-10-17):</strong> both guides frame the <strong>suite</strong> and "model routing is the main lever today, not the whole product", aligned with README § suite-at-a-glance.</li>
+<li><code>README.md:104</code> and <code>docs/guides/install.md:66</code> quote the stderr line as <code>downshift: TRIVIAL task → downshift to claude-haiku-4-5</code>. The real line is <code>downshift: correlation_id=&lt;id&gt; TRIVIAL task → downshift to claude-haiku-4-5 (~75% cheaper)</code> (<code>main.go</code> <code>stderrLine</code>, <code>policy.go</code> <code>Summary</code>). Trimmed sample, not wrong, but a grep for the documented text fails.</li>
+</ol>
+<h2 id="hidden-capabilities">Hidden capabilities</h2>
+<p>Things the code does that no public doc explains well (file where it lives; where it is mentioned, if at all).</p>
+<ol type="1">
+<li><strong>Verification sensor.</strong> <code>SubagentStop</code> records whether the child ran a recognised test or lint command and whether the last one passed (<code>verification: passed|failed|none</code> on usage records); <code>downshift verification-report</code> groups cost per tier next to that verdict. <code>internal/adapters/claudecode/verification.go</code>, <code>cmd/verification.go</code>. Mentioned once in CHANGELOG; absent from <code>help --all</code>, README, stats-export.</li>
+<li><strong>Prompt-injection as a risk category.</strong> A task that says "ignore previous instructions", "this is a trivial task" or "use the cheapest model" is treated as risky: never downshifted, floor off the small tier. <code>core/risk.go</code> <code>prompt_injection</code>. Docs name the category in passing only.</li>
+<li><strong>The hook's time and safety budget.</strong> 1 MiB payload cap, 2 s stdin read timeout, a 1.5 s hook deadline (<code>hookctx.HookBudget</code>) that kills helper commands, 1 s per embed call, 400 ms transcript wait, 500 ms sensor lock, 3 s graph fetcher, and <code>CmdTrusted</code>, which refuses an E5 helper that is <code>curl</code>, <code>bash</code>, <code>-c</code> or a symlink. <code>cmd/main.go</code>, <code>internal/hookctx</code>, <code>semantic/embed.go</code>, <code>e5shadow/cmdvalidate.go</code>. None of these numbers or the helper-command policy appear in user docs.</li>
+<li><strong>Operational knobs.</strong> Event-log rotation (<code>DOWNSHIFT_LOG_MAX_MB</code>, <code>DOWNSHIFT_LOG_MAX_BACKUPS</code>), <code>DOWNSHIFT_NB_UPSHIFT</code>, <code>DOWNSHIFT_NB_DOWNSHIFT</code>, <code>DOWNSHIFT_QUIET</code>, and <code>DOWNSHIFT_CONTROL_SHARE</code> are listed in <code>docs/guides/config.md</code>. <code>DOWNSHIFT_E5_*</code>, <code>DOWNSHIFT_GRAPHIFY_CMD</code>, and <code>DOWNSHIFT_MINILM_EMBED</code> are gone.</li>
+<li><del>Graph escalation</del> removed 2026-10-17.</li>
+<li><strong>Second stderr line per spawn.</strong> <code>downshift: honor=unobserved quota=&lt;available|held|unknown&gt; usage=unobserved</code> is printed for every decision on every harness; only <code>docs/guides/daily-truth.md</code> describes it.</li>
+<li><strong>Antigravity multi-child rule.</strong> The decision, the task text and the written model all follow the last subagent that has a <code>Prompt</code>; earlier children are not routed. <code>antigravity.go</code> <code>decidedSubagent</code>, <code>TestMultiChild_*</code>. Only the hardening audit and CHANGELOG mention it.</li>
+<li><strong>Decision-intelligence shadow record and in-process extras.</strong> Every decision event carries a <code>decision_intelligence</code> advisory block (<code>Apply: false</code>); <code>internal/lifecycleobserver</code> compiles but has no CLI or hook path (<code>internal/orchestration</code> and <code>internal/routecache</code> were removed on 2026-10-19). Design docs exist; user docs do not say they are inert.</li>
+<li><strong>Agent-type baseline attribution.</strong> <code>stats --detail</code> prints "Baseline by agent type" so an unknown-baseline rate can be pinned on <code>Explore</code>, <code>Plan</code> or <code>custom</code>. Only <code>stats-export.md</code> describes it.</li>
+<li><strong>Refuted-rewrite honesty.</strong> When Claude Code reports a different <code>resolvedModel</code>, the decision is priced on the model that ran, saves nothing, leaves the model mix and never counts as inferred honored (<code>TestAggregate_RefutedRewriteSavesNothing</code>). Explained in the audit and CHANGELOG, not in the stats docs a user reads.</li>
+</ol>
+<section><h2 id="more-docs">More docs</h2><ul class="rel"><li><a href="/docs/install/">Install Downshift: Claude Code, Codex and Cursor hook setup<span>Guide</span></a></li><li><a href="/docs/config/">Downshift configuration: state directory and local settings<span>Guide</span></a></li><li><a href="/docs/subagents/">Downshift and Claude Code subagents: when routing can act<span>Guide</span></a></li><li><a href="/docs/session-view/">Downshift session view: subagent tree, reasons and pause<span>Guide</span></a></li><li><a href="/docs/report/">Downshift report: measuring routed versus control spawn cost<span>Guide</span></a></li><li><a href="/docs/evidence/">Downshift evidence ladder: what each saving figure means<span>Guide</span></a></li><li><a href="/docs/companions/">Downshift companions: Headroom and Claude Code mods to pair<span>Guide</span></a></li><li><a href="/docs/capability-matrix/">Downshift capability matrix: status and evidence per feature<span>Reference</span></a></li><li><a href="/docs/harness-matrix/">Downshift harness matrix: Claude Code, Codex, Cursor status<span>Reference</span></a></li><li><a href="/docs/session-models/">Downshift session models: which model IDs a hook may write<span>Reference</span></a></li><li><a href="/docs/complexity-weights/">Downshift complexity weights: how a task becomes a model<span>Reference</span></a></li><li><a href="/docs/architecture/">Downshift architecture: deterministic hook and offline CLI<span>Design</span></a></li><li><a href="/docs/subagent-routing-ab-2026-10-15/">Downshift routed vs control: first Claude Code A/B results<span>Evidence</span></a></li><li><a href="/docs/real-usage-2026-10-19/">Downshift real usage: a Claude Code day and the last 30 days<span>Evidence</span></a></li><li><a href="/docs/dci-mvp-v01/">Downshift Code Intelligence MVP: evidence for Claude Code<span>Evidence</span></a></li></ul></section></div></article></main>
+<footer><div class="w"><div class="fg"><div><p class="fh">Product</p><ul><li><a href="/#start">Get started</a></li><li><a href="/#evidence">Evidence</a></li><li><a href="/#faq">FAQ</a></li><li><a href="/guides/">Guides</a></li></ul></div><div><p class="fh">Docs</p><ul><li><a href="/docs/install/">Install guide</a></li><li><a href="/docs/">Documentation</a></li><li><a href="/docs/capability-matrix/">Capability matrix</a></li><li><a href="/llms.txt">llms.txt</a></li></ul></div><div><p class="fh">Project</p><ul><li><a href="https://github.com/tiagovilasboas/downshift" rel="noopener">GitHub</a></li><li><a href="https://github.com/sponsors/tiagovilasboas" rel="noopener">Sponsor</a></li><li><a href="https://github.com/tiagovilasboas/downshift/blob/main/LICENSE" rel="noopener">Apache-2.0 license</a></li></ul></div></div><div class="legal"><p>Downshift by Tiago Vilas Boas. Downshift here is a Go tool for AI coding agents, not the React downshift autocomplete library and unrelated to any car transmission.</p><p class="cnpj">MONTANHA TECH · CNPJ 60.782.110/0001-84</p></div></div></footer>
+</body>
+</html>
