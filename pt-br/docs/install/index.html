@@ -1,0 +1,491 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Instalar o Downshift: hooks no Claude Code, Codex e Cursor</title>
+<meta name="description" content="Como instalar o Downshift e ligar o hook PreToolUse no Claude Code, Codex, Cursor e outros harnesses: install.sh, setup --dry-run, doctor e configuração manual.">
+<link rel="canonical" href="https://downshift-ai.vercel.app/pt-br/docs/install/">
+<link rel="alternate" hreflang="en" href="https://downshift-ai.vercel.app/docs/install/">
+<link rel="alternate" hreflang="pt-BR" href="https://downshift-ai.vercel.app/pt-br/docs/install/">
+<link rel="alternate" hreflang="x-default" href="https://downshift-ai.vercel.app/docs/install/">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/icon-192.png">
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#0a0a0a">
+<meta name="color-scheme" content="dark">
+<meta name="robots" content="index,follow,max-image-preview:large">
+<meta name="author" content="Tiago Vilas Boas">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Downshift">
+<meta property="og:locale" content="pt_BR">
+<meta property="og:title" content="Instalar o Downshift: hooks no Claude Code, Codex e Cursor">
+<meta property="og:description" content="Como instalar o Downshift e ligar o hook PreToolUse no Claude Code, Codex, Cursor e outros harnesses: install.sh, setup --dry-run, doctor e configuração manual.">
+<meta property="og:url" content="https://downshift-ai.vercel.app/pt-br/docs/install/">
+<meta property="og:image" content="https://downshift-ai.vercel.app/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Logo do Downshift com a frase: modelo certo para cada subagente. Sem LLM no roteamento.">
+<meta property="article:modified_time" content="2026-10-19">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Instalar o Downshift: hooks no Claude Code, Codex e Cursor">
+<meta name="twitter:description" content="Como instalar o Downshift e ligar o hook PreToolUse no Claude Code, Codex, Cursor e outros harnesses: install.sh, setup --dry-run, doctor e configuração manual.">
+<meta name="twitter:image" content="https://downshift-ai.vercel.app/og.png">
+<meta name="twitter:image:alt" content="Logo do Downshift com a frase: modelo certo para cada subagente. Sem LLM no roteamento.">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"TechArticle","headline":"Instalação e configuração dos harnesses","description":"Como instalar o Downshift e ligar o hook PreToolUse no Claude Code, Codex, Cursor e outros harnesses: install.sh, setup --dry-run, doctor e configuração manual.","inLanguage":"pt-BR","dateModified":"2026-10-19","author":{"@type":"Person","name":"Tiago Vilas Boas","url":"https://github.com/tiagovilasboas"},"publisher":{"@type":"Organization","name":"Downshift","url":"https://downshift-ai.vercel.app/","logo":{"@type":"ImageObject","url":"https://downshift-ai.vercel.app/icon-512.png","width":512,"height":512}},"image":"https://downshift-ai.vercel.app/og.png","mainEntityOfPage":{"@type":"WebPage","@id":"https://downshift-ai.vercel.app/pt-br/docs/install/"},"isPartOf":{"@type":"CollectionPage","@id":"https://downshift-ai.vercel.app/docs/"},"isBasedOn":"https://github.com/tiagovilasboas/downshift/blob/main/docs/guides/install.md","about":{"@type":"SoftwareApplication","name":"Downshift","url":"https://downshift-ai.vercel.app/","codeRepository":"https://github.com/tiagovilasboas/downshift","applicationCategory":"DeveloperApplication"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Início","item":"https://downshift-ai.vercel.app/pt-br/"},{"@type":"ListItem","position":2,"name":"Documentação","item":"https://downshift-ai.vercel.app/docs/"},{"@type":"ListItem","position":3,"name":"Instalação e configuração dos harnesses","item":"https://downshift-ai.vercel.app/pt-br/docs/install/"}]}]}</script>
+<link rel="preload" href="/fonts/Geist-Variable.woff2" as="font" type="font/woff2" crossorigin>
+<style>@font-face{font-family:"Geist";src:url(/fonts/Geist-Variable.woff2) format("woff2");font-weight:100 900;font-style:normal;font-display:swap}@font-face{font-family:"Geist Mono";src:url(/fonts/GeistMono-Variable.woff2) format("woff2");font-weight:100 900;font-style:normal;font-display:swap}@font-face{font-family:"Geist Fallback";src:local("Arial"),local("Helvetica");size-adjust:104.8%;ascent-override:95.9%;descent-override:28.2%;line-gap-override:0%}:root{color-scheme:dark;--b:#0a0a0a;--c:#141414;--l:#1f2329;--f:#d6dae2;--t:#fff;--m:#9a9ea5;--a:#22C55E;--r:#22C55E;--sb:#1f1f1f;--sf:#fff;--pb:#fff;--pf:#000;--cb:#121212;--ct:#e6edf3;--ss:"Geist","Geist Fallback",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;--mo:"Geist Mono",ui-monospace,SFMono-Regular,Menlo,monospace}@media not all{:root{--b:#fafafa;--c:#fff;--l:#d9dde3;--f:#1f2937;--t:#0a0a0a;--m:#4b5563;--a:#166534;--r:#0a0a0a;--sb:#eceff3;--sf:#0a0a0a;--pb:#0a0a0a;--pf:#fff;--cb:#f1f3f6;--ct:#111827}}*{box-sizing:border-box}html{-webkit-text-size-adjust:100%;text-size-adjust:100%;scroll-padding-top:88px}body{margin:0;background:var(--b);color:var(--f);font:16px/1.65 var(--ss);-webkit-font-smoothing:antialiased}::selection{background:color-mix(in srgb,var(--a) 35%,transparent);color:var(--t)}a{color:var(--t);text-underline-offset:3px}a:hover{text-decoration-color:var(--a)}a:focus-visible{outline:2px solid var(--r);outline-offset:3px;border-radius:6px}.w{max-width:1280px;margin:0 auto;padding:0 16px}@media(min-width:1024px){.w{padding:0 24px}}h1,h2,h3{color:var(--t);font-weight:500;letter-spacing:-.025em;margin:0;text-wrap:balance}header{position:sticky;top:0;z-index:10;background:color-mix(in srgb,var(--b) 88%,transparent);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border-bottom:1px solid var(--l)}header nav{display:flex;align-items:center;gap:4px;height:72px}.lg{display:inline-flex;align-items:center;min-height:44px;margin-right:auto}.lg img{display:block;height:40px;width:auto}.nl{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 12px;border-radius:999px;color:var(--m);text-decoration:none;font-size:14px}.nl:hover{color:var(--t);background:var(--sb)}.nl.ds{display:none}@media(min-width:640px){.nl.ds{display:inline-flex}}.nl.lang{min-width:44px;background:var(--sb);color:var(--sf);font-weight:500;font-size:13px}.bc ol{list-style:none;margin:0 auto;padding:16px 0 0;font-size:14px;color:var(--m);max-width:1024px}.bc li{display:inline;margin:0}.bc li+li:before{content:"/";margin:0 8px;color:var(--m)}.bc a{color:var(--m);display:inline-flex;align-items:center;min-height:44px;text-decoration:none}.bc a:hover{color:var(--t)}.bc [aria-current]{color:var(--f);overflow-wrap:anywhere}article{max-width:720px;margin:0 auto;padding:8px 0 96px}article>*{min-width:0}@media(min-width:1100px){.ga{display:grid;max-width:1024px;grid-template-columns:240px minmax(0,720px);column-gap:64px;align-items:start}.ga>.top,.ga>.bd{grid-column:2}.ga>.toc{grid-column:1;grid-row:1/span 2;position:sticky;top:96px;max-height:calc(100vh - 120px);overflow-y:auto}}h1{font-size:34px;line-height:1.12;font-weight:450;margin:16px 0 0}@media(min-width:640px){h1{font-size:46px}}h2{font-size:24px;line-height:1.25;margin:56px 0 16px}@media(min-width:640px){h2{font-size:30px}}h3{font-size:18px;line-height:1.35;margin:32px 0 8px}p{margin:0 0 16px}.by{margin:16px 0 0;color:var(--m);font-size:14px}.by a{color:var(--m)}.dis{margin:8px 0 0;color:var(--m);font-size:14px}.tl{margin:32px 0 0;background:var(--c);border:1px solid var(--l);border-left:2px solid var(--a);border-radius:4px 16px 16px 4px;padding:16px 20px}.tl p{margin:0;color:var(--f)}.lbl{margin:0 0 8px;font:500 12px var(--ss);letter-spacing:.04em;text-transform:uppercase;color:var(--m)}.toc{margin:32px 0 0;border:1px solid var(--l);border-radius:16px;padding:16px 20px;background:var(--c)}@media(min-width:1100px){.toc{margin:24px 0 0 -4px;border:0;padding:0 0 0 4px;background:none}}.toc ol{list-style:none;margin:0;padding:0;font-size:14px}.toc a{display:flex;align-items:center;min-height:44px;color:var(--m);text-decoration:none;line-height:1.35;padding:4px 0}.toc a:hover{color:var(--t)}ul,ol{margin:0 0 16px;padding-left:24px}li{margin:4px 0}li::marker{color:var(--m)}code{font:.88em var(--mo);background:var(--sb);border:1px solid var(--l);border-radius:6px;padding:1px 6px}pre{margin:0 0 16px;background:var(--cb);color:var(--ct);border:1px solid var(--l);border-radius:12px;padding:16px;overflow-x:auto;font:13px/1.6 var(--mo)}pre code{font:inherit;background:none;border:0;padding:0;color:inherit}pre:focus-visible,.tw:focus-visible{outline:2px solid var(--r);outline-offset:2px}.tw{margin:0 0 16px;overflow-x:auto;border:1px solid var(--l);border-radius:12px}table{border-collapse:collapse;width:100%;font-size:14px;line-height:1.5}th,td{text-align:left;vertical-align:top;padding:10px 14px;border-bottom:1px solid var(--l);min-width:120px}th{color:var(--t);font-weight:500;background:var(--c)}tr:last-child td{border-bottom:0}.co{margin:0 0 16px;background:var(--c);border:1px solid var(--l);border-left:2px solid var(--t);border-radius:4px 16px 16px 4px;padding:16px 20px}.co p:last-child{margin:0}.co.warn{border-left-color:var(--a)}.ex{margin:56px 0 0;border:1px solid var(--l);border-radius:16px;padding:0 20px 4px}@media(min-width:640px){.ex{padding:0 28px 8px}}.ex h2{margin-top:24px}.src{color:var(--m);font-size:14px}.faq h3{margin-top:24px}.faq p{color:var(--f)}.cta{margin:56px 0 0;background:var(--c);border:1px solid var(--l);border-radius:16px;padding:24px}@media(min-width:640px){.cta{padding:32px}}.cta h2{margin-top:0}.cta pre{white-space:pre-wrap;overflow-wrap:anywhere}.btns{display:flex;flex-wrap:wrap;gap:12px;margin-top:8px}.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 20px;border-radius:999px;background:var(--sb);color:var(--sf);font-weight:500;font-size:15px;text-decoration:none}.btn:hover{opacity:.86}.btn.p{background:var(--pb);color:var(--pf)}.btn svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}.rel,.srcs,.gl{list-style:none;padding:0;margin:0}.rel li{margin:0;border-top:1px solid var(--l)}.rel li:last-child{border-bottom:1px solid var(--l)}.rel a{display:flex;align-items:center;min-height:56px;padding:8px 0;text-decoration:none;color:var(--t);font-weight:500}.rel a:hover{color:var(--a)}.rel span{color:var(--m);font-weight:400;margin-left:8px;font-size:14px}.srcs li{margin:0;padding:12px 0;border-top:1px solid var(--l);font-size:14px;color:var(--m)}.srcs a{display:inline-flex;align-items:center;min-height:44px;overflow-wrap:anywhere;word-break:break-word}.srcs strong{color:var(--f);font-weight:500}.ev{display:inline-block;margin-left:8px;border:1px solid var(--l);border-radius:999px;padding:0 8px;font-size:12px;color:var(--m)}.gl{margin-top:32px}.gl li{margin:0;padding:24px 0;border-top:1px solid var(--l)}.gl h2{margin:0 0 8px;font-size:22px}.gl h2 a{text-decoration:none;display:inline-flex;min-height:44px;align-items:center}.gl h2 a:hover{color:var(--a)}.gl p{margin:0;color:var(--m)}.lead{margin:16px 0 0;font-size:18px;color:var(--m)}.alt{margin-top:48px;color:var(--m)}footer{border-top:1px solid var(--l);padding:48px 0 32px;color:var(--m);font-size:14px}.fg{display:grid;grid-template-columns:1fr 1fr;gap:24px 48px}@media(min-width:768px){.fg{grid-template-columns:repeat(3,1fr)}}.fg ul{list-style:none;margin:0;padding:0}.fg li{margin:0}.fh{margin:0 0 4px;color:var(--t);font-weight:500}footer a{color:var(--m);text-decoration:none;display:inline-flex;align-items:center;min-height:44px}footer a:hover{color:var(--t)}.legal{margin:32px 0 0;padding-top:24px;border-top:1px solid var(--l);font-size:12px;display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 24px}.legal p{margin:0}.cnpj{opacity:.75;letter-spacing:.02em}@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+.dl{display:block}
+.dl>*{min-width:0}
+.dl .ga{display:block;max-width:none;min-width:0;width:100%}
+.dsb{display:none}
+.toc-side{display:none}
+.dsb .lbl{margin:24px 0 8px}
+.dsb .lbl:first-child{margin-top:0}
+.dsb ul{list-style:none;margin:0;padding:0}
+.dsb a{display:flex;align-items:center;min-height:36px;padding:4px 10px;margin:0 -10px;border-radius:8px;color:var(--m);text-decoration:none;font-size:14px;line-height:1.35}
+.dsb a:hover{color:var(--t)}
+.dsb a[aria-current]{color:var(--t);background:var(--c)}
+.dsb-alt{margin:20px 0 0;font-size:13px;color:var(--m)}
+.dsb-alt a{display:inline;margin:0;padding:0;min-height:0}
+.toc-side{position:sticky;top:96px;max-height:calc(100vh - 120px);overflow-y:auto}
+.toc-side .lbl{margin:0 0 8px}
+.toc-side ol{list-style:none;margin:0;padding:0;font-size:14px;border-left:1px solid var(--l)}
+.toc-side a{display:block;min-height:36px;padding:4px 12px;margin-left:-1px;border-left:2px solid transparent;color:var(--m);text-decoration:none;line-height:1.35}
+.toc-side a:hover{color:var(--t)}
+.ga>.toc-in{position:static;max-height:none;overflow:visible;margin:24px 0 0;border:1px solid var(--l);background:var(--c);padding:16px 20px}
+.ga>.toc-in a{min-height:44px}
+@media(min-width:900px){
+.dl{display:grid;grid-template-columns:200px minmax(0,1fr);column-gap:56px;align-items:start}
+.dsb{display:block;position:sticky;top:96px;max-height:calc(100vh - 120px);overflow-y:auto;padding-bottom:24px}
+}
+@media(min-width:1280px){
+.dl{grid-template-columns:200px minmax(0,720px) 180px;column-gap:48px}
+.ga>.toc-in{display:none}
+.toc-side{display:block}
+}
+</style>
+</head>
+<body>
+<header><div class="w"><nav aria-label="Main"><a class="lg" href="/pt-br/" aria-label="Downshift"><picture><source srcset="/downshift-logo-dark.svg" media="(prefers-color-scheme:dark)"><img src="/downshift-logo-dark.svg" alt="Downshift" width="258" height="60"></picture></a><a class="nl" href="/pt-br/guias/">Guias</a><a class="nl ds" href="/docs/" aria-current="page">Docs</a><a class="nl ds" href="https://github.com/tiagovilasboas/downshift" rel="noopener">GitHub</a><a class="nl lang" href="/docs/install/" hreflang="en" lang="en" aria-label="Read in English">EN</a></nav></div></header>
+<main class="w"><nav class="bc" aria-label="Caminho de navegação"><ol><li><a href="/pt-br/">Início</a></li><li><a href="/docs/">Documentação</a></li><li><span aria-current="page">Instalação e configuração dos harnesses</span></li></ol></nav><div class="dl"><aside class="dsb" aria-label="Documentação"><p class="lbl">Documentação</p><ul><li><a href="/pt-br/docs/install/" aria-current="page">Instalação e configuração dos harnesses</a></li></ul><p class="dsb-alt">A documentação completa está em inglês. <a href="/docs/">Ver todas as páginas</a></p></aside><article class="ga"><div class="top"><h1>Instalação e configuração dos harnesses</h1><p class="by">Downshift por <a href="https://github.com/tiagovilasboas/downshift" rel="noopener">Tiago Vilas Boas</a>. Atualizado em 19 de outubro de 2026. <a href="https://github.com/tiagovilasboas/downshift/blob/main/docs/guides/install.md" rel="noopener">Código-fonte no GitHub</a></p><p class="dis">Downshift aqui é uma ferramenta em Go para agentes de código com IA, sem relação com a biblioteca React downshift de autocomplete nem com câmbios de carro.</p></div><nav class="toc toc-in" aria-labelledby="toc-h"><p class="lbl" id="toc-h">Nesta página</p><ol><li><a href="#verificação-de-saúde">Verificação de saúde</a></li><li><a href="#quickstart-do-zero-a-um-hook-funcionando-em-2-minutos">Quickstart: do zero a um hook funcionando em 2 minutos</a></li><li><a href="#testar-localmente-antes-de-conectar-o-hook">Testar localmente antes de conectar o hook</a></li><li><a href="#instalação-claude-code">Instalação (Claude Code)</a></li><li><a href="#instalação-cursor">Instalação (Cursor)</a></li><li><a href="#instalação-codex">Instalação (Codex)</a></li><li><a href="#lista-permitida-da-sessão">Lista permitida da sessão</a></li><li><a href="#harnesses-experimentais">Harnesses experimentais</a></li><li><a href="#dsmon-widget-de-monitoramento-ao-vivo">dsmon: widget de monitoramento ao vivo</a></li><li><a href="#cli-do-grok-configuração-não-hook">CLI do Grok (configuração, não hook)</a></li><li><a href="#compatibilidade-de-planos-leia-antes-de-instalar">Compatibilidade de planos (leia antes de instalar)</a></li><li><a href="#solução-de-problemas">Solução de problemas</a></li></ol></nav><div class="bd"><aside class="co"><p class="lbl">Tradução</p><p>Tradução do documento original em inglês. Em caso de diferença, vale a versão em inglês, que é a referência.</p></aside><p>Downshift por Tiago Vilas Boas <a href="https://github.com/tiagovilasboas/downshift" rel="noopener">https://github.com/tiagovilasboas/downshift</a></p>
+<p>Guia de referência para pessoas e agentes de código que instalam o Downshift em uma máquina de usuário.</p>
+<p><strong>Relacionados:</strong> <a href="/docs/config/">config.md</a> · <a href="/docs/session-models/">session-models.md</a> · <a href="/docs/harness-matrix/">harness-matrix.md</a> · <a href="https://github.com/tiagovilasboas/downshift/blob/main/examples/README.md" rel="noopener">examples/README.md</a> · <a href="https://github.com/tiagovilasboas/downshift/blob/main/docs/pt/README.md" rel="noopener">Guias em português</a></p>
+<p><strong>Status dos harnesses:</strong> o Claude Code está Concluído; Codex e Cursor são Funcionais; Antigravity e KiroCrew são Experimentais (veja <a href="#harnesses-experimentais">Harnesses experimentais</a>); o OpenCode está em Beta (o adaptador e a rota de comunicação estão neste repositório; a integração do plugin está em desenvolvimento). As seções abaixo seguem essa ordem. Definições e evidências: <a href="/docs/harness-matrix/#status-per-harness">harness-matrix.md</a>.</p>
+<h2 id="verificação-de-saúde">Verificação de saúde</h2>
+<p>Depois da instalação:</p>
+<pre tabindex="0"><code class="language-bash">downshift doctor          # versão, diretório de estado (~/.downshift), fonte do catálogo
+downshift try &quot;rename userId in auth.ts&quot; claude-code</code></pre>
+<p>Teste opcional do adaptador (a partir de um clone deste repositório):</p>
+<pre tabindex="0"><code class="language-bash">./examples/run-all.sh</code></pre>
+<p>A descoberta de disponibilidade e a cota de uso são configuradas à parte. Veja <a href="https://github.com/tiagovilasboas/downshift/blob/main/docs/reference/session-discovery.md" rel="noopener">session-discovery.md</a> para a lista de modelos e <a href="https://github.com/tiagovilasboas/downshift/blob/main/docs/guides/quota.md" rel="noopener">quota.md</a> para a ponte da barra de status nativa do Claude Code, a coleta de transcrições do Codex, a validade dos dados e o modo de cota obrigatória. Uma descoberta bem-sucedida não prova que há crédito incluído, e instalar uma ponte não prova que ela recebeu uma observação de uso em tempo real.</p>
+<h2 id="quickstart-do-zero-a-um-hook-funcionando-em-2-minutos">Quickstart: do zero a um hook funcionando em 2 minutos</h2>
+<p><strong>Passo 1: instalar</strong> (macOS / Linux):</p>
+<pre tabindex="0"><code class="language-bash">curl -fsSL https://raw.githubusercontent.com/tiagovilasboas/downshift/main/install.sh | sh</code></pre>
+<p>O instalador baixa o arquivo da versão e o <code>checksums.txt</code> da mesma release no GitHub e verifica o sha256 antes de instalar qualquer coisa. Se a soma não bater ou o arquivo de checksums faltar, ele para. <code>DOWNSHIFT_SKIP_CHECKSUM=1</code> instala sem verificação e avisa que fez isso. As releases também estão na <a href="https://github.com/tiagovilasboas/downshift/releases" rel="noopener">página de Releases</a>, com o mesmo <code>checksums.txt</code>.</p>
+<p><strong>Proveniência do build (opcional).</strong> As releases geradas pelo job <code>release</code> trazem uma atestação de proveniência do build no GitHub. Depois da verificação do sha256, se a CLI <code>gh</code> estiver instalada, o <code>install.sh</code> executa <code>gh attestation verify &lt;arquivo&gt; --repo tiagovilasboas/downshift</code> e imprime <code>Build provenance verified</code>. Por padrão, isso nunca bloqueia: sem <code>gh</code>, sem <code>gh auth login</code> ou com uma release anterior às atestações, ele mostra um aviso e continua só com o sha256. <code>DOWNSHIFT_REQUIRE_ATTESTATION=1</code> transforma qualquer resultado diferente de "verificado" em erro, e nada é instalado; <code>DOWNSHIFT_SKIP_ATTESTATION=1</code> pula a checagem. No fim, o instalador diz o que ficou comprovado: "sha256 and GitHub build provenance" ou "sha256 only" (um download íntegro, mas que não prova quem publicou). Ele aceita apenas uma versão estrita <code>vMAJOR.MINOR.PATCH[-prerelease]</code>, baixa com <code>curl --proto '=https' --tlsv1.2</code> e instala por meio de um nome temporário seguido de renomeação. Manualmente: <code>gh attestation verify downshift_&lt;ver&gt;_&lt;os&gt;_&lt;arch&gt;.tar.gz --repo tiagovilasboas/downshift</code>.</p>
+<p>O <code>install.sh</code> ainda trata um argumento sem flag como a versão da release. <code>--explicit-upshift</code> pode vir antes ou depois dessa versão. Ele grava <code>"explicit_upshift": true</code> em <code>session-models.json</code> sem remover as listas de harnesses que já estiverem ali. A mesma chave em tempo de execução é <code>DOWNSHIFT_EXPLICIT_UPSHIFT=1</code>. O padrão é desligado. Veja <a href="/docs/session-models/#explicit_upshift">session-models.md</a>.</p>
+<p><strong>Passo 2: visualizar e depois ligar os hooks:</strong></p>
+<pre tabindex="0"><code class="language-bash">downshift setup --dry-run   # mostra o diff de cada harness encontrado; não grava nada
+downshift setup             # pergunta antes, faz backup dos arquivos e depois mescla os hooks</code></pre>
+<p>No Claude Code, o <code>setup</code> liga <code>PreToolUse</code> (matcher <code>Agent|Task</code>), <code>PostToolUse</code>, <code>PostToolUseFailure</code> e <code>SubagentStop</code>, configura a barra de status quando não há nenhuma, e define <code>"model": "opusplan"</code> (Opus em modo plan, Sonnet na execução) e <code>"permissions": {"defaultMode": "plan"}</code> (as sessões começam em modo plan) para as chaves que você ainda não definiu. Valores existentes são mantidos, e <code>--no-session-policy</code> pula as duas coisas. O mod "You should know" embutido do Claude Code (<code>"enabledPlugins": {"cc-plugin-you-should-know@builtin": true}</code>) é opt-in, porque cada verificação é uma requisição cobrada ao modelo da sessão: o <code>setup</code> mostra uma sugestão, e <code>downshift setup --you-should-know</code> a grava (<code>/plugin disable cc-plugin-you-should-know@builtin</code> a desliga) (<a href="/docs/session-models/#main-session-policy-plan-mode-and-opusplan-claude-code">política de sessão principal</a>). Ele também encontra o Cursor, o Codex e o Antigravity, mantém as chaves não relacionadas e os hooks existentes, e é idempotente. <code>downshift setup --undo</code> restaura o backup mais recente. O KiroCrew (Experimental) precisa do seu script wrapper e só é informado; veja <a href="#kirocrew-modo-de-política-pelo-hook-nativo-da-kiro-cli">KiroCrew</a>. O JSON manual está em <a href="#configuração-manual-claude-code">Configuração manual</a> abaixo.</p>
+<p><strong>Passo 3: testar o classificador</strong> com os seus próprios prompts:</p>
+<pre tabindex="0"><code class="language-bash">downshift doctor                                          # checklist: binário, hooks por harness, estado, pontuações
+downshift try &quot;rename the userId variable&quot; claude-code    # o que seria escolhido, e por quê</code></pre>
+<p><strong>Passo 4: confirmar que funciona.</strong> Abra uma nova sessão do Claude Code e peça para criar um subagente para uma tarefa trivial. Você verá uma linha assim no stderr:</p>
+<pre tabindex="0"><code>downshift: TRIVIAL task → downshift to claude-haiku-4-5</code></pre>
+<p>Essa linha significa que o hook disparou e emitiu uma reescrita antes de o subagente começar. Se o harness aplicou a reescrita é outro fato. <code>downshift stats</code> separa <code>rewrite_emitted</code> de honrada, e a matriz diz o que está verificado por plano.</p>
+<p><strong>Confirmar que a reescrita foi honrada</strong> (importante para a validação de saída do beta):</p>
+<ul>
+<li>Peça ao Claude Code: <em>"spawn a subagent to rename the userId variable in auth.ts"</em></li>
+<li>Abra os logs internos ou o monitor do Claude Code (confira o modelo real do subagente na interface)</li>
+<li>Confirme que ele começou no haiku, e não no modelo de fronteira padrão da sessão</li>
+<li>Isso prova que a reescrita do hook não foi só emitida: ela foi <strong>de fato aplicada</strong> pelo harness</li>
+</ul>
+<p><strong>Passo 5: ver o que aconteceu.</strong> <code>downshift stats --days=1</code> mostra decisões e economia estimada; <code>downshift session --tree</code> mostra os subagentes desta sessão como uma árvore. No Claude Code, o plugin expõe <code>/downshift:status</code>; o alias manual opcional <code>/downshift</code> está em <a href="#o-comando-downshift-claude-code">O comando /downshift</a>.</p>
+<p><strong>Passo 6: (opcional) acompanhar ao vivo.</strong> <code>downshift watch</code> redesenha a árvore de subagentes da sessão atual (modelo, status final, custo, motivo) a cada segundo, em todos os harnesses; <code>downshift session --tree</code> imprime uma vez só, e <code>/downshift:status</code> ou <code>/downshift</code> mostra isso dentro do Claude Code. O widget flutuante mais antigo continua disponível: <a href="#dsmon-widget-de-monitoramento-ao-vivo">dsmon, widget de monitoramento ao vivo</a>.</p>
+<h3 id="configuração-manual-claude-code">Configuração manual (Claude Code)</h3>
+<p>Use isto no lugar do <code>setup</code> se preferir editar <code>~/.claude/settings.json</code> por conta própria. O matcher do PreToolUse é <code>Agent|Task</code>. O schema de <code>Task</code> do Claude Code aceita só nomes de família (<code>haiku</code>, <code>sonnet</code>, <code>opus</code>, <code>fable</code>) em <code>model</code>. O Downshift grava o nome de família do catálogo por você, e deixa o subagente como está quando um modelo não tem um.</p>
+<pre tabindex="0"><code class="language-json">{
+  &quot;hooks&quot;: {
+    &quot;PreToolUse&quot;: [
+      { &quot;matcher&quot;: &quot;Agent|Task&quot;, &quot;hooks&quot;: [{ &quot;type&quot;: &quot;command&quot;, &quot;command&quot;: &quot;downshift claude-code&quot; }] }
+    ]
+  }
+}</code></pre>
+<p>Para o status do filho e o uso real, adicione também <code>PostToolUse</code> e <code>PostToolUseFailure</code> (<code>downshift claude-code-post-tool-use</code>) e <code>SubagentStop</code> (<code>downshift claude-code-subagent-stop</code>), como o <code>setup</code> faz.</p>
+<h2 id="testar-localmente-antes-de-conectar-o-hook">Testar localmente antes de conectar o hook</h2>
+<p>Antes de adicionar o hook ao Claude Code, teste a lógica do classificador e do hook localmente:</p>
+<p><strong>Teste 1: só o classificador (terminal):</strong></p>
+<pre tabindex="0"><code class="language-bash">downshift try &quot;rename the userId variable&quot; claude-code
+downshift try &quot;rearchitect the payment flow&quot; claude-code
+downshift try &quot;implement the CSV export&quot; claude-code</code></pre>
+<p><strong>Teste 2: hook completo (JSON):</strong></p>
+<pre tabindex="0"><code class="language-bash">downshift claude-code &lt; examples/claude-code-pretooluse-session.json</code></pre>
+<p>Isso imita exatamente o que o Claude Code vai enviar. A saída é o JSON que o harness vai aplicar, mais o retorno no stderr com a decisão e um ID de feedback para acompanhamento.</p>
+<p>Veja <a href="https://github.com/tiagovilasboas/downshift/blob/main/examples/README.md" rel="noopener">examples/</a> para payloads de exemplo. <code>claude-code-pretooluse-session.json</code> traz uma lista <code>session_models</code>, então mostra uma reescrita de verdade.</p>
+<blockquote class="co">
+<p><strong>⚠️ Só Claude Code Pro/Max/Teams/API.</strong> O plano gratuito não tem subagentes reais e bloqueia instalações pela rede. Veja <a href="#compatibilidade-de-planos-leia-antes-de-instalar">Compatibilidade de planos</a> antes de continuar.</p>
+</blockquote>
+<h2 id="instalação-claude-code">Instalação (Claude Code)</h2>
+<p><strong>Status: Concluído.</strong> Reescrita observada e honrada, uso e fim do filho registrados, plugin e política de sessão (<a href="https://github.com/tiagovilasboas/downshift/blob/main/docs/evidence/claude-code-rewrite-honored-2026-10-06.md" rel="noopener">evidência</a>, <a href="https://github.com/tiagovilasboas/downshift/blob/main/docs/evidence/billing-gap-audit.md" rel="noopener">auditoria de cobrança</a>).</p>
+<p>Gere ou instale o binário único (sem runtime, sem dependências):</p>
+<pre tabindex="0"><code class="language-bash"># Recomendado: instalador de uma linha (macOS / Linux, detecta a arquitetura automaticamente)
+# Instala em /usr/local/bin/downshift; não precisa mexer no PATH
+curl -fsSL https://raw.githubusercontent.com/tiagovilasboas/downshift/main/install.sh | sh
+
+# Alternativa: toolchain do Go (qualquer plataforma)
+go install github.com/tiagovilasboas/downshift/cmd/downshift@latest</code></pre>
+<blockquote class="co">
+<p><strong>Nota sobre o toolchain do Go:</strong> <code>go install</code> coloca o binário em <code>~/go/bin</code>. Se aparecer <code>downshift: command not found</code>, adicione o bin do Go ao PATH:</p>
+<pre tabindex="0"><code class="language-bash">export PATH=&quot;$HOME/go/bin:$PATH&quot;   # sessão atual
+echo &#39;export PATH=&quot;$HOME/go/bin:$PATH&quot;&#39; &gt;&gt; ~/.zshrc &amp;&amp; source ~/.zshrc  # permanente</code></pre>
+<p>O instalador <code>curl</code> acima evita isso, porque grava direto em <code>/usr/local/bin</code>.</p>
+</blockquote>
+<p>Binários pré-compilados para macOS (arm64/amd64), Linux (arm64/amd64) e Windows (amd64) estão na página de <a href="https://github.com/tiagovilasboas/downshift/releases" rel="noopener">Releases</a>.</p>
+<p><strong>Caminho mais rápido:</strong> o <code>downshift setup</code> encontra o Claude Code, o Cursor, o Codex e o Antigravity nesta máquina e mescla todos os hooks (além da barra de status do Claude Code, quando nenhuma estiver configurada) nos arquivos de hook de cada um, usando o caminho absoluto deste binário. Ele mantém as chaves não relacionadas e os hooks existentes, é idempotente, mostra um diff e salva um backup com data e hora. <code>--dry-run</code> não grava nada, <code>--yes</code> pula a pergunta, <code>--undo</code> restaura o backup mais recente. O KiroCrew precisa do script wrapper e só é informado. O JSON manual vem a seguir.</p>
+<p>Adicione o hook em <code>~/.claude/settings.json</code>:</p>
+<pre tabindex="0"><code class="language-json">{
+  &quot;hooks&quot;: {
+    &quot;PreToolUse&quot;: [
+      {
+        &quot;matcher&quot;: &quot;Agent|Task&quot;,
+        &quot;hooks&quot;: [
+          { &quot;type&quot;: &quot;command&quot;, &quot;command&quot;: &quot;downshift claude-code&quot; }
+        ]
+      }
+    ]
+  }
+}</code></pre>
+<p>É só isso. A partir da próxima sessão, cada criação de subagente passa pelo hook; se o modelo é reescrito depende da tarefa (com confiança, sem risco) e do plano (<a href="/docs/harness-matrix/">matriz de harnesses</a>). Em trabalho natural, a maioria das criações é segurada, e isso é intencional.</p>
+<h3 id="instalação-pelo-plugin-claude-code">Instalação pelo plugin (Claude Code)</h3>
+<p>Os mesmos quatro hooks e o comando <code>/downshift:status</code> vêm como um plugin do Claude Code cuja raiz é este repositório. Ele precisa do binário <code>downshift</code> no PATH (passo 1 acima) e substitui o passo 2 só para o Claude Code. O <code>downshift setup</code> faz essa instalação por você quando consegue: executa <code>claude plugin marketplace add</code> e <code>claude plugin install downshift@downshift</code>, e depois remove os hooks do Downshift que ele gravou antes no <code>settings.json</code> (o plugin já os traz; manter os dois faria cada criação de subagente ser roteada duas vezes). Ele só instala o plugin quando o <code>claude</code> está no PATH e um shell de login resolve <code>downshift</code> para o mesmo binário que executa o <code>setup</code>, porque os hooks do plugin chamam <code>downshift</code> pelo nome; caso contrário, continua gravando os hooks no <code>settings.json</code> e diz o motivo. <code>--no-plugin</code> sempre mantém os hooks no <code>settings.json</code>. Os outros harnesses continuam usando <code>downshift setup</code>.</p>
+<pre tabindex="0"><code class="language-text">/plugin install downshift --marketplace tiagovilasboas/downshift      # Claude Code 2.1.275+</code></pre>
+<p>ou em dois passos, <code>/plugin marketplace add tiagovilasboas/downshift</code> e depois <code>/plugin install downshift@downshift</code>. O plugin liga <code>PreToolUse</code>, <code>PostToolUse</code>, <code>PostToolUseFailure</code>, <code>SubagentStop</code> e <code>UserPromptSubmit</code> (para a Inteligência de Código do Downshift) a partir de <a href="https://github.com/tiagovilasboas/downshift/blob/main/hooks/hooks.json" rel="noopener"><code>hooks/hooks.json</code></a> (cada entrada só chama o binário), adiciona as skills <code>downshift-setup</code>, <code>downshift-audit</code> e <code>cost-reducer</code>, e o comando abaixo como <code>/downshift:status</code>. No Claude Code 2.1.287 ou superior, ele também carrega o <a href="https://github.com/tiagovilasboas/downshift/blob/main/hooks/cache-tax/README.md" rel="noopener">mod cache-tax incluído</a>: um envio frio em um contexto de 50 mil tokens ou mais é retido uma vez, com o preço estimado da reescrita (reenvie para pagar, ou use <code>/cache-tax guard warn</code> para só ser avisado), e <code>/keepwarm 90m</code> mantém o cache aquecido durante uma pausa, com uma pequena requisição ao modelo a cada 50 minutos ociosos, o que gasta uso. Se você já instalou <code>cache-tax@claude-code-mods</code>, desinstale uma das cópias; o <code>doctor</code> avisa. O marketplace também oferece savvy-progress e filetree, uma instalação para cada (o <code>downshift setup</code> instala os dois no Claude Code; manualmente: <code>/plugin install savvy-progress@downshift</code>, <code>/plugin install filetree@downshift</code>; veja <a href="https://github.com/tiagovilasboas/downshift/blob/main/mods/README.md" rel="noopener">mods/README.md</a>). Ele não configura <code>opusplan</code>, o modo plan, a barra de status nem o mod You should know: isso são configurações, não hooks, e o <code>downshift setup</code> as grava (You should know só com <code>--you-should-know</code>). Defina <code>"model": "opusplan"</code> e <code>"permissions": {"defaultMode": "plan"}</code> em <code>~/.claude/settings.json</code> por conta própria (ou <code>/model opusplan</code> numa sessão), e <code>/plugin enable cc-plugin-you-should-know@builtin</code> para o You should know (uma requisição cobrada a cada verificação), se quiser isso sem o <code>setup</code>; veja <a href="/docs/session-models/#main-session-policy-plan-mode-and-opusplan-claude-code">política de sessão principal</a>.</p>
+<p>Use um canal só. Um hook de plugin e um hook de configuração com o mesmo comando rodam os dois, então uma sessão ligada pelos dois roteia cada criação duas vezes. O <code>downshift setup</code> pula os hooks quando vê o plugin ativado em <code>~/.claude/settings.json</code> (ele ainda aplica a política de sessão e a barra de status), e o <code>downshift doctor</code> avisa quando encontra os dois. Para trocar do <code>setup</code> para o plugin, rode antes <code>downshift setup --undo</code>. A detecção lê só o arquivo de configurações do usuário; um plugin ativado pelo <code>.claude/settings.json</code> de um projeto não é visto.</p>
+<h3 id="o-comando-downshift-claude-code">O comando /downshift (Claude Code)</h3>
+<p>Opcional quando a instalação é manual. É um comando de barra que mostra o que o Downshift fez na sessão atual (uma árvore de subagentes, por que o último rodou onde rodou, pausa e retomada):</p>
+<pre tabindex="0"><code class="language-bash">mkdir -p ~/.claude/commands
+cp commands/status.md ~/.claude/commands/downshift.md   # a partir deste repositório</code></pre>
+<p>Com o plugin, ele já existe como <code>/downshift:status</code>. Depois, no Claude Code: <code>/downshift:status</code>, <code>/downshift:status --why</code>, <code>/downshift:status --pause</code>, <code>/downshift:status --resume</code>. A cópia manual opcional acima mantém <code>/downshift</code> como alias local. O comando só executa <code>downshift session</code> pela ferramenta Bash, que a linha <code>allowed-tools</code> limita a esse comando. O mesmo <code>downshift session</code> funciona no terminal para qualquer harness. Veja <a href="/docs/session-view/">session-view.md</a>.</p>
+<h3 id="inteligência-de-código-do-downshift-dci">Inteligência de Código do Downshift (DCI)</h3>
+<p>O Downshift inclui um mecanismo opcional de inteligência de código que descobre o código do repositório, extrai símbolos AST (Go) e léxicos, pontua a relevância com BM25 e injeta contexto estrutural compacto (até 3.500 bytes UTF-8) pelo <code>UserPromptSubmit</code> no Claude Code.</p>
+<p>Por padrão, o DCI está <code>off</code>. Para ativar em um repositório:</p>
+<pre tabindex="0"><code class="language-bash">downshift dci enable active   # injeta contexto nos prompts do Claude Code
+downshift dci enable observe  # observa e registra telemetria, sem injetar
+downshift dci status          # mostra o modo ativo e as estatísticas do cache
+downshift dci doctor          # confere permissões, descoberta e latências
+downshift dci benchmark       # roda benchmarks locais de desempenho e relevância</code></pre>
+<p>Para ver a telemetria e as métricas do DCI:</p>
+<pre tabindex="0"><code class="language-bash">downshift stats --dci         # mostra os prompts, as injeções e as latências do DCI</code></pre>
+<p>Veja <a href="https://github.com/tiagovilasboas/downshift/blob/main/docs/design/code-intelligence.md" rel="noopener">code-intelligence.md</a> para os detalhes de arquitetura.</p>
+<h2 id="instalação-cursor">Instalação (Cursor)</h2>
+<p><strong>Status: Funcional.</strong> A reescrita é emitida numa criação real de subagente; a aplicação pelo harness não está confirmada, e ela é descartada nos planos Free e Pro legado (<a href="https://github.com/tiagovilasboas/downshift/blob/main/docs/evidence/cursor-rewrite-honored-2026-10-10.md" rel="noopener">evidência</a>, <a href="https://github.com/tiagovilasboas/downshift/blob/main/docs/evidence/cursor-gap-diagnostic.md" rel="noopener">diagnóstico de lacunas</a>).</p>
+<p>O protocolo de hooks do Cursor espelha o do Claude Code: a mesma interceptação <code>preToolUse</code>, com <code>updated_input</code> para reescrever o modelo do subagente. Gere o binário e depois adicione o hook em <code>.cursor/hooks.json</code> (nível do projeto) ou <code>~/.cursor/hooks.json</code> (global):</p>
+<pre tabindex="0"><code class="language-json">{
+  &quot;version&quot;: 1,
+  &quot;hooks&quot;: {
+    &quot;preToolUse&quot;: [
+      { &quot;command&quot;: &quot;downshift cursor&quot;, &quot;matcher&quot;: &quot;Task&quot; }
+    ]
+  }
+}</code></pre>
+<p>O <code>matcher: "Task"</code> limita o hook às criações de subagentes. O Cursor observa o arquivo de configuração e o recarrega ao salvar.</p>
+<h2 id="instalação-codex">Instalação (Codex)</h2>
+<p><strong>Status: Funcional.</strong> A reescrita é emitida numa criação real de subagente; a aplicação pelo harness é inferida, não observada (<a href="https://github.com/tiagovilasboas/downshift/blob/main/docs/evidence/codex-rewrite-honored-2026-10-02.md" rel="noopener">evidência</a>).</p>
+<p>O Codex cria subagentes por uma ferramenta reservada <code>spawn_agent</code>, no <code>multi_agent_v2</code>. Você não consegue colocar um modelo na chamada visível ao provedor, mas um hook <code>PreToolUse</code> pode injetar o modelo <strong>e</strong> o <code>reasoning_effort</code> na entrada da ferramenta antes de o filho começar, que é exatamente onde o <code>downshift</code> roda.</p>
+<p>Ative as flags de recurso em <code>config.toml</code>:</p>
+<pre tabindex="0"><code class="language-toml">[features]
+hooks = true
+
+[features.multi_agent_v2]
+enabled = true</code></pre>
+<p>Registre o hook em <code>.codex/hooks.json</code> (projeto) ou <code>~/.codex/hooks.json</code> (global). O matcher cobre os nomes de ferramenta <code>Agent</code> e o <code>spawn_agent</code> com namespace:</p>
+<pre tabindex="0"><code class="language-json">{
+  &quot;hooks&quot;: {
+    &quot;PreToolUse&quot;: [
+      {
+        &quot;matcher&quot;: &quot;(^Agent$|.*spawn_agent$)&quot;,
+        &quot;hooks&quot;: [
+          { &quot;type&quot;: &quot;command&quot;, &quot;command&quot;: &quot;downshift codex&quot; }
+        ]
+      }
+    ]
+  }
+}</code></pre>
+<h3 id="confie-no-hook-antes-de-testar">Confie no hook antes de testar</h3>
+<p>O Codex não executa hooks locais recém-configurados até você revisar e confiar no comando exato. Isso é um controle de segurança do Codex, não um erro do downshift. Depois de salvar a configuração, abra o Codex e rode:</p>
+<pre tabindex="0"><code class="language-text">/hooks</code></pre>
+<p>Revise e confie no hook <code>downshift codex</code>, e depois abra uma <strong>nova sessão</strong> antes de pedir ao Codex para criar um subagente. Enquanto o hook não for confiável, o Codex o ignora e o subagente mantém o modelo da sessão sem mudança.</p>
+<p>No Codex, o downshift roteia <strong>dois eixos ao mesmo tempo</strong>: o tier do modelo e o esforço de raciocínio (<code>low</code> para trabalho trivial, até <code>high</code> para trabalho de fronteira). Numa sessão que oferece GPT-6 Sol e Luna, um subagente trivial pode ir de <code>gpt-6-sol</code> para <code>gpt-6-luna</code> com esforço baixo, desde que a lista permitida da sessão e o Codex aceitem a entrada reescrita.</p>
+<p>O Downshift aplica o esforço de raciocínio escolhido, exceto quando uma trava segura a decisão (o subagente mantém o esforço pedido) ou quando a decisão não tem confiança e não reescreve o modelo. Uma revisão de código é uma tarefa de fronteira, então uma sessão com <code>gpt-5.6-terra</code> roteia o subagente para <code>gpt-5.6-sol</code> com esforço alto. <code>gpt-6-astra</code> está marcado com <code>routing: "explicit_only"</code> no catálogo. Com o <code>explicit_upshift</code> desligado por padrão, o downshift não o escolhe. Se o subagente atual já roda no Astra, o modelo é preservado sem mudança. Defina <code>"explicit_upshift": true</code> em <code>session-models.json</code>, exporte <code>DOWNSHIFT_EXPLICIT_UPSHIFT=1</code> ou rode <code>install.sh --explicit-upshift</code> para que o upshift o escolha quando ele estiver no conjunto de créditos deste harness (ou quando este harness não informar conjunto de créditos). O <code>claude-fable-5-1-thinking-high</code> do Cursor segue o mesmo princípio de opt-in. O <code>claude-fable-5-1</code> do Claude Code não é <code>explicit_only</code>; acrescente esse id à lista da sessão para ativá-lo. Para marcar qualquer outro modelo como explicit-only, adicione <code>"routing": "explicit_only"</code> à entrada dele em <code>~/.downshift/catalog.json</code> (o diretório de estado; <code>~/.harness-downshift/</code> só é lido quando é o diretório legado em uso).</p>
+<p>Um prompt puramente mecânico, como <code>Use a subagent to only list the .go files</code>, é roteado para <code>gpt-6-luna</code> com esforço baixo, quando esse id exato está na lista permitida da sessão.</p>
+<blockquote class="co">
+<p>A especificação de criação <code>multi_agent_v2</code> do Codex ainda está evoluindo. O downshift preserva os campos reservados e falha de forma aberta, mas fixe a versão exata do Codex que você usa e mantenha um teste de aceitação com uma criação real.</p>
+</blockquote>
+<h2 id="lista-permitida-da-sessão">Lista permitida da sessão</h2>
+<p>O Downshift só grava um id de modelo quando esse id está na sessão atual. O catálogo fornece tier, custo, família e esforço para os ids que também estão na sessão. Ele nunca adiciona um id que a sessão não tem. Se a lista da sessão não puder ser determinada, o hook deixa o modelo atual sem mudança.</p>
+<p>Os hooks do Cursor, do Claude Code e do Codex enviam o modelo ativo, não a lista completa do seletor. O Codex também envia um ID de sessão; o Downshift valida e faz hash desse ID antes de registrar, para que as decisões locais possam ser agrupadas sem guardar o identificador bruto. Registre os ids de modelo selecionáveis em <code>~/.downshift/session-models.json</code> (legado: <code>~/.harness-downshift/</code>). Uma lista no nível superior do harness é um fallback; uma lista exata <code>sessions.&lt;harness&gt;.&lt;session_id&gt;</code> tem precedência. As listas são mantidas pelo operador: o Downshift não consulta o seletor de modelos do Codex nem infere a elegibilidade da conta. A exceção é o Claude Code: sem lista de nenhuma fonte, ele infere a sessão pelo modelo atual (a escada de tiers do catálogo abaixo, terminando nesse modelo), então pode fazer downshift, mas nunca upshift além do que a sessão já roda; <code>DOWNSHIFT_INFER_SESSION=off</code> desliga isso. Se um payload do hook trouxer <code>session_models</code> ou <code>available_models</code>, essa lista é usada e o arquivo é ignorado. Detalhes e evidências: <a href="/docs/session-models/">session-models.md</a>. <a href="https://github.com/tiagovilasboas/downshift/blob/main/docs/examples/session-models.example.json" rel="noopener">session-models.example.json</a> é uma sessão do Cursor de 27/09/2026. É um exemplo, não o padrão para todo usuário.</p>
+<p>Para a cota do Cursor, o hook pode ler, offline, uma exportação nativa completa indicada por <code>DOWNSHIFT_CURSOR_NATIVE_FILE</code>, antes do cache de cota canônico. Uma exportação configurada malformada ou desatualizada segura o roteamento. A extensão externa experimental foi testada no Cursor 3.24.9 e não conseguiu acessar a API <code>cursor</code>, que só existe embutida, mesmo com uma flag explícita de API proposta; nenhuma exportação foi gerada. Instalar essa extensão não ativa a coleta nessa versão. Veja <a href="https://github.com/tiagovilasboas/downshift/blob/main/docs/evidence/cursor-gap-diagnostic.md" rel="noopener">o diagnóstico de runtime</a>. A pertinência ao provedor continua sendo a fonte de verdade; não a substitua por uma lista fixa de modelos.</p>
+<h2 id="harnesses-experimentais">Harnesses experimentais</h2>
+<blockquote class="co">
+<p><strong>Experimental (prova de conceito).</strong> O KiroCrew roda só em modo de política (bloqueia e tenta de novo, sem reescrita no lugar), e a reescrita do Antigravity usa um envelope <code>overwrite</code> que não é um campo documentado do fornecedor; cada um tem um filho observado numa build e nenhum registra o fim do filho. Todo recurso continua calculado para eles (regra de camadas, <code>cmd/downshift/conformance_test.go</code>), e os adaptadores, os testes e os hooks ficam no repositório, mas trate-os como provas de conceito, não como instalações suportadas. Instale-os só se você aceitar isso.</p>
+</blockquote>
+<h3 id="antigravity-google-deepmind">Antigravity (Google DeepMind)</h3>
+<p><strong>Status: Experimental.</strong> Um filho observado no desktop 2.21.1 (<a href="https://github.com/tiagovilasboas/downshift/blob/main/docs/evidence/antigravity-executor-ack.md" rel="noopener">evidência</a>); nenhum fim de filho registrado.</p>
+<p>O Antigravity executa subagentes por <code>invoke_subagent</code> e aceita a modificação de argumentos no protocolo de hook <code>PreToolUse</code> por meio de <code>overwrite</code>.</p>
+<p>Registre o hook em <code>~/.gemini/config/hooks.json</code>:</p>
+<pre tabindex="0"><code class="language-json">{
+  &quot;PreToolUse&quot;: [
+    {
+      &quot;matcher&quot;: &quot;invoke_subagent&quot;,
+      &quot;command&quot;: &quot;downshift antigravity&quot;
+    }
+  ]
+}</code></pre>
+<p>Quando o Antigravity tenta criar um subagente (por exemplo, herdando o modelo pai ou pedindo <code>pro</code>), o <code>downshift antigravity</code> intercepta a chamada da ferramenta, classifica a <strong>última</strong> entrada de <code>Subagents</code> que tem um <code>Prompt</code> não vazio (não necessariamente <code>Subagents[0]</code>; linhas finais sem <code>Prompt</code> são ignoradas) e reescreve o <code>Model</code> <strong>desse</strong> subagente (<code>flash_lite</code> para tarefas mecânicas, <code>flash</code> para o tier intermediário), por meio de um envelope <code>overwrite</code> que não é um campo documentado do fornecedor. O evento de roteamento vai para <code>~/.downshift/events.jsonl</code>.</p>
+<h3 id="kirocrew-modo-de-política-pelo-hook-nativo-da-kiro-cli">KiroCrew (modo de política pelo hook nativo da Kiro CLI)</h3>
+<p><strong>Status: Experimental.</strong> Bloqueio e nova tentativa observados uma vez na Kiro CLI 2.29.0; sem reescrita no lugar (<a href="https://github.com/tiagovilasboas/downshift/blob/main/docs/evidence/kirocrew-native-hook-2026-10-10.md" rel="noopener">evidência</a>).</p>
+<p>Para a Kiro CLI 2.29, registre o Downshift pela configuração persistente <code>agent.kiro_hooks</code> do KiroCrew. O KiroCrew gera a especificação de agente consumida pela Kiro CLI, cujo hook nativo <code>preToolUse</code> roda antes da ferramenta: <code>exit 0</code> permite; <code>exit 2</code> bloqueia e devolve o stderr ao agente. Não existe canal <code>updated_input</code>, então o adaptador usa o <strong>modo de política</strong>. Ele classifica uma criação pendente com um modelo filho explícito e:</p>
+<ul>
+<li><strong>tier certo já</strong> → <code>exit 0</code>, permite em silêncio;</li>
+<li><strong>divergência de tier com confiança</strong> → <code>exit 2</code>, bloqueia com uma mensagem que nomeia o modelo para recriar (e, para um tier pequeno, um lembrete para reduzir o contexto e caber na janela menor);</li>
+<li><strong>downshift incerto, modelo desconhecido ou ferramenta que não é de subagente</strong> → <code>exit 0</code>, falha de forma aberta. O roteador nunca bloqueia uma criação por causa da própria dúvida.</li>
+</ul>
+<p>Use a ferramenta MCP <code>spawn_run</code> do <code>kirocrew-core</code> com os argumentos <code>task</code> e <code>model</code> explícitos. O pipeline nativo <code>use_subagent</code> / crew pode omitir o modelo filho; essas chamadas ficam fora da cobertura do roteamento. O Downshift nunca infere o modelo filho a partir do modelo do pai nem de um título da interface. O classificador é determinístico; o agente precisa tentar de novo uma criação bloqueada com o modelo recomendado.</p>
+<h4 id="configuração">Configuração</h4>
+<blockquote class="co">
+<p><strong>Importante: existem dois caminhos de hook.</strong> <code>~/.kiro/agents/kirocrew.json</code> é <strong>gerado</strong> pelo KiroCrew e sobrescrito a cada reinício; edições ali se perdem. O caminho durável de registro é <code>~/.kiro/crew/config.json</code>, via <code>agent.kiro_hooks</code>. <code>~/.kiro/crew/hooks.json</code> é um registro de hooks separado e informativo (um <code>run_count</code> crescente prova que foi invocado; o código de saída não bloqueia o caminho da ferramenta). Use <code>config.json</code> para a aplicação de políticas. Confirmado na Kiro CLI 2.29.0, em 10/10/2026.</p>
+</blockquote>
+<ol type="1">
+<li>Gere o binário:
+<pre tabindex="0"><code class="language-bash">go build -o downshift ./cmd/downshift</code></pre></li>
+<li>Torne executável o wrapper versionado:
+<pre tabindex="0"><code class="language-bash">chmod +x scripts/kirocrew-pre-tool-use.sh</code></pre>
+O wrapper chama o binário <code>downshift</code> do repositório com o subcomando <code>kirocrew</code>. Mantenha-o ao lado deste build, no checkout do repositório.</li>
+<li>Mescle esta entrada em <code>~/.kiro/crew/config.json</code>, preservando a configuração e os hooks existentes. Troque o caminho de exemplo pelo caminho absoluto do wrapper no seu checkout:
+<pre tabindex="0"><code class="language-json">{
+  &quot;agent&quot;: {
+    &quot;kiro_hooks&quot;: {
+      &quot;preToolUse&quot;: [
+        {
+          &quot;matcher&quot;: &quot;*&quot;,
+          &quot;command&quot;: &quot;/absolute/path/to/downshift/scripts/kirocrew-pre-tool-use.sh&quot;
+        }
+      ]
+    }
+  }
+}</code></pre>
+O KiroCrew mescla <code>kiro_hooks</code> com os hooks embutidos dele ao gerar a especificação do agente. Ele aceita <code>command</code> como um caminho absoluto de executável existente, preserva <code>command</code> e <code>matcher</code>, e descarta <code>timeout_ms</code>. Comandos com argumentos de shell são rejeitados. O wrapper carrega o subcomando, então ele sobrevive à geração. <strong>Não edite <code>~/.kiro/agents/kirocrew.json</code></strong>: o KiroCrew regenera esse arquivo e suas edições se perderão.</li>
+<li>Preencha a lista de modelos da sessão <code>kirocrew</code> com os modelos realmente selecionáveis na Kiro CLI instalada. Siga <a href="/docs/session-models/">session-models.md</a> para a ordenação e a precedência da descoberta. Sem um alvo elegível conhecido, o modo de política permite a criação sem mudança.</li>
+<li>Carregue <a href="https://github.com/tiagovilasboas/downshift/blob/main/docs/guides/kirocrew-routing-guide.md" rel="noopener">kirocrew-routing-guide.md</a> nas instruções do agente e reinicie o KiroCrew para que ele regenere a especificação. Confirme que o <code>preToolUse</code> gerado inclui o wrapper e os hooks embutidos existentes.</li>
+<li>Teste de fumaça do adaptador com modelos disponíveis conhecidos (sem criar subagente):
+<pre tabindex="0"><code class="language-bash">printf &#39;%s\n&#39; &#39;{&quot;tool_name&quot;:&quot;spawn_run&quot;,&quot;tool_input&quot;:{&quot;task&quot;:&quot;rename a variable&quot;,&quot;model&quot;:&quot;YOUR_AVAILABLE_FRONTIER_MODEL&quot;}}&#39; \
+  | ./scripts/kirocrew-pre-tool-use.sh
+# Uma divergência confiante com um alvo elegível retorna exit 2 e model=...</code></pre>
+Troque o marcador por um modelo real e atual. Isso verifica só a saída do adaptador; não prova que o harness bloqueia a execução.</li>
+</ol>
+<p>Os hooks de ferramenta <code>~/.kiro/crew/hooks.json</code> são informativos: podem executar depois que a ferramenta começa, e o código de saída deles não bloqueia esse caminho. Um <code>run_count</code> crescente prova apenas a invocação. Não use esse registro como aplicação de política, nem mantenha uma duplicata informativa do hook de política nativo.</p>
+<h4 id="evidência-de-aceitação-e-cobertura">Evidência de aceitação e cobertura</h4>
+<p>As instruções vinculadas são o <strong>guia inferencial</strong> do eixo de <strong>comportamento</strong>. O hook de política pré-ferramenta nativo é o <strong>sensor computacional</strong> dessa mesma preocupação. Teste um <code>spawn_run</code> real com uma tarefa trivial e um modelo de fronteira explícito: prove que ele é bloqueado antes de o filho começar e, depois, tente de novo uma vez com o modelo recomendado. Confira o modelo real do filho no registro nativo de subagentes do KiroCrew. Chamadas sem modelo precisam passar sem mudança.</p>
+<p>A regeneração da especificação e um reinício seguido desses testes são o <strong>sensor computacional</strong> de <strong>aderência da arquitetura</strong>, pareado com este guia de configuração. As decisões de roteamento no <code>events.jsonl</code> do diretório de estado dão observações locais contínuas (padrão <code>~/.downshift</code>; legado <code>~/.harness-downshift</code>). Uma decisão bloqueada só prova a aplicação quando pareada com o resultado nativo; ela não prova a execução bem-sucedida do filho, o uso nem a economia. Um observador de conformidade PostToolUse continua sendo uma ferramenta separada de mantenedor (DS-04); esta configuração não instala um. O bloqueio nativo, a nova tentativa e o reconhecimento do modelo servido foram observados em 10/10/2026 com a Kiro CLI 2.29.0; veja <a href="https://github.com/tiagovilasboas/downshift/blob/main/docs/evidence/kirocrew-native-hook-2026-10-10.md" rel="noopener">a evidência específica da build</a>.</p>
+<h2 id="dsmon-widget-de-monitoramento-ao-vivo">dsmon: widget de monitoramento ao vivo</h2>
+<blockquote class="co">
+<p><strong>Prefira <code>downshift watch</code>.</strong> A árvore de sessão ao vivo está embutida no binário <code>downshift</code> (sem build separado, em todos os harnesses): veja <a href="/docs/session-view/#live-downshift-watch">session-view.md</a>. O <code>dsmon</code> continua compilável e está documentado abaixo.</p>
+</blockquote>
+<p><code>cmd/dsmon</code> é um comando separado neste repositório: um widget flutuante de terminal que mostra trocas de modelo, harness, distribuição de tiers e economia estimada de custo em tempo real. Ele lê <code>~/.downshift/events.jsonl</code> e atualiza a cada 800 ms. Sem dependências externas; só a biblioteca padrão do Go.</p>
+<pre tabindex="0"><code>╭──────────────────────────────────────────────────────╮
+│  dsmon  downshift monitor                            │
+│  harness  kirocrew        ◉ live                     │
+│ switches today ────────────────────────────────────  │
+│  04:03  opus   → haiku   trivial  -75%               │
+│  04:02  haiku  → opus    complex  ↑                  │
+│  04:01  opus   → sonnet  medium   -50%               │
+│ stats ──────────────────────────────────────────────  │
+│  35 events   22↓  2↑  8✓                             │
+│  est. saved  $0.18  ~7K tokens ¹                     │
+│  ¹ estimated · actual tokens not yet tracked         │
+╰──────────────────────────────────────────────────────╯
+  04:03:51 · ctrl+c to quit</code></pre>
+<h3 id="compilar-e-executar">Compilar e executar</h3>
+<pre tabindex="0"><code class="language-bash"># Compila o monitor (separado do binário de hook `downshift`)
+go build -o dsmon ./cmd/dsmon
+
+# Executa no terminal atual
+./dsmon
+
+# Abre uma janela flutuante de terminal (detecta iTerm2 / kitty / Ghostty / Terminal.app)
+./cmd/dsmon/launch.sh</code></pre>
+<h3 id="o-que-ele-mostra">O que ele mostra</h3>
+<div class="tw" role="region" aria-label="Campo, Origem, Observações" tabindex="0"><table>
+<thead>
+<tr>
+<th scope="col">Campo</th>
+<th scope="col">Origem</th>
+<th scope="col">Observações</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Harness</td>
+<td><code>events.jsonl</code> → campo <code>harness</code></td>
+<td>Último harness visto hoje</td>
+</tr>
+<tr>
+<td>Trocas</td>
+<td><code>events.jsonl</code> → <code>verdict</code> + campos de modelo</td>
+<td>Últimas 7 decisões de roteamento</td>
+</tr>
+<tr>
+<td>Eventos / ↓ ↑ ✓</td>
+<td><code>events.jsonl</code></td>
+<td>Contagens de hoje por veredito</td>
+</tr>
+<tr>
+<td>Economia estimada ($)</td>
+<td><code>estimated_savings</code> × $0,01 de custo médio por criação</td>
+<td>Estimativa grosseira, não cobrança real</td>
+</tr>
+<tr>
+<td>Tokens estimados</td>
+<td>Derivados de $ economizados ÷ custo de saída de fronteira</td>
+<td>Estimado, não vem do provedor</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Nota sobre o consumo de tokens.</strong> O roteador não tem acesso às contagens de tokens informadas pelo provedor. Ele só vê o que o harness passa ao hook preToolUse, que não inclui dados de uso. As estimativas são direcionalmente corretas (mais downshifts = mais economia), mas não substituem o painel de cobrança do seu provedor. No Claude Code, as contagens reais de tokens vêm de um hook <code>SubagentStop</code> (<code>downshift claude-code-subagent-stop</code>), que precifica o subagente pela própria transcrição quando ele termina; veja <a href="/docs/session-models/#claude-code-real-usage">session-models.md</a>.</p>
+<h2 id="cli-do-grok-configuração-não-hook">CLI do Grok (configuração, não hook)</h2>
+<p>A CLI do Grok é a exceção honesta, e vale ser preciso sobre o motivo.</p>
+<p>O Grok tem subagentes (<code>spawn_subagent</code>, até cerca de 8 em paralelo) e lê os arquivos de hook do Claude Code / Cursor. Mas o contrato do hook <code>PreToolUse</code> dele é <strong>só permitir ou negar</strong>: <code>{ "decision": "deny", "reason": "…" }</code>. Não há <code>updatedInput</code> documentado, então um hook <strong>não consegue reescrever o modelo de um subagente</strong> como faz no Claude Code, no Cursor e no Codex. Um hook do downshift no Grok só poderia <em>bloquear</em> uma criação, e isso não é o trabalho dele.</p>
+<p>Há uma segunda complicação: até a redação deste texto, o Grok Build traz <strong>um único modelo de código</strong> (<code>grok-4.6</code>, com <em>raciocínio configurável</em>), não uma escada de modelos pequeno/médio/fronteira. Então, no Grok, o roteamento não é "trocar o modelo": é <strong>ajustar o esforço de raciocínio</strong>. Trabalho barato roda o <code>grok-4.6</code> com esforço baixo; as tarefas difíceis rodam com esforço alto. O mesmo princípio, outro botão.</p>
+<p>O Grok expõe os dois como configuração de primeira classe, o que é mais robusto que uma reescrita em tempo de execução. Defina o raciocínio por papel de subagente em <code>~/.grok/config.toml</code>:</p>
+<pre tabindex="0"><code class="language-toml"># Tipos somente leitura embutidos → raciocínio baixo (barato e rápido).
+[subagents.personas.explore]
+reasoning_effort = &quot;low&quot;
+
+# Papéis personalizados têm o próprio padrão de raciocínio.
+[subagents.roles.reviewer]
+description = &quot;Reviews generated changes before commit&quot;
+default_capability_mode = &quot;read-only&quot;
+reasoning_effort = &quot;low&quot;
+
+[subagents.roles.architect]
+description = &quot;Cross-cutting design and migrations&quot;
+reasoning_effort = &quot;high&quot;    # torque para as curvas difíceis
+
+# Se o seu catálogo ganhar modelos mais baratos ou mais fortes, fixe-os por tipo também:
+# [subagents.models]
+# explore = &quot;grok-4.6&quot;</code></pre>
+<p>A precedência é: substituição explícita na criação → padrão do papel → padrão da persona → sessão pai. Assim, esses fixos valem a não ser que o agente seja instruído de outra forma. <code>downshift try "&lt;prompt&gt;" grok</code> informa qual tier uma tarefa pede; mapeie esse tier para o esforço de raciocínio de um papel na configuração, uma vez.</p>
+<blockquote class="co">
+<p>Se uma build futura do Grok adicionar <code>updatedInput</code> ao <code>PreToolUse</code> (ou um catálogo multimodelo), um adaptador de hook <code>downshift grok</code> vira um encaixe direto: o classificador e a política já são independentes de harness. Até lá, a configuração é a alavanca certa e documentada.</p>
+</blockquote>
+<h2 id="compatibilidade-de-planos-leia-antes-de-instalar">Compatibilidade de planos (leia antes de instalar)</h2>
+<p><strong>Nem todo plano suporta roteamento de modelos de subagentes.</strong> Esta é uma restrição rígida no nível do harness, não um bug do Downshift. Matriz de evidências: <a href="/docs/harness-matrix/">harness-matrix.md</a>.</p>
+<h3 id="claude-code">Claude Code</h3>
+<div class="tw" role="region" aria-label="Plano, Existem subagentes?, O roteamento de modelos funciona?" tabindex="0"><table>
+<thead>
+<tr>
+<th scope="col">Plano</th>
+<th scope="col">Existem subagentes?</th>
+<th scope="col">O roteamento de modelos funciona?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Free</td>
+<td>❌ Não há subagentes reais</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Pro / Max / Teams</td>
+<td>✅ Sim</td>
+<td>✅ Observado em 06/10/2026 (modelo filho informado pela API)</td>
+</tr>
+<tr>
+<td>API (direta)</td>
+<td>✅ Sim</td>
+<td>Esperado (mesmo caminho de hook); a evidência de 06/10/2026 não registrou o plano</td>
+</tr>
+</tbody>
+</table></div>
+<p>O Claude Code no plano gratuito roda num contêiner isolado, sem saída de rede; então <code>go install</code> vai falhar. O recurso de subagentes só existe nos planos pagos.</p>
+<h3 id="cursor">Cursor</h3>
+<div class="tw" role="region" aria-label="Plano / preço, Existem subagentes?, O roteamento de modelos funciona?" tabindex="0"><table>
+<thead>
+<tr>
+<th scope="col">Plano / preço</th>
+<th scope="col">Existem subagentes?</th>
+<th scope="col">O roteamento de modelos funciona?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Free</td>
+<td>✅ Limitado</td>
+<td>⚠️ <code>updated_input.model</code> é ignorado silenciosamente (problema conhecido)</td>
+</tr>
+<tr>
+<td>Pro (por requisição / legado)</td>
+<td>✅ Sim</td>
+<td>⚠️ o campo <code>model</code> em Task só aceita <code>"fast"</code>; a substituição é descartada silenciosamente</td>
+</tr>
+<tr>
+<td>Pro / Ultra (por uso)</td>
+<td>✅ Sim</td>
+<td>⚠️ Reescrita emitida; modelo filho não confirmado (<a href="/docs/harness-matrix/">P1.6</a>)</td>
+</tr>
+</tbody>
+</table></div>
+<p>O hook <code>preToolUse</code> do Cursor dispara e o Downshift roda, mas a reescrita de <code>model</code> é descartada silenciosamente nos planos legados e gratuitos. <a href="https://forum.cursor.com/t/pretooluse-hook-updated-input-is-silently-ignored-for-the-task-tool/151985" rel="noopener">Registrado no fórum do Cursor</a>. Nos planos Pro/Ultra por uso, em que a seleção de modelo de subagentes é ampliada, o Downshift emite a reescrita; se o harness roda o filho nesse modelo não está confirmado (ainda não há prova do modelo filho — <a href="/docs/harness-matrix/">P1.6</a>, linha <em>Não confirmado</em> da matriz).</p>
+<h3 id="codex">Codex</h3>
+<div class="tw" role="region" aria-label="Plano, Existem subagentes?, O roteamento de modelos funciona?" tabindex="0"><table>
+<thead>
+<tr>
+<th scope="col">Plano</th>
+<th scope="col">Existem subagentes?</th>
+<th scope="col">O roteamento de modelos funciona?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Qualquer (com <code>multi_agent_v2</code> ativado)</td>
+<td>✅ Sim</td>
+<td>✅ Inferido em 02/10/2026 (a criação seguinte pediu o modelo escrito), não observado</td>
+</tr>
+</tbody>
+</table></div>
+<p>Requer <code>[features] multi_agent_v2</code> e <code>hooks = true</code> em <code>config.toml</code>.</p>
+<h3 id="resumo">Resumo</h3>
+<p>O Downshift atende a todos os harnesses acima a partir do mesmo núcleo, e o <strong>Claude Code é o harness principal</strong>: o mais completo (modelo de sessão inferido, hooks de uso e de fim do filho, <code>/downshift:status</code>, barra de status) e o mais verificado. Escolha-o quando puder.</p>
+<p>O Downshift é mais eficaz em:</p>
+<ul>
+<li><strong>Claude Code Pro / Max / Teams / API</strong>: roteamento completo de modelos pelo hook</li>
+<li><strong>Codex</strong> com multi_agent_v2 ativado: modelo + reasoning_effort emitidos; a aplicação é inferida, não observada</li>
+<li><strong>Cursor Pro/Ultra</strong> em planos por uso: reescrita emitida; modelo filho não confirmado (<a href="/docs/harness-matrix/">P1.6</a>)</li>
+</ul>
+<p>Em planos gratuitos ou no preço legado do Cursor, o hook roda, mas as reescritas de modelo podem ser ignoradas silenciosamente pelo harness. A ferramenta falha de forma aberta: o subagente é criado mesmo assim, só sem a troca de modelo.</p>
+<h2 id="solução-de-problemas">Solução de problemas</h2>
+<h3 id="downshift-command-not-found-depois-do-go-install"><code>downshift: command not found</code> depois do <code>go install</code></h3>
+<p>O <code>go install</code> coloca o binário em <code>~/go/bin</code>, que pode não estar no seu PATH.</p>
+<pre tabindex="0"><code class="language-bash">export PATH=&quot;$HOME/go/bin:$PATH&quot;          # sessão atual
+echo &#39;export PATH=&quot;$HOME/go/bin:$PATH&quot;&#39; &gt;&gt; ~/.zshrc &amp;&amp; source ~/.zshrc  # permanente</code></pre>
+<p>O instalador <code>curl</code> (<code>install.sh</code>) evita isso, porque grava direto em <code>/usr/local/bin</code>.</p>
+<h3 id="o-hook-roda-mas-o-modelo-não-muda-cursor">O hook roda, mas o modelo não muda (Cursor)</h3>
+<p>Nos planos gratuitos do Cursor e nos planos legados por requisição, <code>updated_input.model</code> é descartado silenciosamente pelo harness. Este é um <a href="https://forum.cursor.com/t/pretooluse-hook-updated-input-is-silently-ignored-for-the-task-tool/151985" rel="noopener">problema conhecido do Cursor</a>. O hook dispara e o binário roda (você verá a saída no stderr), mas a reescrita do modelo não tem efeito. Veja <a href="#compatibilidade-de-planos-leia-antes-de-instalar">Compatibilidade de planos</a>.</p>
+<h3 id="nenhuma-saída-no-stderr-o-hook-não-dispara">Nenhuma saída no stderr: o hook não dispara</h3>
+<p>Confira o matcher. A ferramenta de subagente do Claude Code é <code>Agent</code> (builds antigas: <code>Task</code>), então o matcher precisa ser <code>"Agent|Task"</code>, como o <code>setup</code> e o plugin gravam. Confirme o binário em si com:</p>
+<pre tabindex="0"><code class="language-bash"># Deve imprimir de imediato uma decisão de permissão em JSON
+echo &#39;{&quot;hook_event_name&quot;:&quot;PreToolUse&quot;,&quot;tool_name&quot;:&quot;Task&quot;,&quot;model&quot;:&quot;claude-opus-5-5&quot;,&quot;tool_input&quot;:{&quot;prompt&quot;:&quot;test&quot;}}&#39; | downshift claude-code</code></pre>
+<p>Se isso imprimir JSON, o binário funciona. Se o hook ainda não disparar numa sessão real, confira se o <code>settings.json</code> é um JSON válido e se o caminho para o <code>downshift</code> é o caminho absoluto (ou se ele está no PATH).</p>
+<h3 id="go-install-falha-no-claude-code-gratuito"><code>go install</code> falha no Claude Code gratuito</h3>
+<p>O Claude Code gratuito roda num contêiner isolado, sem saída de rede. Instale o binário na sua máquina local primeiro, e depois use o hook: o binário roda na sua máquina, não dentro do contêiner do Claude Code.</p>
+<h3 id="o-veredito-mostra-unknown-em-vez-de-downshift">O veredito mostra UNKNOWN em vez de DOWNSHIFT</h3>
+<p><code>UNKNOWN</code> significa que nenhum modelo atual foi informado. Passe o modelo atual como terceiro argumento para o <code>try</code>:</p>
+<pre tabindex="0"><code class="language-bash">downshift try &quot;rename the variable&quot; claude-code claude-opus-5-5
+# → DOWNSHIFT</code></pre>
+<p>No hook em execução, isso é tratado automaticamente: o evento traz o modelo da sessão e o adaptador o lê.</p>
+</div></article><nav class="toc toc-side" aria-label="Nesta página"><p class="lbl">Nesta página</p><ol><li><a href="#verificação-de-saúde">Verificação de saúde</a></li><li><a href="#quickstart-do-zero-a-um-hook-funcionando-em-2-minutos">Quickstart: do zero a um hook funcionando em 2 minutos</a></li><li><a href="#testar-localmente-antes-de-conectar-o-hook">Testar localmente antes de conectar o hook</a></li><li><a href="#instalação-claude-code">Instalação (Claude Code)</a></li><li><a href="#instalação-cursor">Instalação (Cursor)</a></li><li><a href="#instalação-codex">Instalação (Codex)</a></li><li><a href="#lista-permitida-da-sessão">Lista permitida da sessão</a></li><li><a href="#harnesses-experimentais">Harnesses experimentais</a></li><li><a href="#dsmon-widget-de-monitoramento-ao-vivo">dsmon: widget de monitoramento ao vivo</a></li><li><a href="#cli-do-grok-configuração-não-hook">CLI do Grok (configuração, não hook)</a></li><li><a href="#compatibilidade-de-planos-leia-antes-de-instalar">Compatibilidade de planos (leia antes de instalar)</a></li><li><a href="#solução-de-problemas">Solução de problemas</a></li></ol></nav></div></main>
+<footer><div class="w"><div class="fg"><div><p class="fh">Produto</p><ul><li><a href="/pt-br/#start">Começar</a></li><li><a href="/pt-br/#evidence">Evidências</a></li><li><a href="/pt-br/#faq">Perguntas frequentes</a></li><li><a href="/pt-br/guias/">Guias</a></li></ul></div><div><p class="fh">Docs</p><ul><li><a href="/pt-br/docs/install/">Guia de instalação</a></li><li><a href="/docs/">Documentação</a></li><li><a href="/docs/capability-matrix/">Matriz de capacidades</a></li><li><a href="/llms.txt">llms.txt</a></li></ul></div><div><p class="fh">Projeto</p><ul><li><a href="https://github.com/tiagovilasboas/downshift" rel="noopener">GitHub</a></li><li><a href="https://github.com/sponsors/tiagovilasboas" rel="noopener">Patrocinar</a></li><li><a href="https://github.com/tiagovilasboas/downshift/blob/main/LICENSE" rel="noopener">Licença Apache-2.0</a></li></ul></div></div><div class="legal"><p>Downshift por Tiago Vilas Boas. Downshift aqui é uma ferramenta em Go para agentes de código com IA, sem relação com a biblioteca React downshift de autocomplete nem com câmbios de carro.</p><p class="cnpj">MONTANHA TECH · CNPJ 60.782.110/0001-84</p></div></div></footer>
+</body>
+</html>

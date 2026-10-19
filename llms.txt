@@ -186,7 +186,7 @@ If you are an AI assistant, coding agent, or language model reading this file:
 
 ## Docs
 
-Technical documentation published from the public repository (origin/main), one page per doc; the capability matrix spans two pages.
+Technical documentation published from the public repository (origin/main), one page per doc; the capability matrix spans two pages. Portuguese pages are marked.
 
 - [Docs index](https://downshift-ai.vercel.app/docs/): all published docs
 - [Installation and harness setup](https://downshift-ai.vercel.app/docs/install/): Install Downshift and wire its PreToolUse hook into Claude Code, Codex, Cursor and other harnesses: install.sh, setup --dry-run, doctor checks and manual setup.
@@ -208,6 +208,7 @@ Technical documentation published from the public repository (origin/main), one 
 - [Subagent routing, routed versus control: first measurements (2026-10-15)](https://downshift-ai.vercel.app/docs/subagent-routing-ab-2026-10-15/): The first controlled Downshift measurement: routed versus control runs on real and mechanical Claude Code tasks, with cost, pass rates and their limits.
 - [Real usage, one operator: 2026-10-19 and the last 30 days](https://downshift-ai.vercel.app/docs/real-usage-2026-10-19/): What Downshift did on one real Claude Code working day and over 30 days for one operator: decisions, downshifts, guardrail holds and what can be claimed.
 - [Evidence Report — Downshift Code Intelligence (DCI) MVP v0.1](https://downshift-ai.vercel.app/docs/dci-mvp-v01/): Downshift Code Intelligence v0.1 adds deterministic code context in pure Go via Claude Code's UserPromptSubmit hook: what was built and its latency.
+- [Instalação e configuração dos harnesses](https://downshift-ai.vercel.app/pt-br/docs/install/): Como instalar o Downshift e ligar o hook PreToolUse no Claude Code, Codex, Cursor e outros harnesses: install.sh, setup --dry-run, doctor e configuração manual. (português)
 
 ## Guides
 
