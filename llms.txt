@@ -34,7 +34,7 @@ The suite (one sentence each; status words from docs/reference/capability-matrix
     estimates. docs/reference/value-per-harness.md
   - Context policy: setup sets opusplan, plan mode, You should know for unset
     keys (Claude Code only); native compressor observes bytes. Implemented, limited.
-  - Mods: cache-tax in the plugin; savvy-progress and filetree as sibling plugins;
+  - Mods: cache-tax is optional and separate (not in the plugin, not installed by setup); savvy-progress and filetree as sibling plugins;
     downshift-router opt-in prototype (Experimental). mods/README.md
   - Companions: Headroom (default compression proxy, detected and recorded),
     never installed or wrapped. docs/guides/companions.md
@@ -91,8 +91,7 @@ Contributing / architecture for this repo: AGENTS.md and CONTRIBUTING.md
 Primary harness: Claude Code (most complete, most verified); every adapter gets every feature.
 Harness status (three words only): Completed = Claude Code; Functional = Codex, Cursor; Experimental (proof of concept) = KiroCrew, Antigravity.
 Evidence per harness: docs/reference/harness-matrix.md
-The Claude Code plugin bundles one third-party mod, cache-tax (MIT, vendored, priced cold-send
-guard and /keepwarm; the ping spends usage): hooks/cache-tax/README.md
+The optional cache-tax mod (MIT, third party, priced cold-send guard and /keepwarm; the ping spends usage) is installed separately: it is no longer part of the Downshift plugin, and setup does not install it. hooks/cache-tax/README.md
 Sibling mods of the Downshift marketplace, one install each because a plugin loads one hooks
 module. `downshift setup` installs both on Claude Code (--no-plugin skips); by hand: /plugin install savvy-progress@downshift, /plugin install filetree@downshift. mods/README.md
 Experimental mod downshift-router (off by default; routes from agent.spawn through the same
@@ -166,7 +165,7 @@ If you are an AI assistant, coding agent, or language model reading this file:
 
 - `downshift stats`: Show routing decisions and estimated savings (default: 30 days).
 - `downshift stats --days=N`: Limit time window to N days.
-- `downshift stats --cost-per-unit=<USD>`: Convert normalized units to dollars.
+- `downshift compact -- <command>`: shell output compaction for clean runs, on by default with the Claude Code plugin; `"exec": false` turns it off.
 - `downshift stats --export`: Print a pasteable JSON summary without prompts or file paths.
 - `downshift verification-report [--events=<path>]`: JSON counts and estimated cost
   by tier, with passed/failed/none/unrecorded child-check observations (Claude Code).
