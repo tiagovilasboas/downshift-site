@@ -107,8 +107,8 @@ downshift try &quot;rename the userId variable&quot; claude-code    # what would
 <li>Confirm it started on haiku, not the session's default frontier model</li>
 <li>This proves the hook's rewrite was not just emitted—it was <strong>actually applied</strong> by the harness</li>
 </ul>
-<p><strong>Step 5 — See what happened.</strong> <code>downshift stats --days=1</code> shows decisions and estimated savings; <code>downshift session --tree</code> shows this session's subagents as a tree. In Claude Code, the plugin exposes <code>/downshift:status</code>; the optional manual alias <code>/downshift</code> is in <a href="#the-downshift-command-claude-code">The /downshift command</a>.</p>
-<p><strong>Step 6 — (Optional) Watch it live.</strong> <code>downshift watch</code> redraws the current session's subagent tree (model, end status, cost, why) every second, for every harness; <code>downshift session --tree</code> prints it once, and <code>/downshift:status</code> or <code>/downshift</code> shows it inside Claude Code. The older floating widget is still available: <a href="#dsmon--live-monitor-widget">dsmon — live monitor widget</a>.</p>
+<p><strong>Step 5 — See what happened.</strong> <code>downshift stats --days=1</code> shows decisions and tokens saved; <code>downshift session --tree</code> shows this session's subagents as a tree. In Claude Code, the plugin exposes <code>/downshift:status</code>; the optional manual alias <code>/downshift</code> is in <a href="#the-downshift-command-claude-code">The /downshift command</a>.</p>
+<p><strong>Step 6 — (Optional) Watch it live.</strong> <code>downshift watch</code> redraws the current session's subagent tree (model, end status, tokens, why) every second, for every harness; <code>downshift session --tree</code> prints it once, and <code>/downshift:status</code> or <code>/downshift</code> shows it inside Claude Code. The older floating widget is still available: <a href="#dsmon--live-monitor-widget">dsmon — live monitor widget</a>.</p>
 <h3 id="manual-setup-claude-code">Manual setup (Claude Code)</h3>
 <p>Use this instead of <code>setup</code> if you prefer to edit <code>~/.claude/settings.json</code> yourself. The PreToolUse matcher is <code>Agent|Task</code>. Claude Code's <code>Task</code> schema accepts only family names (<code>haiku</code>, <code>sonnet</code>, <code>opus</code>, <code>fable</code>) in <code>model</code>. Downshift writes the catalog's family name for you and leaves the spawn alone when a model has none.</p>
 <pre tabindex="0"><code class="language-json">{
@@ -298,7 +298,7 @@ Replace the placeholder with a real current model. This checks adapter output on
 <blockquote class="co">
 <p><strong>Prefer <code>downshift watch</code>.</strong> The live session tree is built into the <code>downshift</code> binary (no separate build, every harness): see <a href="/docs/session-view/#live-downshift-watch">session-view.md</a>. <code>dsmon</code> stays buildable and is documented below.</p>
 </blockquote>
-<p><code>cmd/dsmon</code> is a separate command inside this repo — a floating terminal widget that shows model switches, harness, tier distribution and estimated cost savings in real time. It reads <code>~/.downshift/events.jsonl</code> and refreshes every 800 ms. Zero external dependencies; pure stdlib Go.</p>
+<p><code>cmd/dsmon</code> is a separate command inside this repo — a floating terminal widget that shows model switches, harness, tier distribution and estimated tokens saved in real time. It reads <code>~/.downshift/events.jsonl</code> and refreshes every 800 ms. Zero external dependencies; pure stdlib Go.</p>
 <pre tabindex="0"><code>╭──────────────────────────────────────────────────────╮
 │  dsmon  downshift monitor                            │
 │  harness  kirocrew        ◉ live                     │
@@ -308,7 +308,7 @@ Replace the placeholder with a real current model. This checks adapter output on
 │  04:01  opus   → sonnet  medium   -50%               │
 │ stats ──────────────────────────────────────────────  │
 │  35 events   22↓  2↑  8✓                             │
-│  est. saved  $0.18  ~7K tokens ¹                     │
+│  est. saved  ~7K tokens ¹                            │
 │  ¹ estimated · actual tokens not yet tracked         │
 ╰──────────────────────────────────────────────────────╯
   04:03:51 · ctrl+c to quit</code></pre>
@@ -347,14 +347,14 @@ go build -o dsmon ./cmd/dsmon
 <td>Today's counts by verdict</td>
 </tr>
 <tr>
-<td>Est. saved ($)</td>
-<td><code>estimated_savings</code> × $0.01 avg spawn cost</td>
-<td>Rough estimate, not actual billing</td>
+<td>Est. saved (tokens)</td>
+<td>Tokens that ran on a cheaper model than requested, the shared <code>telemetry.TokenSavings</code> view</td>
+<td>Observed where the harness reports tokens; not a bill</td>
 </tr>
 <tr>
-<td>Est. tokens</td>
-<td>Derived from $ saved ÷ frontier output cost</td>
-<td>Estimated, not from provider</td>
+<td>Tokens</td>
+<td>Observed child tokens, when the harness reports them</td>
+<td>Not from a provider invoice</td>
 </tr>
 </tbody>
 </table></div>
