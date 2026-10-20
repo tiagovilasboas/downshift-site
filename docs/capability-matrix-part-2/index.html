@@ -322,11 +322,11 @@
 <td><code>hooks/cache-tax/README.md</code></td>
 </tr>
 <tr>
-<td>Sibling mod savvy-progress (<code>mods/savvy-progress/</code>, MIT, vendored v1.2.1, plugin <code>savvy-progress@downshift</code>): progress bar above the prompt, <code>/agents-info</code> panel of subagents</td>
+<td>Sibling mod savvy-progress (<code>mods/savvy-progress/</code>, MIT, vendored v1.2.8, plugin <code>savvy-progress@downshift</code>): progress bar above the prompt, <code>/agents-info</code> panel of subagents</td>
 <td>Implemented (third-party, pinned)</td>
 <td><code>mods/savvy-progress/hooks/register.tsx</code>, own <code>hooks.json</code></td>
-<td>upstream suite vendored, <code>claude plugin test mods/savvy-progress</code>; <code>claude plugin validate mods/savvy-progress</code></td>
-<td>Claude Code 2.1.287+ only (mods); separate plugin because a plugin loads one hooks module; <code>setup</code> installs it with <code>claude plugin install</code> (<code>--no-plugin</code> skips); owner decision 2026-10-17</td>
+<td>upstream suite vendored, <code>claude plugin test mods/savvy-progress</code>; <code>claude plugin validate mods/savvy-progress</code>; #349 adds coverage that the crew badge matches panel-visible entries</td>
+<td>Claude Code 2.1.287+ only (mods); separate plugin because a plugin loads one hooks module; <code>setup</code> installs it with <code>claude plugin install</code> (<code>--no-plugin</code> skips); crew badge counts running agents, finished agents still visible in the panel, and planned tasks; hidden completed agents no longer inflate it</td>
 <td><code>mods/savvy-progress/README.md</code></td>
 </tr>
 <tr>
