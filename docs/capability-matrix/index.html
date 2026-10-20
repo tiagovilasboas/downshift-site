@@ -440,7 +440,7 @@
 <td>README</td>
 </tr>
 <tr>
-<td>Child-end line inside the harness (<code>↳ downshift: finished on haiku · 14k tokens · $0.01 (opus would be $0.38)</code>)</td>
+<td>Child-end line inside the harness (<code>↳ downshift: finished on haiku · N tokens (work N, cache N) · saved from opus</code>)</td>
 <td>Implemented, not validated everywhere</td>
 <td><code>internal/telemetry/liveline.go</code> (<code>ChildEndLine</code>), <code>CanShowChildLine</code></td>
 <td>computed for every harness; <code>DOWNSHIFT_QUIET=1</code></td>
@@ -448,11 +448,11 @@
 <td><code>docs/reference/session-models.md</code></td>
 </tr>
 <tr>
-<td><code>downshift serve</code> web dashboard; <code>dsmon</code>, <code>dsmon-hook</code>, <code>dsmon-server</code></td>
+<td><code>dsmon</code>, <code>dsmon-hook</code></td>
 <td>Experimental</td>
-<td><code>internal/server</code>, <code>web/</code>, <code>cmd/dsmon*</code></td>
-<td><code>server_test.go</code></td>
-<td>Dollars use a placeholder $0.01 per normalised unit (<code>server.go</code>); listed under "Experimental" in <code>help --all</code></td>
+<td><code>cmd/dsmon*</code></td>
+<td>none</td>
+<td>Listed under "Experimental" in <code>help --all</code>; <code>downshift watch</code> is the supported live view</td>
 <td><code>docs/guides/install.md</code> (dsmon)</td>
 </tr>
 <tr>
@@ -487,7 +487,7 @@
 <td><code>docs/reference/stats-export.md</code></td>
 </tr>
 <tr>
-<td>Usage per subagent (input, output, cache read and write tokens, catalog-priced)</td>
+<td>Usage per subagent (input, output, cache read and write tokens)</td>
 <td>Implemented, not validated everywhere</td>
 <td><code>internal/childend</code>, <code>internal/adapters/claudecode/subagentstop.go</code>, <code>telemetry/cost.go</code></td>
 <td><code>TestSubagentStop_PricesFromTranscriptAndLinksToTheDecision</code>; <code>docs/evidence/billing-gap-audit.md</code> 2026-10-09: 5 of 5 linked records matched native tokens and model</td>
@@ -582,7 +582,7 @@
 <td><code>docs/reference/stats-export.md</code>, README</td>
 </tr>
 <tr>
-<td><code>downshift report</code>: routed versus control cost per completed task, rework rate, 95% bootstrap interval (2,000 resamples, seed 20261013), <code>not enough data</code> under 20 tasks per group</td>
+<td><code>downshift report</code>: routed versus control tokens per completed task, rework rate, token check (a point percentage; no interval printed), <code>not enough data</code> under 20 tasks per group</td>
 <td>Implemented</td>
 <td><code>cmd/report.go</code>, <code>telemetry/report.go</code>, <code>tasks.go</code></td>
 <td><code>report_test.go</code> (<code>TestBuildReport_SavingsAndDeterministicCI</code>, <code>TestBuildReport_NoSavingsIntervalIncludesZero</code>)</td>
