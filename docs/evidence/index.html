@@ -25,7 +25,7 @@
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="Downshift logo with the line: Right model for every subagent. No LLM in the loop.">
-<meta property="article:modified_time" content="2026-10-19">
+<meta property="article:modified_time" content="2026-10-20">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Downshift evidence ladder: what each saving figure means">
 <meta name="twitter:description" content="Evidence covers historical list-price estimates, token telemetry, benchmarks, routed-versus-control token comparisons and task outcomes; current reports show no dollar amounts.">
@@ -150,7 +150,7 @@
 <h2 id="b-saving-estimated-by-telemetry">B. Saving estimated by telemetry</h2>
 <p>Source: <code>internal/telemetry/telemetry.go</code> (<code>Aggregate</code>), <code>export.go</code>, <a href="https://github.com/tiagovilasboas/downshift/blob/main/docs/reference/stats-export.md" rel="noopener">stats-export.md</a>.</p>
 <ul>
-<li><strong>Normalised units</strong> (<code>norm_baseline</code>, <code>norm_routed</code>): every decision is 1.0 baseline unit; an applied downshift is charged <code>1 - estimated_savings</code> (a list-price ratio), an applied upshift <code>upshift_cost_ratio</code>, everything else 1.0. No tokens are involved. <code>--cost-per-unit</code> turns units into dollars by multiplication, nothing more.</li>
+<li><strong>Normalised units</strong> (<code>norm_baseline</code>, <code>norm_routed</code>): every decision is 1.0 baseline unit; an applied downshift is charged <code>1 - estimated_savings</code> (a list-price ratio), an applied upshift <code>upshift_cost_ratio</code>, everything else 1.0. They are counts, not money: no tokens are involved and no price is applied.</li>
 <li><strong>Current telemetry output</strong>: <code>stats</code> reports observed token counts, coverage and dimensionless normalized units; <code>report</code> compares routed and control tokens per completed task; schema 3 export contains token and coverage fields with no USD keys. Older event logs can still contain legacy dollar fields, but current commands do not expose dollar amounts.</li>
 <li><strong>Provenance.</strong> <a href="https://github.com/tiagovilasboas/downshift/blob/main/docs/evidence/billing-gap-audit.md" rel="noopener">billing-gap-audit.md</a> (2026-10-09, 7 days): <code>total</code> 186, <code>usage_records</code> 15, <code>usage_linked</code> 5, <code>actual_cost_usd</code> 15.432977 and <code>real_saved_usd</code> 0.424866 from the then-current export, plus <code>baseline_no_route</code> 0; these are historical schema-2 fields, not current output. Native tokens and model matched the record on 5 of 5 linked children. That is provenance for token counts, not a bill. P3.4 needs 50 linked records and stands at 5 in that audit.</li>
 <li><strong>Tokens rerouted, and why "tokens saved" is not a claim.</strong> Routing does not claim to reduce tokens. The observed token counts show what the child used; dimensionless normalized units in <code>stats</code> are not dollars, and current output does not price those counts. "Tokens rerouted" counts the tokens of usage records linked to an applied, non-refuted rewrite, by harness and requested-to-ran model pair, split into moved to a cheaper model and moved to a pricier one. It is rung B evidence: counts are observed (Claude Code only today, because it is the only harness that records child tokens), normalized units are dimensionless, and the baseline stays a counterfactual. Older descriptions of dollar figures refer to pre-schema-3 output, not current commands. It carries these limits: a refuted rewrite, an unknown requested model or a decision with no usage record contributes nothing. Downshift does not claim fewer tokens: no run without routing exists to subtract from, a cheaper model can need more tokens or a retry, and on a plan with no per-token bill (Claude Code Pro, Max, Team; Cursor plans) what was saved is not tokens or dollars but headroom against a quota, which no hook sees.</li>
@@ -342,7 +342,7 @@
 <tr>
 <td>Routing decisions and guardrails fired</td>
 <td>available</td>
-<td><code>verdict</code>, <code>corrections</code>, <code>HELD_*</code> codes; <code>stats</code> "Guardrails held"; <code>session --why</code>; <code>stats --by-harness</code></td>
+<td><code>verdict</code>, <code>corrections</code>, <code>HELD_*</code> codes; <code>stats</code> "Guardrails held"; <code>session --why</code> also shows permission mode and recorded quota status when present; report counts decisions by permission mode</td>
 </tr>
 <tr>
 <td>Requested versus executed model</td>

@@ -25,7 +25,7 @@
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="Downshift logo with the line: Right model for every subagent. No LLM in the loop.">
-<meta property="article:modified_time" content="2026-10-19">
+<meta property="article:modified_time" content="2026-10-20">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Downshift session models: which model IDs a hook may write">
 <meta name="twitter:description" content="Downshift writes only a model id that exists in the current harness session. How session lists, metadata and catalog fallback work, and Claude Code inference.">
@@ -224,6 +224,7 @@
 <li>when a subagent ends and its tokens are known (<strong>SubagentStop</strong> on Claude Code, after the child transcript is complete; not PostToolUse on an async launch, which has no tokens yet): <code>↳ downshift: finished on haiku · 14k tokens (work N, cache N) · saved from opus</code>. The model is the one the child ran on. <code>saved from</code> (or <code>pricier than</code>) appears only when the requested model is known, differs and the tokens moved tier; no dollar is printed. Missing parts are left out, never guessed. PostToolUse at launch records <code>resolvedModel</code> but prints no finish line until SubagentStop supplies usage.</li>
 </ul>
 <p><code>DOWNSHIFT_QUIET=1</code> silences both lines. Routing, telemetry and the stderr notes are unchanged. The line never blocks, never changes the subagent result, and a failed hook prints nothing. The harness fact is <code>CanShowChildLine</code> in <code>HarnessCapabilities</code> (true for Claude Code only, false elsewhere until a harness is shown to display it); the line is built by <code>telemetry.ChildEndLine</code> for every harness. Not yet verified: that a given Claude Code release displays <code>systemMessage</code> from PostToolUse and SubagentStop (documented as a common hook output field, not observed on a live session).</p>
+<p>When a Claude Code decision record includes these fields, <code>downshift session --why</code> also shows its permission mode and recorded quota status. These are diagnostic observations; permission mode does not affect routing.</p>
 <h2 id="capability-path-public-scores">Capability path (public scores)</h2>
 <p>An optional second way to pick a model from the same session list. It chooses the cheapest candidate whose public capability score reaches the level the task tier needs, measured across the session's own range. It never adds a candidate id, it sits behind the same guardrails and quota gates, and it abstains on COMPLEX work, any risk signal, any deterministic lift, and when any candidate lacks a score. Full rules, sources and privacy: <a href="https://github.com/tiagovilasboas/downshift/blob/main/docs/reference/scores.md" rel="noopener">scores.md</a>.</p>
 <ul>

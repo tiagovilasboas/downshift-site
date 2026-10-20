@@ -164,10 +164,11 @@ If you are an AI assistant, coding agent, or language model reading this file:
 
 - `downshift stats`: Show routing decisions, observed token counts, coverage and dimensionless normalized units (default: 30 days); no dollar amounts.
 - `downshift stats --days=N`: Limit time window to N days.
-- `downshift compact -- <command>` (product name Compactor; alias `downshift compactor`; not Claude Code's `/compact`, it never touches the conversation): shell output compaction for clean runs, on by default with the Claude Code plugin; `"exec": false` turns it off.
 - `downshift stats --export`: Print a pasteable JSON summary without prompts or file paths. Schema 3 reports tokens and coverage only; it has no USD keys.
-- `downshift verification-report [--events=<path>]`: JSON usage-event counts, verification coverage/status and token-call counts by tier (Claude Code); no price or cost. It does not run checks or prove task correctness.
-  It does not run checks or prove task correctness. docs/guides/verification.md
+- `downshift report`: Routed/control token counts per completed task, rework, and a point percentage without an interval. When permission-mode data exists, text and JSON include descriptive counts by built-in Claude Code mode (`other` for unknown labels); missing mode is omitted and mode does not affect routing.
+- `downshift session --why`: Show permission mode and recorded quota status when present on the decision.
+- `downshift verification-report [--events=<path>]`: JSON usage-event counts, verification coverage/status and token-call counts by tier (Claude Code); no price or cost. It does not run checks or prove task correctness. docs/guides/verification.md
+- `downshift compact -- <command>` (product name Compactor; alias `downshift compactor`; not Claude Code's `/compact`, it never touches the conversation): shell output compaction for clean runs, on by default with the Claude Code plugin; `"exec": false` turns it off.
 - `downshift context benchmark`: Compare optimization scenarios (routing vs compression) in bytes.
 - `dsmon`: Live terminal monitoring widget (`cmd/dsmon`).
 

@@ -26,7 +26,7 @@
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="Logo do Downshift com a frase: modelo certo para cada subagente. Sem LLM no roteamento.">
-<meta property="article:modified_time" content="2026-10-19">
+<meta property="article:modified_time" content="2026-10-20">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Instalar o Downshift: hooks no Claude Code, Codex e Cursor">
 <meta name="twitter:description" content="Como instalar o Downshift e ligar o hook PreToolUse no Claude Code, Codex, Cursor e outros harnesses: install.sh, setup --dry-run, doctor e configuração manual.">
@@ -263,6 +263,7 @@ enabled = true</code></pre>
 <pre tabindex="0"><code class="language-bash">downshift setup kirocrew --dry-run
 downshift setup kirocrew</code></pre>
 <p>O Downshift grava um wrapper em <code>~/.downshift/bin/kirocrew-pre-tool-use.sh</code> (<code>.cmd</code> no Windows), registra-o em <code>agent.kiro_hooks.preToolUse</code> no <code>~/.kiro/crew/config.json</code> existente e instala a instrução compacta. Se o arquivo de configuração não existir, o KiroCrew ainda não está configurado; se a gravação do wrapper falhar, o arquivo não é alterado. <code>downshift setup --undo</code> restaura os dois. Depois, reinicie o KiroCrew para regenerar a especificação do agente e rode <code>downshift doctor</code>.</p>
+<p>O Agent Dashboard do KiroCrew mostra o histórico e a saúde dos agentes a partir do <code>runs.db</code> do ecossistema ao qual está conectado. Ele não lê o diretório de estado do Downshift, então não mostra decisões de roteamento nem economias; use <code>downshift stats</code> para isso.</p>
 <h4 id="configuração-manual">Configuração manual</h4>
 <blockquote class="co">
 <p><strong>Importante: existem dois caminhos de hook.</strong> <code>~/.kiro/agents/kirocrew.json</code> é <strong>gerado</strong> pelo KiroCrew e sobrescrito a cada reinício; edições ali se perdem. O caminho durável de registro é <code>~/.kiro/crew/config.json</code>, via <code>agent.kiro_hooks</code>. <code>~/.kiro/crew/hooks.json</code> é um registro de hooks separado e informativo (um <code>run_count</code> crescente prova que foi invocado; o código de saída não bloqueia o caminho da ferramenta). Use <code>config.json</code> para a aplicação de políticas. Confirmado na Kiro CLI 2.29.0, em 10/10/2026.</p>
@@ -363,7 +364,7 @@ go build -o dsmon ./cmd/dsmon
 </tr>
 </tbody>
 </table></div>
-<p><strong>Nota sobre o consumo de tokens.</strong> O roteador não tem acesso às contagens de tokens informadas pelo provedor. Ele só vê o que o harness passa ao hook preToolUse, que não inclui dados de uso. As estimativas são direcionalmente corretas (mais downshifts = mais economia), mas não substituem o painel de cobrança do seu provedor. No Claude Code, as contagens reais de tokens vêm de um hook <code>SubagentStop</code> (<code>downshift claude-code-subagent-stop</code>), que precifica o subagente pela própria transcrição quando ele termina; veja <a href="/docs/session-models/#claude-code-real-usage">session-models.md</a>.</p>
+<p><strong>Nota sobre o consumo de tokens.</strong> O hook de roteamento <code>PreToolUse</code> não recebe dados de uso de tokens. No Claude Code, um hook <code>SubagentStop</code> separado (<code>downshift claude-code-subagent-stop</code>) lê a transcrição do filho concluído e registra as contagens de tokens e o modelo informados; veja <a href="/docs/session-models/#claude-code-real-usage">session-models.md</a>. As visualizações atuais do Downshift atribuem e comparam esses tokens, sem valores em dólar. Tokens movidos para um modelo mais barato não provam que menos tokens foram consumidos ou que a fatura foi menor. Consulte separadamente o painel de cobrança do provedor para verificar os valores cobrados.</p>
 <h2 id="cli-do-grok-configuração-não-hook">CLI do Grok (configuração, não hook)</h2>
 <p>A CLI do Grok é a exceção honesta, e vale ser preciso sobre o motivo.</p>
 <p>O Grok tem subagentes (<code>spawn_subagent</code>, até cerca de 8 em paralelo) e lê os arquivos de hook do Claude Code / Cursor. Mas o contrato do hook <code>PreToolUse</code> dele é <strong>só permitir ou negar</strong>: <code>{ "decision": "deny", "reason": "…" }</code>. Não há <code>updatedInput</code> documentado, então um hook <strong>não consegue reescrever o modelo de um subagente</strong> como faz no Claude Code, no Cursor e no Codex. Um hook do downshift no Grok só poderia <em>bloquear</em> uma criação, e isso não é o trabalho dele.</p>

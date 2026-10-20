@@ -26,7 +26,7 @@
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="Downshift logo with the line: Right model for every subagent. No LLM in the loop.">
-<meta property="article:modified_time" content="2026-10-19">
+<meta property="article:modified_time" content="2026-10-20">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Install Downshift: Claude Code, Codex and Cursor hook setup">
 <meta name="twitter:description" content="Install Downshift and wire its PreToolUse hook into Claude Code, Codex, Cursor and other harnesses: install.sh, setup --dry-run, doctor checks and manual setup.">
@@ -265,6 +265,7 @@ downshift setup kirocrew</code></pre>
 <p>Downshift writes a wrapper to <code>~/.downshift/bin/kirocrew-pre-tool-use.sh</code> (<code>.cmd</code> on Windows), registers it under <code>agent.kiro_hooks.preToolUse</code> in the existing <code>~/.kiro/crew/config.json</code>, and installs the compact steering. If the config file does not exist, KiroCrew is not set up yet; if writing the wrapper fails, the config is left untouched. <code>downshift setup --undo</code> restores both. Then restart KiroCrew to regenerate its agent spec and run <code>downshift doctor</code>.</p>
 <h4 id="manual-setup">Manual setup</h4>
 <blockquote class="co">
+<p>KiroCrew’s Agent Dashboard shows agent run history and health from the ecosystem’s <code>runs.db</code>. It does not read Downshift’s state directory, so it cannot show routing decisions or savings; use <code>downshift stats</code> for those.</p>
 <p><strong>Important — two hook paths exist.</strong> <code>~/.kiro/agents/kirocrew.json</code> is <strong>generated</strong> by KiroCrew and overwritten on every restart; edits there are lost. The durable registration path is <code>~/.kiro/crew/config.json</code> via <code>agent.kiro_hooks</code>. <code>~/.kiro/crew/hooks.json</code> is a separate, informational hook registry (growing <code>run_count</code> proves invocation; exit code does not block the tool path). Use <code>config.json</code> for policy enforcement. Confirmed on Kiro CLI 2.29.0, 2026-10-10.</p>
 </blockquote>
 <ol type="1">
@@ -363,7 +364,7 @@ go build -o dsmon ./cmd/dsmon
 </tr>
 </tbody>
 </table></div>
-<p><strong>Token consumption note.</strong> The router has no access to provider-reported token counts — it only sees what the harness passes to the preToolUse hook, which does not include usage data. The estimates are directionally correct (more downshifts = more savings) but not a substitute for your provider's billing dashboard. On Claude Code, real token counts come from a <code>SubagentStop</code> hook (<code>downshift claude-code-subagent-stop</code>), which prices the subagent from its own transcript once it finishes; see <a href="/docs/session-models/#claude-code-real-usage">session-models.md</a>.</p>
+<p><strong>Token consumption note.</strong> The <code>PreToolUse</code> routing hook does not receive token usage. On Claude Code, a separate <code>SubagentStop</code> hook (<code>downshift claude-code-subagent-stop</code>) reads the completed child’s transcript and records its reported token counts and model; see <a href="/docs/session-models/#claude-code-real-usage">session-models.md</a>. Current Downshift views attribute and compare those tokens, with no dollar amounts. Tokens moved to a cheaper model do not prove that fewer tokens were consumed or that the bill was lower. Check the provider’s billing dashboard separately for charges.</p>
 <h2 id="grok-cli-config-not-hook">Grok CLI (config, not hook)</h2>
 <p>Grok CLI is the honest exception, and it's worth being precise about why.</p>
 <p>Grok has subagents (<code>spawn_subagent</code>, up to ~8 in parallel) and it reads Claude Code / Cursor hook files. But its <code>PreToolUse</code> hook contract is <strong>allow-or-deny only</strong> — <code>{ "decision": "deny", "reason": "…" }</code>. There is no documented <code>updatedInput</code>, so a hook <strong>cannot rewrite a subagent's model</strong> the way it can on Claude Code, Cursor, and Codex. A downshift hook on Grok could only <em>block</em> a spawn, which isn't the job.</p>
