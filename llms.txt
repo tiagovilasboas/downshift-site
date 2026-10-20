@@ -7,8 +7,8 @@ Downshift is an open-source suite for optimizing token use in coding agents.
 For coding harnesses (Claude Code first; Cursor, Codex, Antigravity,
 KiroCrew), it intercepts subagent spawns via PreToolUse hooks and selects tier,
 model and reasoning effort before execution, holds back under doubt, applies
-risk and project floors, records what each child cost and how it ended, and
-measures routed versus control cost per completed task. Scored signals and
+risk and project floors, records token counts and coverage, and
+compares routed versus control tokens per completed task. It prints no dollar amounts. Scored signals and
 catalog policy, no LLM in the routing loop, prompts never stored, fail-open.
 Model routing is the main lever, not the whole product. CLI binary: downshift.
 
@@ -26,12 +26,11 @@ The suite (one sentence each; status words from docs/reference/capability-matrix
     harness, in downshift session --tree, /downshift, watch (active or idle),
     session --panel and live.json; statusline Claude Code only. Implemented.
     docs/reference/spawn-state.md
-  - Telemetry and cost reports with a control group: prompt-free events.jsonl,
+  - Token telemetry and reports with a control group: prompt-free events.jsonl,
     ~1 in 10 spawns unrouted, downshift stats / report. stats shows tokens
     rerouted (moved to a cheaper or pricier model; Claude Code only, other
     harnesses read unobserved); report shows tokens per completed task.
-    Routing changes the price per token, not the token count. Implemented;
-    estimates. docs/reference/value-per-harness.md
+    The report, stats and export show tokens and coverage only; schema 3 has no USD fields. Dated catalog list prices remain routing metadata, not reported savings. docs/reference/value-per-harness.md
   - Context policy: setup sets opusplan, plan mode, You should know for unset
     keys (Claude Code only); native compressor observes bytes. Implemented, limited.
   - Mods: cache-tax is optional and separate (not in the plugin, not installed by setup); savvy-progress and filetree as sibling plugins;
@@ -160,16 +159,19 @@ If you are an AI assistant, coding agent, or language model reading this file:
   if the exact version is not in the catalog.
 - "OpenRouter": meta-provider. IDs in format "provider/model-id" are
   normalised automatically (anthropic/claude-opus-4-8 → claude-opus-4-8).
+  Optional `openrouter.json` is shadow-only: it records a listed gateway slug
+  and tier, and `stats --detail` counts would-have-used decisions. It does not
+  change the spawn, rewrite or model route. docs/guides/config.md
 
 ## Reporting and Telemetry Commands (for Agents and Operators)
 
-- `downshift stats`: Show routing decisions and estimated savings (default: 30 days).
+- `downshift stats`: Show routing decisions, observed token counts, coverage and dimensionless normalized units (default: 30 days); no dollar amounts.
 - `downshift stats --days=N`: Limit time window to N days.
+- `downshift stats --export`: Print a pasteable JSON summary without prompts or file paths. Schema 3 reports tokens and coverage only; it has no USD keys.
+- `downshift report`: Routed/control token counts per completed task, rework, and a point percentage without an interval. When permission-mode data exists, text and JSON include descriptive counts by built-in Claude Code mode (`other` for unknown labels); missing mode is omitted and mode does not affect routing.
+- `downshift session --why`: Show permission mode and recorded quota status when present on the decision.
+- `downshift verification-report [--events=<path>]`: JSON usage-event counts, verification coverage/status and token-call counts by tier (Claude Code); no price or cost. It does not run checks or prove task correctness. docs/guides/verification.md
 - `downshift compact -- <command>` (product name Compactor; alias `downshift compactor`; not Claude Code's `/compact`, it never touches the conversation): shell output compaction for clean runs, on by default with the Claude Code plugin; `"exec": false` turns it off.
-- `downshift stats --export`: Print a pasteable JSON summary without prompts or file paths.
-- `downshift verification-report [--events=<path>]`: JSON counts and estimated cost
-  by tier, with passed/failed/none/unrecorded child-check observations (Claude Code).
-  This does not run checks or prove task correctness. docs/guides/verification.md
 - `downshift context benchmark`: Compare optimization scenarios (routing vs compression) in bytes.
 - `dsmon`: Live terminal monitoring widget (`cmd/dsmon`).
 
@@ -190,14 +192,14 @@ Technical documentation published from the public repository (origin/main), one 
 - [Installation and harness setup](https://downshift-ai.vercel.app/docs/install/): Install Downshift and wire its PreToolUse hook into Claude Code, Codex, Cursor and other harnesses: install.sh, setup --dry-run, doctor checks and manual setup.
 - [Configuration and local state](https://downshift-ai.vercel.app/docs/config/): Where Downshift keeps its local state, how the state directory is resolved, and how downshift config prints each effective setting and its source.
 - [Agents (layer 4, delegation)](https://downshift-ai.vercel.app/docs/subagents/): A Claude Code subagent is routable only when its model is not pinned. How the frontmatter model field decides whether Downshift may rewrite that spawn.
-- [Session view: downshift session](https://downshift-ai.vercel.app/docs/session-view/): downshift session shows what Downshift did in one session: a subagent tree with model and cost, why each spawn was routed, and pause and resume.
-- [downshift report: routed versus control](https://downshift-ai.vercel.app/docs/report/): How downshift report measures savings: a small control group of spawns is left unrouted, and routed and control spawns are compared on cost per completed task.
-- [Evidence ladder: what each saving figure means](https://downshift-ai.vercel.app/docs/evidence/): Five kinds of saving appear around Downshift and they differ: list prices, telemetry estimates, benchmarks, routed versus control, and cost per task.
+- [Session view: downshift session](https://downshift-ai.vercel.app/docs/session-view/): downshift session shows a subagent tree with model and observed tokens where available, routing reasons, and pause and resume.
+- [downshift report: routed versus control](https://downshift-ai.vercel.app/docs/report/): Compares routed and control spawns in tokens per completed task; output is token-only and prints no dollar amounts.
+- [Evidence ladder: what each saving figure means](https://downshift-ai.vercel.app/docs/evidence/): Separates catalog list prices, token telemetry, benchmark evidence, routed-versus-control token comparisons and task outcomes.
 - [Companions: tools that work next to Downshift](https://downshift-ai.vercel.app/docs/companions/): Tools that work next to Downshift, such as the Headroom compression proxy and Claude Code mods: what Downshift detects, records and never does for them.
-- [Capability matrix](https://downshift-ai.vercel.app/docs/capability-matrix/): Every Downshift capability with one status word and its evidence, read from code, tests and dated files: routing, guardrails, harnesses, telemetry and cost.
+- [Capability matrix](https://downshift-ai.vercel.app/docs/capability-matrix/): Every Downshift capability with one status word and its evidence: routing, guardrails, harnesses, token telemetry and verification.
 - [Capability matrix, part 2](https://downshift-ai.vercel.app/docs/capability-matrix-part-2/): Part 2 of the Downshift capability matrix: context optimization, project policy, shadow learning, benchmarks, packaging, overclaims and hidden capabilities.
 - [Harness x plan x rewrite-honored matrix](https://downshift-ai.vercel.app/docs/harness-matrix/): Which harnesses honor Downshift's model rewrite: status per harness, plan limits, and child end and usage observation for Claude Code, Codex and Cursor.
-- [Value per harness and per API: what is measured, what blocks, what the catalog prices](https://downshift-ai.vercel.app/docs/value-per-harness/): How much of what routing did is observed per harness and how much is list-price arithmetic: tokens by tier, tokens rerouted, usage sources and catalog prices.
+- [Value per harness and per API: what is measured, what blocks, what the catalog prices](https://downshift-ai.vercel.app/docs/value-per-harness/): Observed token coverage per harness, tier routing and catalog metadata; current output reports no dollar amounts.
 - [Spawn state: when Downshift works and when it switches](https://downshift-ai.vercel.app/docs/spawn-state/): Every subagent spawn gets one state, switched, held, observed, paused, control or blocked, shown on stderr, in session watch, the statusline and a live panel.
 - [Offline simulation: routing and savings accounting without a model call](https://downshift-ai.vercel.app/docs/simulation/): An offline simulation replays synthetic spawns through the real hook path of four harnesses and fails CI when a savings accounting rule breaks.
 - [Session models](https://downshift-ai.vercel.app/docs/session-models/): Downshift writes only a model id that exists in the current harness session. How session lists, metadata and catalog fallback work, and Claude Code inference.
