@@ -107,8 +107,8 @@ downshift try &quot;rename the userId variable&quot; claude-code    # o que seri
 <li>Confirme que ele começou no haiku, e não no modelo de fronteira padrão da sessão</li>
 <li>Isso prova que a reescrita do hook não foi só emitida: ela foi <strong>de fato aplicada</strong> pelo harness</li>
 </ul>
-<p><strong>Passo 5: ver o que aconteceu.</strong> <code>downshift stats --days=1</code> mostra decisões e economia estimada; <code>downshift session --tree</code> mostra os subagentes desta sessão como uma árvore. No Claude Code, o plugin expõe <code>/downshift:status</code>; o alias manual opcional <code>/downshift</code> está em <a href="#o-comando-downshift-claude-code">O comando /downshift</a>.</p>
-<p><strong>Passo 6: (opcional) acompanhar ao vivo.</strong> <code>downshift watch</code> redesenha a árvore de subagentes da sessão atual (modelo, status final, custo, motivo) a cada segundo, em todos os harnesses; <code>downshift session --tree</code> imprime uma vez só, e <code>/downshift:status</code> ou <code>/downshift</code> mostra isso dentro do Claude Code. O widget flutuante mais antigo continua disponível: <a href="#dsmon-widget-de-monitoramento-ao-vivo">dsmon, widget de monitoramento ao vivo</a>.</p>
+<p><strong>Passo 5: ver o que aconteceu.</strong> <code>downshift stats --days=1</code> mostra decisões e tokens economizados; <code>downshift session --tree</code> mostra os subagentes desta sessão como uma árvore. No Claude Code, o plugin expõe <code>/downshift:status</code>; o alias manual opcional <code>/downshift</code> está em <a href="#o-comando-downshift-claude-code">O comando /downshift</a>.</p>
+<p><strong>Passo 6: (opcional) acompanhar ao vivo.</strong> <code>downshift watch</code> redesenha a árvore de subagentes da sessão atual (modelo, status final, tokens, motivo) a cada segundo, em todos os harnesses; <code>downshift session --tree</code> imprime uma vez só, e <code>/downshift:status</code> ou <code>/downshift</code> mostra isso dentro do Claude Code. O widget flutuante mais antigo continua disponível: <a href="#dsmon-widget-de-monitoramento-ao-vivo">dsmon, widget de monitoramento ao vivo</a>.</p>
 <h3 id="configuração-manual-claude-code">Configuração manual (Claude Code)</h3>
 <p>Use isto no lugar do <code>setup</code> se preferir editar <code>~/.claude/settings.json</code> por conta própria. O matcher do PreToolUse é <code>Agent|Task</code>. O schema de <code>Task</code> do Claude Code aceita só nomes de família (<code>haiku</code>, <code>sonnet</code>, <code>opus</code>, <code>fable</code>) em <code>model</code>. O Downshift grava o nome de família do catálogo por você, e deixa o subagente como está quando um modelo não tem um.</p>
 <pre tabindex="0"><code class="language-json">{
@@ -298,7 +298,7 @@ Troque o marcador por um modelo real e atual. Isso verifica só a saída do adap
 <blockquote class="co">
 <p><strong>Prefira <code>downshift watch</code>.</strong> A árvore de sessão ao vivo está embutida no binário <code>downshift</code> (sem build separado, em todos os harnesses): veja <a href="/docs/session-view/#live-downshift-watch">session-view.md</a>. O <code>dsmon</code> continua compilável e está documentado abaixo.</p>
 </blockquote>
-<p><code>cmd/dsmon</code> é um comando separado neste repositório: um widget flutuante de terminal que mostra trocas de modelo, harness, distribuição de tiers e economia estimada de custo em tempo real. Ele lê <code>~/.downshift/events.jsonl</code> e atualiza a cada 800 ms. Sem dependências externas; só a biblioteca padrão do Go.</p>
+<p><code>cmd/dsmon</code> é um comando separado neste repositório: um widget flutuante de terminal que mostra trocas de modelo, harness, distribuição de tiers e economia estimada em tokens em tempo real. Ele lê <code>~/.downshift/events.jsonl</code> e atualiza a cada 800 ms. Sem dependências externas; só a biblioteca padrão do Go.</p>
 <pre tabindex="0"><code>╭──────────────────────────────────────────────────────╮
 │  dsmon  downshift monitor                            │
 │  harness  kirocrew        ◉ live                     │
@@ -308,7 +308,7 @@ Troque o marcador por um modelo real e atual. Isso verifica só a saída do adap
 │  04:01  opus   → sonnet  medium   -50%               │
 │ stats ──────────────────────────────────────────────  │
 │  35 events   22↓  2↑  8✓                             │
-│  est. saved  $0.18  ~7K tokens ¹                     │
+│  est. saved  ~7K tokens ¹                            │
 │  ¹ estimated · actual tokens not yet tracked         │
 ╰──────────────────────────────────────────────────────╯
   04:03:51 · ctrl+c to quit</code></pre>
@@ -347,14 +347,14 @@ go build -o dsmon ./cmd/dsmon
 <td>Contagens de hoje por veredito</td>
 </tr>
 <tr>
-<td>Economia estimada ($)</td>
-<td><code>estimated_savings</code> × $0,01 de custo médio por criação</td>
-<td>Estimativa grosseira, não cobrança real</td>
+<td>Economia estimada (tokens)</td>
+<td>Tokens de filhos que rodaram em modelo mais barato que o pedido, na visão compartilhada <code>telemetry.TokenSavings</code></td>
+<td>Observado onde o harness informa tokens; não é cobrança</td>
 </tr>
 <tr>
-<td>Tokens estimados</td>
-<td>Derivados de $ economizados ÷ custo de saída de fronteira</td>
-<td>Estimado, não vem do provedor</td>
+<td>Tokens</td>
+<td>Tokens observados do filho, quando o harness os informa</td>
+<td>Não vem da fatura do provedor</td>
 </tr>
 </tbody>
 </table></div>
