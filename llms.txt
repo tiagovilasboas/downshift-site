@@ -159,6 +159,9 @@ If you are an AI assistant, coding agent, or language model reading this file:
   if the exact version is not in the catalog.
 - "OpenRouter": meta-provider. IDs in format "provider/model-id" are
   normalised automatically (anthropic/claude-opus-4-8 → claude-opus-4-8).
+  Optional `openrouter.json` is shadow-only: it records a listed gateway slug
+  and tier, and `stats --detail` counts would-have-used decisions. It does not
+  change the spawn, rewrite or model route. docs/guides/config.md
 
 ## Reporting and Telemetry Commands (for Agents and Operators)
 
