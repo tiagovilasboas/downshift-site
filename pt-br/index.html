@@ -83,48 +83,157 @@
 <ds-chat class="dc">
 <script type="application/json">
 {
- "title": "Downshift roteia os subagentes de um agente",
+ "title": "Downshift numa sessão de agente",
  "caption": "Ilustração. As linhas do Downshift usam o formato real de saída da CLI.",
- "messages": [
+ "labels": {
+  "replay": "Repetir",
+  "agents": "Agentes",
+  "scenarios": "Cenários",
+  "downshifted": "Rebaixados",
+  "tokens": "Tokens",
+  "compactor": "Compactor",
+  "none": "Nenhum subagente nesta tarefa."
+ },
+ "scenarios": [
   {
-   "role": "user",
-   "text": "Renomeie parseConfig para loadConfig no repo, liste os arquivos em src e rotacione os segredos da API de produção.",
-   "delay_ms": 0
+   "label": "Renomear helpers",
+   "tokens": "~4k",
+   "compactor": "203 → 119 B",
+   "agents": [
+    {
+     "title": "Renomear os cinco helpers",
+     "from": "opus",
+     "to": "haiku"
+    },
+    {
+     "title": "Listar arquivos em src",
+     "from": "opus",
+     "to": "haiku"
+    }
+   ],
+   "messages": [
+    {
+     "role": "user",
+     "text": "Renomeie os cinco helpers de config e rode os testes.",
+     "delay_ms": 200
+    },
+    {
+     "role": "agent",
+     "text": "Dois subagentes, um para renomear e outro para listar, depois os testes.",
+     "delay_ms": 500
+    },
+    {
+     "role": "tool",
+     "kind": "Agent",
+     "text": "Renomear os cinco helpers",
+     "detail": "assumed current: claude-opus-5-5 (harness default)\n→ small: opus → haiku · its tokens would run on a cheaper model than requested\nwhy: trivial task, no risk, confident",
+     "agent": 0,
+     "time": "6s",
+     "delay_ms": 400
+    },
+    {
+     "role": "tool",
+     "kind": "Agent",
+     "text": "Listar arquivos em src",
+     "detail": "assumed current: claude-opus-5-5 (harness default)\n→ small: opus → haiku · its tokens would run on a cheaper model than requested\nwhy: trivial task, no risk, confident",
+     "agent": 1,
+     "time": "2s",
+     "delay_ms": 200
+    },
+    {
+     "role": "tool",
+     "kind": "Bash",
+     "text": "go test ./internal/...",
+     "detail": "Go test: PASS (3 packages ok) under github.com/tiagovilasboas/downshift/internal/\nok execwrap\nok telemetry\nok classify\n[downshift compact: compacted 203 to 119 bytes]",
+     "compact": true,
+     "time": "9s",
+     "delay_ms": 300
+    },
+    {
+     "role": "agent",
+     "text": "Pronto. Os testes passaram; só o resumo compactado chegou ao meu contexto.",
+     "delay_ms": 400
+    }
+   ]
   },
   {
-   "role": "agent",
-   "text": "Três subagentes: renomear, listar arquivos e rotacionar segredos. O Downshift roteia cada um antes de iniciar.",
-   "delay_ms": 900
+   "label": "Rotacionar segredos",
+   "tokens": "~6k",
+   "compactor": "",
+   "agents": [
+    {
+     "title": "Listar arquivos em src",
+     "from": "opus",
+     "to": "haiku"
+    },
+    {
+     "title": "Rotacionar segredos de produção",
+     "from": "opus",
+     "note": "mantido"
+    }
+   ],
+   "messages": [
+    {
+     "role": "user",
+     "text": "Liste os arquivos em src e rotacione os segredos da API de produção.",
+     "delay_ms": 200
+    },
+    {
+     "role": "agent",
+     "text": "Dois subagentes. O Downshift avalia cada um antes de iniciar.",
+     "delay_ms": 500
+    },
+    {
+     "role": "tool",
+     "kind": "Agent",
+     "text": "Listar arquivos em src",
+     "detail": "assumed current: claude-opus-5-5 (harness default)\n→ small: opus → haiku · its tokens would run on a cheaper model than requested\nwhy: trivial task, no risk, confident",
+     "agent": 0,
+     "time": "2s",
+     "delay_ms": 400
+    },
+    {
+     "role": "tool",
+     "kind": "Agent",
+     "text": "Rotacionar segredos de produção",
+     "detail": "assumed current: claude-opus-5-5 (harness default)\n→ mid: opus → sonnet (not applied, tokens stay on opus)\nwhy: toca uma área de risco, o classificador não teve confiança\nnote: not rewritten: held by a guardrail",
+     "agent": 1,
+     "time": "14s",
+     "delay_ms": 200
+    },
+    {
+     "role": "agent",
+     "text": "A rotação de segredos ficou no modelo pedido. Vou pedir sua confirmação antes de executar.",
+     "delay_ms": 400
+    }
+   ]
   },
   {
-   "role": "downshift",
-   "text": "assumed current: claude-opus-5-5 (harness default)\n→ small: opus → haiku · its tokens would run on a cheaper model than requested\nwhy: trivial task, no risk, confident",
-   "delay_ms": 1400
-  },
-  {
-   "role": "downshift",
-   "text": "assumed current: claude-opus-5-5 (harness default)\n→ small: opus → haiku · its tokens would run on a cheaper model than requested\nwhy: trivial task, no risk, confident",
-   "delay_ms": 1200
-  },
-  {
-   "role": "downshift",
-   "text": "assumed current: claude-opus-5-5 (harness default)\n→ mid: opus → sonnet (not applied, tokens stay on opus)\nwhy: toca uma área de risco, o classificador não teve confiança\nnote: not rewritten: held by a guardrail",
-   "delay_ms": 1600
-  },
-  {
-   "role": "agent",
-   "text": "A rotação de segredos fica no modelo pedido. Vou pedir sua confirmação antes de executá-la. Rodando os testes agora.",
-   "delay_ms": 1000
-  },
-  {
-   "role": "tool",
-   "text": "Go test: PASS (3 packages ok) under github.com/tiagovilasboas/downshift/internal/\nok execwrap\nok telemetry\nok classify\n[downshift compact: compacted 203 to 119 bytes]",
-   "delay_ms": 1800
-  },
-  {
-   "role": "agent",
-   "text": "Os testes passaram. Só o resumo compactado chegou ao meu contexto, com a marca mostrando o tamanho bruto.",
-   "delay_ms": 1200
+   "label": "Rodar testes",
+   "tokens": "~1k",
+   "compactor": "203 → 119 B",
+   "agents": [],
+   "messages": [
+    {
+     "role": "user",
+     "text": "Rode os testes internos.",
+     "delay_ms": 200
+    },
+    {
+     "role": "tool",
+     "kind": "Bash",
+     "text": "go test ./internal/...",
+     "detail": "Go test: PASS (3 packages ok) under github.com/tiagovilasboas/downshift/internal/\nok execwrap\nok telemetry\nok classify\n[downshift compact: compacted 203 to 119 bytes]",
+     "compact": true,
+     "time": "9s",
+     "delay_ms": 500
+    },
+    {
+     "role": "agent",
+     "text": "Os três pacotes passaram. A marca mostra o tamanho bruto da saída.",
+     "delay_ms": 400
+    }
+   ]
   }
  ]
 }
