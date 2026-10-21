@@ -213,7 +213,7 @@ Technical documentation published from the public repository (origin/main), one 
 ## Guides
 
 Static articles about Claude Code token use, sourced from Anthropic docs and real Downshift output.
-Honest status: Verified on Claude Code only. Codex and Cursor are functional, OpenCode is beta. The ~12% figure is a list-price estimate from one operator's controlled run on mechanical delegated tasks (checks passed 12/12 in both arms); on natural complex tasks nothing is attributable yet.
+Honest status: Verified on Claude Code only. Codex and Cursor are functional, OpenCode is beta. The headline figure is about 24% fewer tokens per accepted run with routing (95% interval +2.1% to +46.7%; 16% per run; 46 runs, one operator, mechanical delegated tasks, 2026-10-21). An earlier list-price trial on 2026-10-15 showed about 12% (checks passed 12/12 in both arms). On natural complex tasks nothing is attributable yet.
 
 - [Guides index](https://downshift-ai.vercel.app/guides/): all English guides
 - [Claude Code token optimization: the levers, ranked by evidence](https://downshift-ai.vercel.app/guides/claude-code-token-optimization/): A map of the levers that cut Claude Code token usage: model choice, subagents, prompt cache, context and hooks. What Anthropic documents and what is unproven.
