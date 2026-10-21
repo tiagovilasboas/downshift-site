@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<meta name="color-scheme" content="dark light">
+<title>ds-chat demo | Downshift</title>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<script src="/components/ds-chat.js" defer></script>
+</head>
+<body>
+<main>
+<h1>&lt;ds-chat&gt; demo</h1>
+<p>Placeholder messages only. The animation runs once when the chat enters the viewport; use Replay to run it again.</p>
+<ds-chat>
+<script type="application/json">
+{
+  "title": "session.chat",
+  "caption": "Placeholder conversation showing every message role.",
+  "messages": [
+    {"role": "user", "text": "Rename the config loader and update its callers.", "delay_ms": 300},
+    {"role": "agent", "text": "I will search for the loader first, then spawn a helper for the mechanical edits.", "delay_ms": 700},
+    {"role": "tool", "text": "$ grep -rn \"loadConfig\" ./src ./internal ./cmd/example/with/a/very/long/path/that/should/wrap/inside/its/own/block/only.go\nsrc/config.ts:12\nsrc/app.ts:40", "delay_ms": 600},
+    {"role": "downshift", "text": "helper -> small model, low effort (mechanical rename)", "delay_ms": 500},
+    {"role": "agent", "text": "Done. Three files changed and the tests pass.", "delay_ms": 800}
+  ]
+}
+</script>
+<ol>
+<li data-role="user">Rename the config loader and update its callers.</li>
+<li data-role="agent">I will search for the loader first, then spawn a helper for the mechanical edits.</li>
+<li data-role="tool">$ grep -rn "loadConfig" ./src</li>
+<li data-role="downshift">helper -> small model, low effort (mechanical rename)</li>
+<li data-role="agent">Done. Three files changed and the tests pass.</li>
+</ol>
+</ds-chat>
+</main>
+</body>
+</html>
