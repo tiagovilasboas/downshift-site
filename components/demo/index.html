@@ -12,28 +12,43 @@
 <body>
 <main>
 <h1>&lt;ds-chat&gt; demo</h1>
-<p>Placeholder messages only. The animation runs once when the chat enters the viewport; use Replay to run it again.</p>
+<p>Placeholder content. The first scenario plays when the window enters the viewport; pick a tab or use Replay.</p>
 <ds-chat>
 <script type="application/json">
 {
-  "title": "session.chat",
-  "caption": "Placeholder conversation showing every message role.",
-  "messages": [
-    {"role": "user", "text": "Rename the config loader and update its callers.", "delay_ms": 300},
-    {"role": "agent", "text": "I will search for the loader first, then spawn a helper for the mechanical edits.", "delay_ms": 700},
-    {"role": "tool", "text": "$ grep -rn \"loadConfig\" ./src ./internal ./cmd/example/with/a/very/long/path/that/should/wrap/inside/its/own/block/only.go\nsrc/config.ts:12\nsrc/app.ts:40", "delay_ms": 600},
-    {"role": "downshift", "text": "helper -> small model, low effort (mechanical rename)", "delay_ms": 500},
-    {"role": "agent", "text": "Done. Three files changed and the tests pass.", "delay_ms": 800}
+  "title": "Agent session",
+  "caption": "Placeholder scenarios showing every row type.",
+  "scenarios": [
+    {"label": "Rename", "tokens": "~2k", "compactor": "",
+     "agents": [{"title": "Rename the loader", "from": "opus", "to": "haiku"}, {"title": "Review the change", "from": "opus", "note": "held"}],
+     "messages": [
+      {"role": "user", "text": "Rename the config loader and update its callers."},
+      {"role": "agent", "text": "One helper for the rename, one for the review."},
+      {"role": "tool", "kind": "Agent", "text": "Rename the loader", "detail": "helper -> small model (placeholder)", "agent": 0, "time": "3s"},
+      {"role": "tool", "kind": "Agent", "text": "Review the change", "detail": "kept on the requested model (placeholder)", "agent": 1, "time": "5s"},
+      {"role": "agent", "text": "Done."}]},
+    {"label": "Search", "tokens": "~1k", "compactor": "120 → 40 B", "agents": [],
+     "messages": [
+      {"role": "user", "text": "Find the callers."},
+      {"role": "tool", "kind": "Bash", "text": "grep -rn loadConfig ./src ./internal ./cmd/example/with/a/very/long/path.go", "detail": "src/config.ts:12\nsrc/app.ts:40", "compact": true, "time": "1s"},
+      {"role": "agent", "text": "Two callers."}]}
   ]
 }
 </script>
 <ol>
 <li data-role="user">Rename the config loader and update its callers.</li>
-<li data-role="agent">I will search for the loader first, then spawn a helper for the mechanical edits.</li>
-<li data-role="tool">$ grep -rn "loadConfig" ./src</li>
-<li data-role="downshift">helper -> small model, low effort (mechanical rename)</li>
-<li data-role="agent">Done. Three files changed and the tests pass.</li>
+<li data-role="agent">One helper for the rename, one for the review.</li>
 </ol>
+</ds-chat>
+<h2>v1 block (backward compatible)</h2>
+<ds-chat>
+<script type="application/json">
+{"title": "session.chat", "messages": [
+  {"role": "user", "text": "Rename the loader."},
+  {"role": "tool", "text": "$ grep -rn loadConfig ./src\nsrc/config.ts:12"},
+  {"role": "downshift", "text": "helper -> small model (placeholder)"}
+]}
+</script>
 </ds-chat>
 </main>
 </body>
