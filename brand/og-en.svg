@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" lang="en">
-<defs><style>@font-face{font-family:Geist;src:url(../fonts/Geist-Variable.woff2);font-weight:100 900}
-text{font-family:Geist,sans-serif;fill:#fff}.h{font-size:92px;font-weight:600;letter-spacing:-3px}.n{font-size:34px;font-weight:600}.d{font-size:34px;font-weight:400;fill:#A3A3A3}.u{font-size:26px;fill:#A3A3A3}</style></defs>
+<defs><style>@font-face{font-family:Geist;src:url(../fonts/Geist-Variable.woff2);font-weight:100 900}@font-face{font-family:GeistMono;src:url(../fonts/GeistMono-Variable.woff2);font-weight:100 900}
+text{font-family:Geist,sans-serif;fill:#fff}.h{font-size:74px;font-weight:600;letter-spacing:-2px}.s{font-size:32px;font-weight:400;fill:#A3A3A3}.u{font-size:24px;fill:#8A8F98}.m{font-family:GeistMono,monospace;font-size:28px;fill:#E5E7EB}.mg{fill:#22C55E}.md{fill:#8A8F98}</style></defs>
 <rect width="1200" height="630" fill="#0a0a0a"/>
 <svg x="60" y="44" width="340" height="79" viewBox="0 0 900 210">
 
@@ -39,9 +39,11 @@ text{font-family:Geist,sans-serif;fill:#fff}.h{font-size:92px;font-weight:600;le
 <path d="M136 0H1063V195H358V1490H136Z" transform="translate(673.351 176.000) scale(0.0141602 -0.0141602)" fill="#9CA3AF"/>
 <path d="M233 -17C312 -17 373 44 373 123C373 201 312 263 233 263C155 263 94 201 94 123C94 44 155 -17 233 -17Z" transform="translate(693.283 176.000) scale(0.0141602 -0.0141602)" fill="#9CA3AF"/>
 </svg>
-<text x="72" y="270" class="h">Route. Compact. Focus.</text>
-<circle cx="82" cy="374" r="7" fill="#22C55E"/><text x="108" y="385" class="n">Routing</text><text x="365" y="385" class="d">Right model per subagent</text>
-<circle cx="82" cy="440" r="7" fill="#22C55E"/><text x="108" y="451" class="n">Compactor</text><text x="365" y="451" class="d">Shorter, clean shell output</text>
-<circle cx="82" cy="506" r="7" fill="#22C55E"/><text x="108" y="517" class="n">DCI</text><text x="365" y="517" class="d">Only the code a change touches</text>
-<text x="72" y="592" class="u">downshift-ai.vercel.app</text>
+<text x="72" y="262" class="h">Fewer tokens, same agent.</text>
+<text x="72" y="320" class="s">Right model per subagent, shorter clean output,</text>
+<text x="72" y="362" class="s">and only the code a change touches.</text>
+<rect x="72" y="404" width="1056" height="132" rx="14" fill="#141414" stroke="#262626" stroke-width="2"/>
+<text x="104" y="458" class="m">→ small: opus → <tspan class="mg">haiku</tspan></text>
+<text x="104" y="506" class="m md">why: trivial task, no risk, confident</text>
+<text x="72" y="590" class="u">downshift-ai.vercel.app</text>
 </svg>
