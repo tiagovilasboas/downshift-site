@@ -27,6 +27,7 @@ CSP_SOURCE = "/(.*)"
 CSP_KEY = "Content-Security-Policy"
 HASHED_DIRECTIVES = ("script-src", "style-src")
 SKIPPED_DIRS = {"node_modules", ".git"}
+DATA_BLOCK_TYPES = {"application/ld+json", "application/json"}  # never executed, so no hash
 
 INLINE_BLOCK = re.compile(rb"<(style|script)\b([^>]*)>(.*?)</\1\s*>", re.DOTALL | re.IGNORECASE)
 ATTR_SRC = re.compile(rb"(?<![\w-])src\s*=", re.IGNORECASE)
@@ -49,7 +50,7 @@ def is_skipped_inline(tag: str, attrs: bytes) -> bool:
     if ATTR_SRC.search(attrs):
         return True  # external script, no inline body to hash
     type_match = ATTR_TYPE.search(attrs)
-    return bool(type_match) and type_match.group(1).decode("ascii").lower() == "application/ld+json"
+    return bool(type_match) and type_match.group(1).decode("ascii").lower() in DATA_BLOCK_TYPES
 
 
 def iter_html_files(root: Path):
