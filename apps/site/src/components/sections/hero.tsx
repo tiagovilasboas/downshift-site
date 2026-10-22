@@ -1,6 +1,7 @@
 'use client';
 
 import { motion, useReducedMotion } from 'motion/react';
+import { RoutingViz } from './routing-viz';
 
 // Stats row — exact numbers from index.html, do not invent
 const STATS = [
@@ -63,18 +64,8 @@ export function Hero() {
           </motion.div>
         </div>
 
-        {/* Routing visualization — M3 placeholder; full animated SVG from ds-chat.js */}
-        <figure className="dsc" id="dsc">
-          <div
-            className="dsc-s"
-            role="img"
-            aria-label="Replay of the 56 subagent spawns in the 2026-10-15 controlled Downshift trial. 19 downshifted to haiku, 36 kept sonnet, 1 raised to opus."
-            style={{ minHeight: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--m)', fontSize: 13 }}
-          >
-            {/* Animated SVG loaded by ds-chat.js at runtime */}
-            Loading routing visualization…
-          </div>
-        </figure>
+        {/* Routing visualization — exact SVG from index.html, animated by ds-chat.js */}
+        <RoutingViz />
       </div>
 
       {/* Stats row */}
