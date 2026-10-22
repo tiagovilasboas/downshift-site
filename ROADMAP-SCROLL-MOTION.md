@@ -31,7 +31,8 @@ motion verified statically; Safari and Firefox not verified.
 | 5 | Check Safari and Firefox on a real device; until then the reveals stay behind `@supports` | S | open |
 | 6 | A script that regenerates the CSP hashes from the pages, so a CSS or JS edit stops being a manual hash edit | M | open |
 | 7 | Section rail as a nav with text labels, if the header links are not enough | M | later |
-| — | Parallax, scroll-snap, a scroll library | — | rejected unless a measured need appears |
+| 8 | Native CSS scroll-snap (y proximity, respects reduced-motion) | S | done (2026-10-22) |
+| — | Parallax, a scroll library | — | rejected unless a measured need appears |
 
 ### Task 4: lab baseline of the new home (2026-10-21)
 
