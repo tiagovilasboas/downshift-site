@@ -3,8 +3,7 @@ import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/next';
-import '@downshift/ui/globals.css';
-import './globals.css';
+import '../globals.css';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://downshift-ai.vercel.app'),
