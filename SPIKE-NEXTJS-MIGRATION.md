@@ -738,60 +738,129 @@ export default async function sitemap() {
 
 ---
 
-## Plano de Migração Atualizado
+## Plano de Execução
 
-### Fase 1: Setup Monorepo (2h)
-- [ ] Inicializar Turborepo
-- [ ] Criar estrutura de pastas
-- [ ] Setup pnpm workspace
-- [ ] Configurar turbo.json
+### Milestone 1: Monorepo Foundation (3h)
 
-### Fase 2: Package UI (2h)
-- [ ] Extrair componentes shadcn/ui para packages/ui
-- [ ] Configurar preset Tailwind em packages/config
-- [ ] Setup TypeScript base config
-- [ ] Testar exports
+| Task | Estimativa | Entrega |
+|------|------------|---------|
+| 1.1 Inicializar Turborepo + pnpm workspace | 30min | turbo.json, pnpm-workspace.yaml |
+| 1.2 Criar packages/config (Tailwind preset, TS base) | 45min | Preset exportável |
+| 1.3 Criar packages/ui (Button, Card, Badge, Terminal) | 1h | Componentes shadcn/ui |
+| 1.4 Setup apps/site (Next.js 15 vazio) | 30min | `pnpm dev` funciona |
+| 1.5 Setup apps/docs (Next.js 15 + MDX vazio) | 15min | Estrutura pronta |
 
-### Fase 3: App Site (4h)
-- [ ] Setup Next.js 15 em apps/site
-- [ ] Migrar Hero section com Motion
-- [ ] Migrar Features, Problem, Evidence
-- [ ] Migrar Install, FAQ
-- [ ] Setup i18n (PT-BR)
-- [ ] Routing visualization (SVG interativo)
+**Checkpoint:** `pnpm dev` roda ambas as apps, packages importam corretamente.
 
-### Fase 4: App Docs (3h)
-- [ ] Setup Next.js 15 em apps/docs com MDX
-- [ ] Criar componentes de navegação (Sidebar, TOC)
-- [ ] Migrar todas as docs de HTML para MDX
-- [ ] Migrar todas as guides de HTML para MDX
-- [ ] Setup syntax highlighting
+---
 
-### Fase 5: ds-chat Component (2h)
-- [ ] Migrar de vanilla JS para React em packages/ds-chat
-- [ ] Integrar em apps/site
-- [ ] Preservar toda lógica de cenários
+### Milestone 2: Site Marketing (6h)
 
-### Fase 6: SEO e Meta (1h)
-- [ ] Metadata API em ambas as apps
-- [ ] Structured data (site)
-- [ ] Sitemaps separados
-- [ ] OG images
+| Task | Estimativa | Entrega |
+|------|------------|---------|
+| 2.1 Layout base (Header, Footer, globals.css) | 1h | Navegação funciona |
+| 2.2 Hero section + Motion animations | 1.5h | Animações de entrada |
+| 2.3 Features strip (3 cards com badges) | 45min | Roteamento/Compact/DCI |
+| 2.4 Problem section (3 cards) | 45min | Layout preservado |
+| 2.5 Evidence section | 30min | Números e metodologia |
+| 2.6 Install section + Terminal component | 45min | Copy button funciona |
+| 2.7 FAQ section (accordion) | 30min | Expandir/colapsar |
+| 2.8 i18n PT-BR | 45min | /pt-br funciona |
 
-### Fase 7: Deploy (1h)
-- [ ] Configurar vercel.json para multi-project
-- [ ] Testar rewrites
-- [ ] Verificar CSP headers
-- [ ] Deploy preview
+**Checkpoint:** Site EN e PT-BR renderizam igual ao HTML atual.
 
-### Fase 8: Testes (2h)
-- [ ] Lighthouse > 95 em ambas as apps
-- [ ] Testar dark/light mode
-- [ ] Testar responsive
-- [ ] Testar i18n
-- [ ] Verificar links internos
+---
 
-**Total estimado: ~17h**
+### Milestone 3: Componentes Interativos (4h)
+
+| Task | Estimativa | Entrega |
+|------|------------|---------|
+| 3.1 Migrar SVG routing visualization | 1.5h | Animação de replay |
+| 3.2 Migrar ds-chat para packages/ds-chat | 2h | Todos os cenários |
+| 3.3 Integrar ds-chat no site | 30min | Funciona em produção |
+
+**Checkpoint:** Demo interativo funciona como no HTML atual.
+
+---
+
+### Milestone 4: Docs App (5h)
+
+| Task | Estimativa | Entrega |
+|------|------------|---------|
+| 4.1 Sidebar navigation component | 1h | Navegação hierárquica |
+| 4.2 Table of Contents (TOC) | 45min | Scroll spy |
+| 4.3 MDX components (code blocks, callouts) | 1h | Syntax highlighting |
+| 4.4 Migrar 11 docs de HTML para MDX | 1.5h | Conteúdo preservado |
+| 4.5 Migrar 9 guides de HTML para MDX | 45min | Conteúdo preservado |
+
+**Checkpoint:** Todas as URLs de docs respondem com conteúdo correto.
+
+---
+
+### Milestone 5: SEO e Polish (3h)
+
+| Task | Estimativa | Entrega |
+|------|------------|---------|
+| 5.1 Metadata API (site + docs) | 30min | Títulos dinâmicos |
+| 5.2 Structured Data (JSON-LD) | 30min | SoftwareApplication, FAQPage |
+| 5.3 Sitemaps dinâmicos | 30min | /sitemap.xml funciona |
+| 5.4 OG Image generation | 45min | /og route |
+| 5.5 Vercel Analytics + Speed Insights | 15min | Tracking ativo |
+| 5.6 robots.txt + llms.txt | 15min | AI crawlers permitidos |
+
+**Checkpoint:** Lighthouse SEO 100 em ambas as apps.
+
+---
+
+### Milestone 6: Deploy e Validação (4h)
+
+| Task | Estimativa | Entrega |
+|------|------------|---------|
+| 6.1 Configurar vercel.json (rewrites, CSP) | 1h | Multi-app routing |
+| 6.2 Calcular CSP hashes | 30min | Sem erros de console |
+| 6.3 Deploy preview | 30min | URL de preview |
+| 6.4 Lighthouse audit (Performance 95+) | 1h | Otimizações aplicadas |
+| 6.5 Testar responsive (375px, 768px, 1280px) | 30min | Screenshots |
+| 6.6 Testar dark/light mode | 15min | Ambos funcionam |
+| 6.7 Validar todos os links internos | 15min | Nenhum 404 |
+
+**Checkpoint:** Produção funcionando, Lighthouse verde.
+
+---
+
+### Resumo de Estimativas
+
+| Milestone | Estimativa | Buffer 50% | Total |
+|-----------|------------|------------|-------|
+| 1. Monorepo Foundation | 3h | 1.5h | 4.5h |
+| 2. Site Marketing | 6h | 3h | 9h |
+| 3. Componentes Interativos | 4h | 2h | 6h |
+| 4. Docs App | 5h | 2.5h | 7.5h |
+| 5. SEO e Polish | 3h | 1.5h | 4.5h |
+| 6. Deploy e Validação | 4h | 2h | 6h |
+| **Total** | **25h** | **12.5h** | **37.5h** |
+
+**Estimativa realista: 25-38h de trabalho.**
+
+---
+
+### Ordem de Execução
+
+```
+Milestone 1 (Foundation)
+    │
+    ├── Milestone 2 (Site) ──────┐
+    │                            │
+    └── Milestone 4 (Docs) ──────┼── Milestone 5 (SEO)
+                                 │
+         Milestone 3 (Interativos)
+                                 │
+                                 └── Milestone 6 (Deploy)
+```
+
+Milestones 2, 3 e 4 podem rodar em paralelo após o 1.
+Milestone 5 depende de 2 e 4.
+Milestone 6 é o gate final.
 
 ---
 
