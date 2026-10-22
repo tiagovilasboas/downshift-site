@@ -1,74 +1,32 @@
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { Hero } from '@/components/sections/hero';
-import { Features } from '@/components/sections/features';
 import { Problem } from '@/components/sections/problem';
-import {
-  SectionWho,
-  Install,
-  FAQ,
-  SectionAction,
-  SectionCompact,
-  SectionDCI,
-  SectionFlow,
-  SectionLayers,
-  SectionEvidence,
-  SectionHarnesses,
-  SectionOpen,
-} from '@/components/sections/remaining';
+import { Features } from '@/components/sections/features';
+import { Evidence } from '@/components/sections/evidence';
+import { Install } from '@/components/sections/install';
+import { Faq } from '@/components/sections/faq';
+import { Stub } from '@/components/sections/stub';
 
-interface Props {
-  params: Promise<{ locale: string }>;
-}
-
-export default async function HomePage({ params }: Props) {
-  const { locale } = await params;
-
+export default function HomePage() {
   return (
     <>
-      <Header locale={locale} />
+      <Header />
       <main id="main" tabIndex={-1}>
-        {/* Hero + stats */}
         <Hero />
-
-        {/* Features strip (#features is inside Features) */}
-        <Features />
-
-        {/* Who it is for */}
-        <SectionWho />
-
-        {/* Problem */}
+        <Stub id="who" label="Who it is for" />
         <Problem />
-
-        {/* See it in action — M3 */}
-        <SectionAction />
-
-        {/* Compact section — M3 */}
-        <SectionCompact />
-
-        {/* DCI — M3 */}
-        <SectionDCI />
-
-        {/* How it works — M3 */}
-        <SectionFlow />
-
-        {/* Layers — M3 */}
-        <SectionLayers />
-
-        {/* Evidence — M3 */}
-        <SectionEvidence />
-
-        {/* Harnesses — M3 */}
-        <SectionHarnesses />
-
-        {/* Install / Get started */}
+        <Features />
+        <Stub id="action" label="See it in action" />
+        <Stub id="compact" label="Clean output, smaller context" />
+        <Stub id="dci" label="Code intelligence (DCI)" />
+        <Stub id="flow" label="How a spawn gets its model" />
+        <Stub id="layers" label="Nine layers" />
+        <Evidence />
+        <Stub id="harnesses" label="Harnesses" />
         <Install />
-
-        {/* Open source — M3 */}
-        <SectionOpen />
-
-        {/* FAQ */}
-        <FAQ />
+        <Stub id="open" label="Open source" />
+        <Faq />
       </main>
       <Footer />
     </>
