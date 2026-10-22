@@ -1,7 +1,8 @@
 import type { Metadata } from 'next';
 import { Analytics } from '@vercel/analytics/react';
-import '@downshift/ui/globals.css';
 import './globals.css';
+import { DocsShell } from '@/components/docs-shell';
+import { buildSidebarGroups } from '@/lib/sidebar';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://downshift-ai.vercel.app/docs'),
@@ -18,6 +19,7 @@ export default function DocsRootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const groups = buildSidebarGroups();
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
@@ -37,7 +39,7 @@ export default function DocsRootLayout({
         />
       </head>
       <body>
-        {children}
+        <DocsShell groups={groups}>{children}</DocsShell>
         <Analytics />
       </body>
     </html>
