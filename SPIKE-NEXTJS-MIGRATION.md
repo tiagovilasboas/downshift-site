@@ -5,299 +5,206 @@
 
 ---
 
+## Arquitetura: Monorepo com Duas Apps
+
+```
+downshift-site/
+├── apps/
+│   ├── site/                        # Landing page marketing
+│   │   ├── app/
+│   │   │   ├── (marketing)/
+│   │   │   │   ├── page.tsx         # Home EN
+│   │   │   │   └── components/
+│   │   │   ├── pt-br/
+│   │   │   │   └── page.tsx         # Home PT-BR
+│   │   │   ├── layout.tsx
+│   │   │   ├── sitemap.ts
+│   │   │   ├── robots.ts
+│   │   │   └── globals.css
+│   │   ├── components/
+│   │   │   ├── marketing/           # Hero, features, problem, etc.
+│   │   │   └── layout/              # Header, footer (site-specific)
+│   │   ├── next.config.ts
+│   │   ├── tailwind.config.ts
+│   │   └── package.json
+│   │
+│   └── docs/                        # Documentação técnica
+│       ├── app/
+│       │   ├── page.tsx             # Docs index
+│       │   ├── [[...slug]]/
+│       │   │   └── page.tsx         # Dynamic docs pages
+│       │   ├── layout.tsx
+│       │   ├── sitemap.ts
+│       │   └── globals.css
+│       ├── components/
+│       │   ├── mdx/                 # MDX components
+│       │   ├── navigation/          # Sidebar, TOC, breadcrumbs
+│       │   └── layout/              # Header, footer (docs-specific)
+│       ├── content/
+│       │   ├── docs/                # MDX: install, config, architecture...
+│       │   └── guides/              # MDX: claude-code-*, tutorials
+│       ├── next.config.ts
+│       ├── tailwind.config.ts
+│       └── package.json
+│
+├── packages/
+│   ├── ui/                          # shadcn/ui compartilhado
+│   │   ├── components/
+│   │   │   ├── button.tsx
+│   │   │   ├── card.tsx
+│   │   │   ├── badge.tsx
+│   │   │   ├── terminal.tsx
+│   │   │   └── copy-button.tsx
+│   │   ├── package.json
+│   │   └── tsconfig.json
+│   │
+│   ├── config/                      # Configs compartilhadas
+│   │   ├── tailwind/
+│   │   │   └── preset.ts            # Tokens, theme, animations
+│   │   ├── typescript/
+│   │   │   └── base.json
+│   │   └── package.json
+│   │
+│   └── ds-chat/                     # Web component interativo
+│       ├── ds-chat.tsx              # Migrado de vanilla JS
+│       ├── scenarios.ts
+│       ├── package.json
+│       └── tsconfig.json
+│
+├── turbo.json                       # Turborepo config
+├── pnpm-workspace.yaml
+├── package.json                     # Root package
+└── vercel.json                      # Multi-project deployment
+```
+
+---
+
 ## Stack Final
 
 | Camada | Escolha | Justificativa |
 |--------|---------|---------------|
+| Monorepo | Turborepo + pnpm | Build caching, task orchestration |
 | Framework | Next.js 15 (App Router) | SSG/ISR, metadata API, best-in-class SEO |
 | Styling | Tailwind CSS v4 + CSS custom properties | Mantém design system atual, tokens nativos |
-| Components | shadcn/ui | Acessível, unstyled, composable |
+| Components | shadcn/ui (packages/ui) | Acessível, unstyled, composable, compartilhado |
 | Motion | Motion (ex-Framer Motion) | Animações declarativas, AI Kit integrado |
+| MDX | @next/mdx + contentlayer | Docs e guides em MDX |
 | Fonts | Geist (já em uso) | Mantém identidade visual |
-| i18n | next-intl | PT-BR/EN com routing nativo |
+| i18n | next-intl (site) | PT-BR/EN com routing nativo |
 | Analytics | Vercel Analytics + Speed Insights | Zero-config, privacy-first |
-| Deployment | Vercel | Já configurado, edge network |
+| Deployment | Vercel Multi-project | Um deploy, duas apps |
 
 ---
 
-## SEO Agressivo — Estratégia Completa
+## Domínios e Routing
 
-### 1. Technical SEO (Next.js nativo)
+| App | Domínio | Paths |
+|-----|---------|-------|
+| site | downshift-ai.vercel.app | `/`, `/pt-br` |
+| docs | downshift-ai.vercel.app/docs | `/docs/*`, `/guides/*`, `/pt-br/guias/*` |
 
-```tsx
-// app/layout.tsx
-export const metadata: Metadata = {
-  metadataBase: new URL('https://downshift-ai.vercel.app'),
-  title: {
-    default: 'Downshift: Claude Code routing, Compactor and DCI',
-    template: '%s | Downshift'
-  },
-  description: 'Free, local tool for Claude Code. Right model per subagent, shorter clean output, only the code a change touches. No extra AI.',
-  keywords: ['Claude Code', 'AI coding agent', 'token optimization', 'model routing', 'subagent', 'LLM cost reduction'],
-  authors: [{ name: 'Tiago Vilas Boas' }],
-  creator: 'Tiago Vilas Boas',
-  publisher: 'Montanha Tech',
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      'max-video-preview': -1,
-      'max-image-preview': 'large',
-      'max-snippet': -1,
-    },
-  },
-  alternates: {
-    canonical: '/',
-    languages: {
-      'en': '/',
-      'pt-BR': '/pt-br',
-    },
-  },
-  openGraph: {
-    type: 'website',
-    locale: 'en_US',
-    alternateLocale: 'pt_BR',
-    url: 'https://downshift-ai.vercel.app',
-    siteName: 'Downshift',
-    title: 'Downshift: Claude Code routing, Compactor and DCI',
-    description: 'Free, local tool for Claude Code. Right model per subagent, shorter clean output, only the code a change touches.',
-    images: [{
-      url: '/og.png',
-      width: 1200,
-      height: 630,
-      alt: 'Downshift: Fewer tokens, same agent',
-    }],
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'Downshift: Claude Code routing, Compactor and DCI',
-    description: 'Free, local tool for Claude Code. Right model per subagent, shorter clean output.',
-    images: ['/og.png'],
-  },
-  verification: {
-    google: 'GOOGLE_SITE_VERIFICATION', // Adicionar após setup
-  },
-};
+```json
+// vercel.json
+{
+  "rewrites": [
+    { "source": "/docs/:path*", "destination": "/docs/:path*" },
+    { "source": "/guides/:path*", "destination": "/docs/guides/:path*" },
+    { "source": "/pt-br/guias/:path*", "destination": "/docs/pt-br/guias/:path*" },
+    { "source": "/:path*", "destination": "/site/:path*" }
+  ]
+}
 ```
 
-### 2. Structured Data (JSON-LD expandido)
+---
 
-```tsx
-// components/structured-data.tsx
-export function StructuredData() {
-  const softwareApp = {
-    "@context": "https://schema.org",
-    "@type": "SoftwareApplication",
-    "name": "Downshift",
-    "applicationCategory": "DeveloperApplication",
-    "operatingSystem": "macOS, Linux, Windows",
-    "license": "https://www.apache.org/licenses/LICENSE-2.0",
-    "url": "https://downshift-ai.vercel.app",
-    "downloadUrl": "https://github.com/tiagovilasboas/downshift/releases",
-    "codeRepository": "https://github.com/tiagovilasboas/downshift",
-    "author": {
-      "@type": "Person",
-      "name": "Tiago Vilas Boas",
-      "url": "https://github.com/tiagovilasboas"
+## Configuração do Monorepo
+
+### Root package.json
+
+```json
+{
+  "name": "downshift-site",
+  "private": true,
+  "scripts": {
+    "dev": "turbo dev",
+    "build": "turbo build",
+    "lint": "turbo lint",
+    "type-check": "turbo type-check"
+  },
+  "devDependencies": {
+    "turbo": "^2.2.0"
+  },
+  "packageManager": "pnpm@9.0.0"
+}
+```
+
+### pnpm-workspace.yaml
+
+```yaml
+packages:
+  - "apps/*"
+  - "packages/*"
+```
+
+### turbo.json
+
+```json
+{
+  "$schema": "https://turbo.build/schema.json",
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": [".next/**", "!.next/cache/**"]
     },
-    "publisher": {
-      "@type": "Organization",
-      "name": "Montanha Tech",
-      "taxID": "60.782.110/0001-84"
+    "dev": {
+      "cache": false,
+      "persistent": true
     },
-    "offers": {
-      "@type": "Offer",
-      "price": "0",
-      "priceCurrency": "USD"
-    },
-    "aggregateRating": { // Quando houver reviews
-      "@type": "AggregateRating",
-      "ratingValue": "5",
-      "ratingCount": "1" // Atualizar conforme crescer
+    "lint": {},
+    "type-check": {
+      "dependsOn": ["^build"]
     }
-  };
-
-  const breadcrumb = {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    "itemListElement": [
-      { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://downshift-ai.vercel.app" },
-      { "@type": "ListItem", "position": 2, "name": "Docs", "item": "https://downshift-ai.vercel.app/docs" },
-      { "@type": "ListItem", "position": 3, "name": "Guides", "item": "https://downshift-ai.vercel.app/guides" }
-    ]
-  };
-
-  const howTo = {
-    "@context": "https://schema.org",
-    "@type": "HowTo",
-    "name": "How to Install Downshift",
-    "description": "Install Downshift in one command to optimize your Claude Code token usage",
-    "totalTime": "PT2M",
-    "step": [
-      {
-        "@type": "HowToStep",
-        "name": "Download",
-        "text": "Run: curl -fsSL https://raw.githubusercontent.com/tiagovilasboas/downshift/main/install.sh | sh"
-      },
-      {
-        "@type": "HowToStep",
-        "name": "Preview",
-        "text": "Run: downshift setup --dry-run"
-      },
-      {
-        "@type": "HowToStep",
-        "name": "Install",
-        "text": "Run: downshift setup --yes"
-      }
-    ]
-  };
-
-  return (
-    <script
-      type="application/ld+json"
-      dangerouslySetInnerHTML={{
-        __html: JSON.stringify({
-          "@context": "https://schema.org",
-          "@graph": [softwareApp, breadcrumb, howTo]
-        })
-      }}
-    />
-  );
+  }
 }
-```
-
-### 3. Sitemap Dinâmico
-
-```tsx
-// app/sitemap.ts
-import { MetadataRoute } from 'next';
-
-export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = 'https://downshift-ai.vercel.app';
-  const lastModified = new Date();
-
-  // Páginas principais
-  const routes = [
-    { path: '', priority: 1.0, changeFrequency: 'weekly' },
-    { path: '/pt-br', priority: 1.0, changeFrequency: 'weekly' },
-    { path: '/docs', priority: 0.9, changeFrequency: 'weekly' },
-    { path: '/guides', priority: 0.8, changeFrequency: 'weekly' },
-    { path: '/pt-br/guias', priority: 0.8, changeFrequency: 'weekly' },
-  ];
-
-  // Docs pages
-  const docs = [
-    'install', 'architecture', 'config', 'evidence',
-    'capability-matrix', 'harness-matrix', 'session-models',
-    'subagents', 'simulation', 'companions', 'report'
-  ];
-
-  // Guides pages
-  const guides = [
-    'claude-code-token-usage', 'claude-code-usage-limit',
-    'claude-code-model-routing', 'claude-code-token-optimization',
-    'claude-code-context-packing', 'claude-code-subagent-models',
-    'claude-code-prompt-cache', 'claude-code-pretooluse-hook-subagent-model',
-    'claude-code-router-vs-downshift'
-  ];
-
-  return [
-    ...routes.map(({ path, priority, changeFrequency }) => ({
-      url: `${baseUrl}${path}`,
-      lastModified,
-      changeFrequency: changeFrequency as 'weekly',
-      priority,
-    })),
-    ...docs.map(doc => ({
-      url: `${baseUrl}/docs/${doc}`,
-      lastModified,
-      changeFrequency: 'monthly' as const,
-      priority: 0.7,
-    })),
-    ...guides.map(guide => ({
-      url: `${baseUrl}/guides/${guide}`,
-      lastModified,
-      changeFrequency: 'monthly' as const,
-      priority: 0.7,
-    })),
-  ];
-}
-```
-
-### 4. Robots.txt Otimizado
-
-```tsx
-// app/robots.ts
-import { MetadataRoute } from 'next';
-
-export default function robots(): MetadataRoute.Robots {
-  return {
-    rules: [
-      {
-        userAgent: '*',
-        allow: '/',
-        disallow: ['/api/', '/_next/'],
-      },
-      {
-        userAgent: 'GPTBot',
-        allow: ['/', '/llms.txt', '/docs/', '/guides/'],
-      },
-      {
-        userAgent: 'ChatGPT-User',
-        allow: '/',
-      },
-      {
-        userAgent: 'Claude-Web',
-        allow: '/',
-      },
-      {
-        userAgent: 'anthropic-ai',
-        allow: '/',
-      },
-    ],
-    sitemap: 'https://downshift-ai.vercel.app/sitemap.xml',
-  };
-}
-```
-
-### 5. llms.txt para AI Crawlers
-
-Já existe, manter e expandir:
-```
-# Downshift
-
-> Free, local tool for Claude Code and other coding agents.
-
-## Features
-- Model routing: right model per subagent spawn
-- Compactor: shorter clean output from routine commands
-- DCI: only the code a change touches (opt-in)
-
-## Install
-curl -fsSL https://raw.githubusercontent.com/tiagovilasboas/downshift/main/install.sh | sh
-downshift setup --yes
-
-## Links
-- Docs: /docs/
-- GitHub: https://github.com/tiagovilasboas/downshift
-- Install guide: /docs/install/
 ```
 
 ---
 
-## Branding — Design System Tokens
+## Package: UI Compartilhado
 
-### Manter os tokens CSS existentes (zero mudança visual)
+### packages/ui/package.json
 
-```tsx
-// tailwind.config.ts
+```json
+{
+  "name": "@downshift/ui",
+  "version": "0.0.1",
+  "private": true,
+  "exports": {
+    "./button": "./components/button.tsx",
+    "./card": "./components/card.tsx",
+    "./badge": "./components/badge.tsx",
+    "./terminal": "./components/terminal.tsx",
+    "./copy-button": "./components/copy-button.tsx",
+    "./globals.css": "./globals.css"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@downshift/config": "workspace:*",
+    "typescript": "^5.6.0"
+  }
+}
+```
+
+### packages/config/tailwind/preset.ts
+
+```ts
 import type { Config } from 'tailwindcss';
 
-const config: Config = {
+export const downshiftPreset: Partial<Config> = {
   darkMode: 'class',
-  content: ['./app/**/*.{ts,tsx}', './components/**/*.{ts,tsx}'],
   theme: {
     extend: {
       colors: {
@@ -315,7 +222,7 @@ const config: Config = {
         'primary-fg': 'var(--pf)',
         'secondary-bg': 'var(--sb)',
         'secondary-fg': 'var(--sf)',
-        'line': 'var(--li)',
+        line: 'var(--li)',
       },
       fontFamily: {
         sans: ['var(--ss)', 'system-ui', 'sans-serif'],
@@ -342,77 +249,89 @@ const config: Config = {
       },
     },
   },
-  plugins: [require('tailwindcss-animate')],
+};
+```
+
+---
+
+## App: Site (Marketing)
+
+### apps/site/package.json
+
+```json
+{
+  "name": "@downshift/site",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --port 3000",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@downshift/ui": "workspace:*",
+    "@vercel/analytics": "^1.3.0",
+    "@vercel/speed-insights": "^1.0.0",
+    "motion": "^11.11.0",
+    "next": "15.0.0",
+    "next-intl": "^3.20.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@downshift/config": "workspace:*",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "tailwindcss": "^4.0.0",
+    "typescript": "^5.6.0"
+  }
+}
+```
+
+### apps/site/tailwind.config.ts
+
+```ts
+import type { Config } from 'tailwindcss';
+import { downshiftPreset } from '@downshift/config/tailwind/preset';
+
+const config: Config = {
+  presets: [downshiftPreset],
+  content: [
+    './app/**/*.{ts,tsx}',
+    './components/**/*.{ts,tsx}',
+    '../../packages/ui/**/*.{ts,tsx}',
+  ],
 };
 
 export default config;
 ```
 
-### Global CSS (preservar variáveis existentes)
-
-```css
-/* app/globals.css */
-@import 'tailwindcss';
-
-@layer base {
-  :root {
-    color-scheme: dark;
-    --b: #0a0a0a;
-    --c: #1a1a1a;
-    --l: #1f2329;
-    --l2: rgba(255, 255, 255, 0.1);
-    --f: #d6dae2;
-    --t: #fff;
-    --m: #868a90;
-    --a: #22C55E;
-    --r: #22C55E;
-    --h: #7d828a;
-    --pb: #fff;
-    --pf: #000;
-    --sb: #1f1f1f;
-    --sf: #fff;
-    --li: #686c73;
-    --ss: "Geist", "Geist Fallback", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-    --mo: "Geist Mono", "Geist Mono Fallback", ui-monospace, SFMono-Regular, Menlo, monospace;
-  }
-
-  @media (prefers-color-scheme: light) {
-    :root {
-      --b: #fafafa;
-      --c: #fff;
-      --l: #d9dde3;
-      --l2: rgba(10, 10, 10, 0.12);
-      --f: #1f2937;
-      --t: #0a0a0a;
-      --m: #4b5563;
-      --a: #166534;
-      --r: #0a0a0a;
-      --h: #6b7280;
-      --pb: #0a0a0a;
-      --pf: #fff;
-      --sb: #eceff3;
-      --sf: #0a0a0a;
-      --li: #80868f;
-    }
-  }
-}
-```
-
----
-
-## Marketing — Fundação
-
-### 1. Analytics Setup
+### apps/site/app/layout.tsx
 
 ```tsx
-// app/layout.tsx
+import '@downshift/ui/globals.css';
+import './globals.css';
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/next';
+import { StructuredData } from '@/components/structured-data';
 
-export default function RootLayout({ children }) {
+export const metadata: Metadata = {
+  metadataBase: new URL('https://downshift-ai.vercel.app'),
+  title: {
+    default: 'Downshift: Claude Code routing, Compactor and DCI',
+    template: '%s | Downshift',
+  },
+  description: 'Free, local tool for Claude Code. Right model per subagent, shorter clean output, only the code a change touches.',
+  // ... resto do metadata (ver seção SEO)
+};
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html>
+    <html lang="en" suppressHydrationWarning>
       <body>
+        <StructuredData />
         {children}
         <Analytics />
         <SpeedInsights />
@@ -422,379 +341,497 @@ export default function RootLayout({ children }) {
 }
 ```
 
-### 2. Newsletter/Waitlist (futuro)
+---
+
+## App: Docs (Documentação)
+
+### apps/docs/package.json
+
+```json
+{
+  "name": "@downshift/docs",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --port 3001",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@downshift/ui": "workspace:*",
+    "@next/mdx": "^15.0.0",
+    "@vercel/analytics": "^1.3.0",
+    "next": "15.0.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "rehype-pretty-code": "^0.13.0",
+    "rehype-slug": "^6.0.0",
+    "remark-gfm": "^4.0.0"
+  },
+  "devDependencies": {
+    "@downshift/config": "workspace:*",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "tailwindcss": "^4.0.0",
+    "typescript": "^5.6.0"
+  }
+}
+```
+
+### apps/docs/next.config.ts
+
+```ts
+import createMDX from '@next/mdx';
+import rehypePrettyCode from 'rehype-pretty-code';
+import rehypeSlug from 'rehype-slug';
+import remarkGfm from 'remark-gfm';
+
+const withMDX = createMDX({
+  options: {
+    remarkPlugins: [remarkGfm],
+    rehypePlugins: [
+      rehypeSlug,
+      [
+        rehypePrettyCode,
+        {
+          theme: 'github-dark',
+          keepBackground: false,
+        },
+      ],
+    ],
+  },
+});
+
+const nextConfig = {
+  basePath: '/docs',
+  pageExtensions: ['ts', 'tsx', 'md', 'mdx'],
+  experimental: {
+    mdxRs: true,
+  },
+};
+
+export default withMDX(nextConfig);
+```
+
+### apps/docs/app/layout.tsx
 
 ```tsx
-// components/newsletter-form.tsx
-'use client';
+import '@downshift/ui/globals.css';
+import './globals.css';
+import { Sidebar } from '@/components/navigation/sidebar';
+import { TableOfContents } from '@/components/navigation/toc';
 
-import { useState } from 'react';
-import { motion } from 'motion/react';
+export const metadata: Metadata = {
+  metadataBase: new URL('https://downshift-ai.vercel.app/docs'),
+  title: {
+    default: 'Downshift Docs',
+    template: '%s | Downshift Docs',
+  },
+  description: 'Documentation for Downshift: model routing, compactor, and DCI for Claude Code.',
+};
 
-export function NewsletterForm() {
-  const [email, setEmail] = useState('');
-  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+export default function DocsLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="en" suppressHydrationWarning>
+      <body className="flex min-h-screen">
+        <Sidebar />
+        <main className="flex-1 px-8 py-12 max-w-3xl mx-auto">
+          {children}
+        </main>
+        <TableOfContents />
+      </body>
+    </html>
+  );
+}
+```
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setStatus('loading');
-    // Integrar com Resend/ConvertKit/Buttondown
+### apps/docs/app/[[...slug]]/page.tsx
+
+```tsx
+import { notFound } from 'next/navigation';
+import { getDocBySlug, getAllDocs } from '@/lib/docs';
+
+interface Props {
+  params: { slug?: string[] };
+}
+
+export async function generateStaticParams() {
+  const docs = await getAllDocs();
+  return docs.map((doc) => ({
+    slug: doc.slug.split('/'),
+  }));
+}
+
+export async function generateMetadata({ params }: Props) {
+  const slug = params.slug?.join('/') || 'index';
+  const doc = await getDocBySlug(slug);
+  if (!doc) return {};
+
+  return {
+    title: doc.meta.title,
+    description: doc.meta.description,
+  };
+}
+
+export default async function DocPage({ params }: Props) {
+  const slug = params.slug?.join('/') || 'index';
+  const doc = await getDocBySlug(slug);
+
+  if (!doc) {
+    notFound();
+  }
+
+  return (
+    <article className="prose prose-invert max-w-none">
+      <h1>{doc.meta.title}</h1>
+      {doc.content}
+    </article>
+  );
+}
+```
+
+### apps/docs/content/docs/install.mdx
+
+```mdx
+---
+title: Installation
+description: Install Downshift in one command
+---
+
+# Installation
+
+Downshift is a single Go binary with no daemon. The installer downloads
+the latest release and runs `downshift setup`, which shows a diff before
+writing anything.
+
+## Quick Install
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/tiagovilasboas/downshift/main/install.sh | sh
+```
+
+## Manual Install
+
+1. Download the latest release from [GitHub Releases](https://github.com/tiagovilasboas/downshift/releases)
+2. Extract and move to your PATH
+3. Run `downshift setup --dry-run` to preview changes
+4. Run `downshift setup --yes` to apply
+
+## Verify Installation
+
+```bash
+downshift version
+```
+
+## Uninstall
+
+```bash
+downshift uninstall
+```
+```
+
+---
+
+## Estrutura de Navegação (Docs)
+
+### apps/docs/lib/docs.ts
+
+```ts
+import fs from 'fs/promises';
+import path from 'path';
+import matter from 'gray-matter';
+import { compileMDX } from 'next-mdx-remote/rsc';
+
+const DOCS_DIR = path.join(process.cwd(), 'content/docs');
+const GUIDES_DIR = path.join(process.cwd(), 'content/guides');
+
+export interface DocMeta {
+  title: string;
+  description: string;
+  order?: number;
+}
+
+export async function getDocBySlug(slug: string) {
+  const isGuide = slug.startsWith('guides/');
+  const dir = isGuide ? GUIDES_DIR : DOCS_DIR;
+  const filePath = isGuide
+    ? path.join(dir, slug.replace('guides/', '') + '.mdx')
+    : path.join(dir, slug + '.mdx');
+
+  try {
+    const source = await fs.readFile(filePath, 'utf8');
+    const { data, content } = matter(source);
+    const { content: mdxContent } = await compileMDX({
+      source: content,
+      options: { parseFrontmatter: true },
+    });
+
+    return {
+      slug,
+      meta: data as DocMeta,
+      content: mdxContent,
+    };
+  } catch {
+    return null;
+  }
+}
+
+export async function getAllDocs() {
+  const docs = await getFilesRecursive(DOCS_DIR);
+  const guides = await getFilesRecursive(GUIDES_DIR);
+
+  return [
+    ...docs.map((f) => ({ slug: f.replace('.mdx', '') })),
+    ...guides.map((f) => ({ slug: 'guides/' + f.replace('.mdx', '') })),
+  ];
+}
+```
+
+### Sidebar Navigation Config
+
+```ts
+// apps/docs/lib/navigation.ts
+export const docsNavigation = [
+  {
+    title: 'Getting Started',
+    items: [
+      { title: 'Installation', href: '/docs/install' },
+      { title: 'Quick Start', href: '/docs/quickstart' },
+      { title: 'Configuration', href: '/docs/config' },
+    ],
+  },
+  {
+    title: 'Features',
+    items: [
+      { title: 'Model Routing', href: '/docs/routing' },
+      { title: 'Compactor', href: '/docs/compactor' },
+      { title: 'DCI', href: '/docs/dci' },
+    ],
+  },
+  {
+    title: 'Reference',
+    items: [
+      { title: 'Architecture', href: '/docs/architecture' },
+      { title: 'Evidence', href: '/docs/evidence' },
+      { title: 'Capability Matrix', href: '/docs/capability-matrix' },
+      { title: 'Harness Matrix', href: '/docs/harness-matrix' },
+    ],
+  },
+  {
+    title: 'Guides',
+    items: [
+      { title: 'Token Optimization', href: '/docs/guides/claude-code-token-optimization' },
+      { title: 'Model Routing', href: '/docs/guides/claude-code-model-routing' },
+      { title: 'Context Packing', href: '/docs/guides/claude-code-context-packing' },
+      { title: 'Usage Limits', href: '/docs/guides/claude-code-usage-limit' },
+    ],
+  },
+];
+```
+
+---
+
+## SEO por App
+
+### Site: Marketing SEO
+
+```tsx
+// apps/site/components/structured-data.tsx
+export function StructuredData() {
+  const softwareApp = {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Downshift",
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "macOS, Linux, Windows",
+    "license": "https://www.apache.org/licenses/LICENSE-2.0",
+    "url": "https://downshift-ai.vercel.app",
+    "downloadUrl": "https://github.com/tiagovilasboas/downshift/releases",
+    "codeRepository": "https://github.com/tiagovilasboas/downshift",
+    "author": {
+      "@type": "Person",
+      "name": "Tiago Vilas Boas",
+      "url": "https://github.com/tiagovilasboas"
+    },
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    }
+  };
+
+  const faqPage = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      // FAQ items from current page
+    ]
   };
 
   return (
-    <motion.form
-      onSubmit={handleSubmit}
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      className="flex gap-2"
-    >
-      <input
-        type="email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        placeholder="you@example.com"
-        className="flex-1 px-4 py-2 rounded-full bg-secondary-bg border border-border"
-      />
-      <button
-        type="submit"
-        disabled={status === 'loading'}
-        className="px-6 py-2 rounded-full bg-primary-bg text-primary-fg font-medium"
-      >
-        {status === 'loading' ? 'Subscribing...' : 'Get updates'}
-      </button>
-    </motion.form>
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{
+        __html: JSON.stringify({ "@context": "https://schema.org", "@graph": [softwareApp, faqPage] })
+      }}
+    />
   );
 }
 ```
 
-### 3. Social Proof Section (futuro)
+### Docs: Technical SEO
 
 ```tsx
-// components/social-proof.tsx
-import { motion } from 'motion/react';
+// apps/docs/app/sitemap.ts
+import { getAllDocs } from '@/lib/docs';
 
-const testimonials = [
-  // Coletar de GitHub stars, issues, discussions
-];
+export default async function sitemap() {
+  const docs = await getAllDocs();
+  const baseUrl = 'https://downshift-ai.vercel.app/docs';
 
-const stats = [
-  { value: '53%', label: 'fewer tokens per task' },
-  { value: '0', label: 'extra AI calls' },
-  { value: '46', label: 'runs in trial' },
-];
-
-export function SocialProof() {
-  return (
-    <section className="py-16">
-      <div className="max-w-7xl mx-auto px-4">
-        <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          className="grid grid-cols-3 gap-8 text-center"
-        >
-          {stats.map((stat, i) => (
-            <motion.div
-              key={stat.label}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.1 }}
-            >
-              <div className="text-5xl font-bold text-title">{stat.value}</div>
-              <div className="text-muted mt-2">{stat.label}</div>
-            </motion.div>
-          ))}
-        </motion.div>
-      </div>
-    </section>
-  );
-}
-```
-
-### 4. OG Image Dinâmico
-
-```tsx
-// app/og/route.tsx
-import { ImageResponse } from 'next/og';
-
-export const runtime = 'edge';
-
-export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url);
-  const title = searchParams.get('title') || 'Downshift';
-  const description = searchParams.get('description') || 'Fewer tokens, same agent';
-
-  return new ImageResponse(
-    (
-      <div
-        style={{
-          width: '100%',
-          height: '100%',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          backgroundColor: '#0a0a0a',
-          color: '#fff',
-          fontFamily: 'Geist',
-        }}
-      >
-        <div style={{ fontSize: 72, fontWeight: 600 }}>{title}</div>
-        <div style={{ fontSize: 32, color: '#868a90', marginTop: 24 }}>{description}</div>
-      </div>
-    ),
-    { width: 1200, height: 630 }
-  );
+  return [
+    { url: baseUrl, lastModified: new Date(), priority: 1.0 },
+    ...docs.map((doc) => ({
+      url: `${baseUrl}/${doc.slug}`,
+      lastModified: new Date(),
+      priority: doc.slug.startsWith('guides/') ? 0.8 : 0.9,
+    })),
+  ];
 }
 ```
 
 ---
 
-## Estrutura de Pastas
+## Migração do Conteúdo Existente
 
-```
-downshift-site/
-├── app/
-│   ├── (marketing)/
-│   │   ├── page.tsx                 # Home EN
-│   │   ├── layout.tsx
-│   │   └── components/
-│   │       ├── hero.tsx
-│   │       ├── features.tsx
-│   │       ├── problem.tsx
-│   │       ├── evidence.tsx
-│   │       ├── install.tsx
-│   │       └── faq.tsx
-│   ├── pt-br/
-│   │   ├── page.tsx                 # Home PT-BR
-│   │   └── guias/
-│   ├── docs/
-│   │   ├── page.tsx
-│   │   └── [slug]/page.tsx
-│   ├── guides/
-│   │   ├── page.tsx
-│   │   └── [slug]/page.tsx
-│   ├── og/route.tsx                 # OG Image API
-│   ├── sitemap.ts
-│   ├── robots.ts
-│   ├── layout.tsx
-│   └── globals.css
-├── components/
-│   ├── ui/                          # shadcn/ui
-│   │   ├── button.tsx
-│   │   ├── card.tsx
-│   │   ├── badge.tsx
-│   │   └── ...
-│   ├── layout/
-│   │   ├── header.tsx
-│   │   ├── footer.tsx
-│   │   └── nav.tsx
-│   ├── marketing/
-│   │   ├── ds-chat.tsx              # Migrado de vanilla JS
-│   │   ├── routing-demo.tsx
-│   │   ├── terminal.tsx
-│   │   └── copy-button.tsx
-│   └── structured-data.tsx
-├── lib/
-│   ├── utils.ts                     # cn(), formatters
-│   └── content.ts                   # MDX loader
-├── content/
-│   ├── docs/                        # MDX docs
-│   └── guides/                      # MDX guides
-├── public/
-│   ├── fonts/
-│   ├── og.png
-│   ├── favicon.svg
-│   └── ...
-├── tailwind.config.ts
-├── next.config.ts
-└── package.json
-```
+### Docs a migrar (de /docs/*.html)
+
+| Arquivo atual | MDX destino |
+|---------------|-------------|
+| docs/install.html | content/docs/install.mdx |
+| docs/architecture.html | content/docs/architecture.mdx |
+| docs/config.html | content/docs/config.mdx |
+| docs/evidence.html | content/docs/evidence.mdx |
+| docs/capability-matrix.html | content/docs/capability-matrix.mdx |
+| docs/harness-matrix.html | content/docs/harness-matrix.mdx |
+| docs/session-models.html | content/docs/session-models.mdx |
+| docs/subagents.html | content/docs/subagents.mdx |
+| docs/simulation.html | content/docs/simulation.mdx |
+| docs/companions.html | content/docs/companions.mdx |
+| docs/report.html | content/docs/report.mdx |
+
+### Guides a migrar (de /guides/*.html)
+
+| Arquivo atual | MDX destino |
+|---------------|-------------|
+| guides/claude-code-token-usage.html | content/guides/claude-code-token-usage.mdx |
+| guides/claude-code-usage-limit.html | content/guides/claude-code-usage-limit.mdx |
+| guides/claude-code-model-routing.html | content/guides/claude-code-model-routing.mdx |
+| guides/claude-code-token-optimization.html | content/guides/claude-code-token-optimization.mdx |
+| guides/claude-code-context-packing.html | content/guides/claude-code-context-packing.mdx |
+| guides/claude-code-subagent-models.html | content/guides/claude-code-subagent-models.mdx |
+| guides/claude-code-prompt-cache.html | content/guides/claude-code-prompt-cache.mdx |
+| guides/claude-code-pretooluse-hook-subagent-model.html | content/guides/claude-code-pretooluse-hook-subagent-model.mdx |
+| guides/claude-code-router-vs-downshift.html | content/guides/claude-code-router-vs-downshift.mdx |
 
 ---
 
-## Animações com Motion
+## Plano de Migração Atualizado
 
-### Hero Animation
+### Fase 1: Setup Monorepo (2h)
+- [ ] Inicializar Turborepo
+- [ ] Criar estrutura de pastas
+- [ ] Setup pnpm workspace
+- [ ] Configurar turbo.json
 
-```tsx
-// components/marketing/hero.tsx
-'use client';
+### Fase 2: Package UI (2h)
+- [ ] Extrair componentes shadcn/ui para packages/ui
+- [ ] Configurar preset Tailwind em packages/config
+- [ ] Setup TypeScript base config
+- [ ] Testar exports
 
-import { motion } from 'motion/react';
+### Fase 3: App Site (4h)
+- [ ] Setup Next.js 15 em apps/site
+- [ ] Migrar Hero section com Motion
+- [ ] Migrar Features, Problem, Evidence
+- [ ] Migrar Install, FAQ
+- [ ] Setup i18n (PT-BR)
+- [ ] Routing visualization (SVG interativo)
 
-export function Hero() {
-  return (
-    <section className="min-h-screen flex items-center">
-      <div className="max-w-7xl mx-auto px-4 grid lg:grid-cols-2 gap-12">
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-        >
-          <motion.span
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="inline-flex items-center gap-2 px-4 py-1 rounded-full border border-border bg-card text-muted text-sm"
-          >
-            <span className="px-2 py-0.5 rounded-full bg-secondary-bg text-title text-xs font-medium">
-              Beta
-            </span>
-            Apache-2.0, Go
-          </motion.span>
-
-          <motion.h1
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3, duration: 0.6 }}
-            className="mt-6 text-4xl lg:text-6xl font-semibold tracking-tight"
-          >
-            <span className="text-title">Your best model</span>
-            <span className="block text-muted">shouldn't do every job.</span>
-          </motion.h1>
-
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4, duration: 0.6 }}
-            className="mt-6 text-lg text-muted max-w-xl"
-          >
-            Downshift gives your coding agent the right model for each subagent,
-            shorter output from clean commands, and, if you turn it on, only the
-            code a change touches. No extra AI call to decide.
-          </motion.p>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5, duration: 0.6 }}
-            className="mt-8 flex gap-4"
-          >
-            <a href="#start" className="btn-primary">Install</a>
-            <a href="/docs" className="btn-secondary">Read the docs</a>
-          </motion.div>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.4, duration: 0.8 }}
-        >
-          <RoutingVisualization />
-        </motion.div>
-      </div>
-    </section>
-  );
-}
-```
-
-### Scroll-triggered sections
-
-```tsx
-// components/marketing/feature-card.tsx
-'use client';
-
-import { motion } from 'motion/react';
-
-interface FeatureCardProps {
-  title: string;
-  description: string;
-  status: 'completed' | 'implemented' | 'opt-in';
-  index: number;
-}
-
-export function FeatureCard({ title, description, status, index }: FeatureCardProps) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 30 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: '-100px' }}
-      transition={{ duration: 0.5, delay: index * 0.1 }}
-      className="border-t border-title pt-4"
-    >
-      <div className="flex items-center gap-3 text-muted text-sm mb-2">
-        <span className="font-mono">{title}</span>
-        <StatusBadge status={status} />
-      </div>
-      <h3 className="text-lg font-medium text-title">{title}</h3>
-      <p className="mt-2 text-foreground">{description}</p>
-    </motion.div>
-  );
-}
-```
-
----
-
-## Plano de Migração
-
-### Fase 1: Setup (2h)
-- [ ] `npx create-next-app@latest downshift-next --typescript --tailwind --eslint --app`
-- [ ] Instalar dependências: `motion`, `next-intl`, `@vercel/analytics`
-- [ ] Configurar shadcn/ui: `npx shadcn@latest init`
-- [ ] Copiar fonts e assets
-- [ ] Configurar Tailwind com tokens existentes
-
-### Fase 2: Layout e Componentes Base (3h)
-- [ ] Header com nav responsivo (já existe, migrar)
-- [ ] Footer (já existe, migrar)
-- [ ] Componentes UI: Button, Card, Badge, Terminal
-- [ ] Copy button com toast
-
-### Fase 3: Home Page (4h)
-- [ ] Hero section com animações
-- [ ] Features strip (3 cards)
-- [ ] Problem section
-- [ ] Evidence section
-- [ ] Install section
-- [ ] FAQ (já existe, usar `<details>`)
-
-### Fase 4: Visualização de Routing (2h)
-- [ ] Migrar o SVG interativo `dsc` para React
-- [ ] Manter a animação de replay
-- [ ] Integrar com Motion
+### Fase 4: App Docs (3h)
+- [ ] Setup Next.js 15 em apps/docs com MDX
+- [ ] Criar componentes de navegação (Sidebar, TOC)
+- [ ] Migrar todas as docs de HTML para MDX
+- [ ] Migrar todas as guides de HTML para MDX
+- [ ] Setup syntax highlighting
 
 ### Fase 5: ds-chat Component (2h)
-- [ ] Migrar de vanilla JS para React
-- [ ] Manter toda a lógica de cenários
-- [ ] Adicionar tipos TypeScript
+- [ ] Migrar de vanilla JS para React em packages/ds-chat
+- [ ] Integrar em apps/site
+- [ ] Preservar toda lógica de cenários
 
-### Fase 6: Docs e Guides (2h)
-- [ ] Setup MDX com `@next/mdx` ou `contentlayer`
-- [ ] Migrar páginas de docs
-- [ ] Migrar páginas de guides
-- [ ] Index pages
+### Fase 6: SEO e Meta (1h)
+- [ ] Metadata API em ambas as apps
+- [ ] Structured data (site)
+- [ ] Sitemaps separados
+- [ ] OG images
 
-### Fase 7: i18n (1h)
-- [ ] Setup next-intl
-- [ ] Migrar conteúdo PT-BR
-- [ ] Language switcher
+### Fase 7: Deploy (1h)
+- [ ] Configurar vercel.json para multi-project
+- [ ] Testar rewrites
+- [ ] Verificar CSP headers
+- [ ] Deploy preview
 
-### Fase 8: SEO e Meta (1h)
-- [ ] Metadata API em todas as páginas
-- [ ] Structured data
-- [ ] OG images dinâmicos
-- [ ] Sitemap e robots.txt
-
-### Fase 9: Testes e Polish (2h)
-- [ ] Lighthouse score > 95 em tudo
+### Fase 8: Testes (2h)
+- [ ] Lighthouse > 95 em ambas as apps
 - [ ] Testar dark/light mode
 - [ ] Testar responsive
 - [ ] Testar i18n
-- [ ] CSP headers no vercel.json
+- [ ] Verificar links internos
+
+**Total estimado: ~17h**
+
+---
+
+## Vantagens desta Arquitetura
+
+1. **Separação de concerns**
+   - Site: foco em conversão, design, animações
+   - Docs: foco em conteúdo técnico, MDX, navegação
+
+2. **Deploy independente**
+   - Mudança em docs não rebuilda site
+   - Turborepo cacheia builds
+
+3. **Compartilhamento eficiente**
+   - UI components reutilizados
+   - Tokens de design centralizados
+   - TypeScript configs compartilhados
+
+4. **Escalabilidade**
+   - Fácil adicionar apps (blog, playground, etc.)
+   - Cada app pode ter seu próprio i18n setup
+   - Docs podem crescer sem impactar performance do site
+
+5. **DX**
+   - `pnpm dev` roda ambas as apps
+   - Hot reload funciona em packages compartilhados
+   - Type safety cross-package
 
 ---
 
 ## Métricas de Sucesso
 
-| Métrica | Atual | Target |
-|---------|-------|--------|
-| Lighthouse Performance | ~90 | 95+ |
-| Lighthouse SEO | ~95 | 100 |
-| Lighthouse Accessibility | ~95 | 100 |
-| First Contentful Paint | ~1.2s | <1s |
-| Largest Contentful Paint | ~2.5s | <2s |
-| Cumulative Layout Shift | ~0.1 | <0.05 |
-| Time to Interactive | ~3s | <2s |
+| Métrica | Site | Docs |
+|---------|------|------|
+| Lighthouse Performance | 95+ | 95+ |
+| Lighthouse SEO | 100 | 100 |
+| Lighthouse Accessibility | 100 | 100 |
+| First Contentful Paint | <1s | <0.8s |
+| Largest Contentful Paint | <2s | <1.5s |
+| Time to Interactive | <2s | <1.5s |
 
 ---
 
@@ -802,20 +839,10 @@ export function FeatureCard({ title, description, status, index }: FeatureCardPr
 
 | Risco | Impacto | Mitigação |
 |-------|---------|-----------|
-| CSP hashes quebram com build | Alto | Script para recalcular hashes no build |
-| Animações pesadas no mobile | Médio | `prefers-reduced-motion` + viewport detection |
-| Bundle size aumenta | Médio | Tree-shaking, lazy loading, dynamic imports |
-| SEO regression | Alto | Comparar before/after com Lighthouse CI |
-
----
-
-## Próximos Passos
-
-1. **Aprovação do spike** — revisar com o time
-2. **Branch de feature** — `feature/nextjs-migration`
-3. **Execução paralela** — manter HTML atual como fallback
-4. **Deploy gradual** — Vercel preview para cada PR
-5. **Cutover** — após todos os testes passarem
+| Complexidade do monorepo | Médio | Turborepo simplifica; pnpm resolve deps |
+| CSP com duas apps | Alto | vercel.json unificado, script de hashes |
+| MDX build lento | Baixo | Turborepo cache, RSC streaming |
+| Routing conflicts | Médio | basePath no docs, rewrites claros |
 
 ---
 
