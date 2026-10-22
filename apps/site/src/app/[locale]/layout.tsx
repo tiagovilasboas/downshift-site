@@ -5,6 +5,11 @@ import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import '../globals.css';
 
+// Pre-render all locales at build time → static pages instead of SSR
+export function generateStaticParams() {
+  return [{ locale: 'en' }, { locale: 'pt-BR' }];
+}
+
 export const metadata: Metadata = {
   metadataBase: new URL('https://downshift-ai.vercel.app'),
   title: {
