@@ -1,31 +1,84 @@
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { Hero } from '@/components/sections/hero';
-import { Problem } from '@/components/sections/problem';
 import { Features } from '@/components/sections/features';
-import { Evidence } from '@/components/sections/evidence';
+import { Problem } from '@/components/sections/problem';
 import { Install } from '@/components/sections/install';
 import { Faq } from '@/components/sections/faq';
-import { Stub } from '@/components/sections/stub';
+import { SectionAction } from '@/components/sections/section-action';
+import { SectionCompact } from '@/components/sections/section-compact';
+import { SectionDCI } from '@/components/sections/section-dci';
+import { SectionFlow } from '@/components/sections/section-flow';
+import { SectionHarnesses } from '@/components/sections/section-harnesses';
+import { SectionOpen } from '@/components/sections/section-open';
 
-export default function HomePage() {
+// Evidence is inside Features already (stub still in remaining.tsx for ordering)
+// Layers: content-heavy, low SEO value — using minimal stub until M5 polish
+function SectionLayers() {
+  return (
+    <section id="layers" style={{ padding: '64px 0' }}>
+      <div className="w">
+        <div className="hd">
+          <h2 className="h2x">Nine layers, each with its status.</h2>
+          <p className="bd">
+            Status is what the repository shows today, not what is planned. Implemented does not
+            mean validated on every harness.
+          </p>
+        </div>
+        <p className="sm" style={{ marginTop: '16px' }}>
+          Full layer breakdown available in the{' '}
+          <a href="/docs/architecture">architecture docs</a>.
+        </p>
+      </div>
+    </section>
+  );
+}
+
+interface Props {
+  params: Promise<{ locale: string }>;
+}
+
+export default async function HomePage({ params }: Props) {
+  const { locale: _locale } = await params;
+
   return (
     <>
       <Header />
       <main id="main" tabIndex={-1}>
+        {/* Hero + stats */}
         <Hero />
-        <Stub id="who" label="Who it is for" />
-        <Problem />
+
+        {/* Features strip + features list */}
         <Features />
-        <Stub id="action" label="See it in action" />
-        <Stub id="compact" label="Clean output, smaller context" />
-        <Stub id="dci" label="Code intelligence (DCI)" />
-        <Stub id="flow" label="How a spawn gets its model" />
-        <Stub id="layers" label="Nine layers" />
-        <Evidence />
-        <Stub id="harnesses" label="Harnesses" />
+
+        {/* Problem */}
+        <Problem />
+
+        {/* See it in action (ds-chat) */}
+        <SectionAction />
+
+        {/* Compact section */}
+        <SectionCompact />
+
+        {/* DCI */}
+        <SectionDCI />
+
+        {/* How it works — 8 steps */}
+        <SectionFlow />
+
+        {/* Nine layers */}
+        <SectionLayers />
+
+        {/* Harnesses table */}
+        <SectionHarnesses />
+
+        {/* Install / Get started */}
         <Install />
-        <Stub id="open" label="Open source" />
+
+        {/* Open source */}
+        <SectionOpen />
+
+        {/* FAQ */}
         <Faq />
       </main>
       <Footer />
