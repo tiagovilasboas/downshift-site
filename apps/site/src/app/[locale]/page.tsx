@@ -39,11 +39,11 @@ interface Props {
 }
 
 export default async function HomePage({ params }: Props) {
-  const { locale: _locale } = await params;
+  const { locale } = await params;
 
   return (
     <>
-      <Header />
+      <Header locale={locale} />
       <main id="main" tabIndex={-1}>
         {/* Hero + stats */}
         <Hero />

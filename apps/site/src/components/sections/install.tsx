@@ -1,90 +1,102 @@
-import { SectionHeading } from '@/components/ui/section-heading';
-import { Card } from '@downshift/ui/card';
-import { CopyButton } from '@downshift/ui/copy-button';
+'use client';
 
-const GH = 'https://github.com/tiagovilasboas/downshift';
+import { useState } from 'react';
 
-const steps: { cmd: string; desc: React.ReactNode }[] = [
-  {
-    cmd: 'curl -fsSL https://raw.githubusercontent.com/tiagovilasboas/downshift/main/install.sh | sh',
-    desc: 'Download the binary for your platform.',
-  },
-  {
-    cmd: 'downshift setup --dry-run',
-    desc: 'Print the diff. Writes nothing.',
-  },
-  {
-    cmd: 'downshift setup --yes',
-    desc: (
-      <>
-        Write the hooks, with a backup. (Run{' '}
-        <code className="font-mono text-foreground">downshift setup</code> to be asked first.)
-      </>
-    ),
-  },
-  {
-    cmd: 'downshift doctor',
-    desc: 'Check the binary, the hooks, state and scores.',
-  },
-  {
-    cmd: 'downshift try "rename the userId variable"',
-    desc: 'See the tier it would pick, and why.',
-  },
-  {
-    cmd: 'downshift setup --undo',
-    desc: 'Restore the latest backup.',
-  },
-];
+function CopyBtn({ target, label }: { target: string; label: string }) {
+  const [copied, setCopied] = useState(false);
+
+  const copy = async () => {
+    const el = document.getElementById(target);
+    if (!el) return;
+    await navigator.clipboard.writeText(el.textContent ?? '').catch(() => {});
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <button
+      type="button"
+      aria-label={label}
+      onClick={copy}
+    >
+      {copied ? 'Copied' : 'Copy'}
+    </button>
+  );
+}
 
 export function Install() {
   return (
-    <section id="start" className="border-b border-border">
-      <div className="mx-auto max-w-6xl px-6 py-20">
-        <SectionHeading
-          title="Install, preview, then write."
-          intro="Setup shows the diff for every harness it finds before it writes anything, saves a timestamped backup, and --undo restores it."
-        />
+    <section id="start">
+      <div className="w">
+        <div className="hd">
+          <h2 className="h2x">Install, preview, then write.</h2>
+          <p className="bd">
+            Setup shows the diff for every harness it finds before it writes anything, saves a
+            timestamped backup, and <code>--undo</code> restores it.
+          </p>
+        </div>
 
-        <ol className="mx-auto flex max-w-3xl flex-col gap-4">
-          {steps.map((step, i) => (
-            <li key={step.cmd}>
-              <Card className="p-4">
-                <div className="flex items-center justify-between gap-3 rounded-lg bg-background px-4 py-3">
-                  <code className="overflow-x-auto whitespace-nowrap font-mono text-sm text-title">
-                    <span className="mr-2 select-none text-muted">{i + 1}</span>
-                    {step.cmd}
-                  </code>
-                  <CopyButton text={step.cmd} className="shrink-0">
-                    Copy
-                  </CopyButton>
-                </div>
-                <p className="mt-2 px-1 text-sm text-muted">{step.desc}</p>
-              </Card>
+        <div className="big" id="install">
+          <ol className="ics">
+            <li>
+              <div className="cmd">
+                <code id="k1">curl -fsSL https://raw.githubusercontent.com/tiagovilasboas/downshift/main/install.sh | sh</code>
+                <CopyBtn target="k1" label="Copy command" />
+              </div>
+              <p>Download the binary for your platform.</p>
             </li>
-          ))}
-        </ol>
+            <li>
+              <div className="cmd">
+                <code id="k2">downshift setup --dry-run</code>
+                <CopyBtn target="k2" label="Copy command" />
+              </div>
+              <p>Print the diff. Writes nothing.</p>
+            </li>
+            <li>
+              <div className="cmd">
+                <code id="k3">downshift setup --yes</code>
+                <CopyBtn target="k3" label="Copy command" />
+              </div>
+              <p>Write the hooks, with a backup. (Run <code>downshift setup</code> to be asked first.)</p>
+            </li>
+            <li>
+              <div className="cmd">
+                <code id="k4">downshift doctor</code>
+                <CopyBtn target="k4" label="Copy command" />
+              </div>
+              <p>Check the binary, the hooks, state and scores.</p>
+            </li>
+            <li>
+              <div className="cmd">
+                <code id="k5">{'downshift try "rename the userId variable"'}</code>
+                <CopyBtn target="k5" label="Copy command" />
+              </div>
+              <p>See the tier it would pick, and why.</p>
+            </li>
+            <li>
+              <div className="cmd">
+                <code id="k6">downshift setup --undo</code>
+                <CopyBtn target="k6" label="Copy command" />
+              </div>
+              <p>Restore the latest backup.</p>
+            </li>
+          </ol>
 
-        <p className="mx-auto mt-6 max-w-3xl text-center text-sm text-muted">
-          Binaries for macOS and Linux (amd64, arm64) and Windows (amd64). On Claude Code, setup also sets the main session to opusplan and plan mode, unless you pass{' '}
-          <code className="font-mono text-foreground">--no-session-policy</code>. It shows a diff first.
-        </p>
+          <p className="sm">
+            Binaries for macOS and Linux (amd64, arm64) and Windows (amd64). On Claude Code, setup
+            also sets the main session to opusplan and plan mode, unless you pass{' '}
+            <code>--no-session-policy</code>. It shows a diff first.
+          </p>
 
-        <div className="mt-8 flex flex-wrap justify-center gap-3">
-          <a
-            href={`${GH}/blob/main/docs/guides/install.md`}
-            rel="noopener"
-            className="inline-flex h-11 items-center gap-1 rounded-full bg-primary-bg px-6 text-sm font-medium text-primary-fg transition-opacity hover:opacity-90"
-          >
-            Install guide
-            <span aria-hidden="true">→</span>
-          </a>
-          <a
-            href={`${GH}/releases`}
-            rel="noopener"
-            className="inline-flex h-11 items-center rounded-full border border-border px-6 text-sm font-medium text-foreground transition-colors hover:border-muted"
-          >
-            Releases
-          </a>
+          <div className="cta">
+            <a className="btn p" href="https://github.com/tiagovilasboas/downshift/blob/main/docs/guides/install.md" rel="noopener noreferrer">
+              Install guide
+              <svg className="ic ch" viewBox="0 0 24 24" aria-hidden="true"><use href="#ic" /></svg>
+            </a>
+            <a className="btn" href="https://github.com/tiagovilasboas/downshift/releases" rel="noopener noreferrer">
+              Releases
+            </a>
+          </div>
         </div>
       </div>
     </section>
