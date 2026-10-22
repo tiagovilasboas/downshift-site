@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react'; // useRef kept for future use
 
 // The exact figure.dsc HTML from index.html — 56 spawns routing visualization
 // The ds-chat.js script animates this when it finds #dsc in the DOM
@@ -8,37 +8,28 @@ const DSC_HTML = `<div class="dsc-s" role="img" aria-label="Replay of the 56 sub
 <div class="dsc-ft"><figcaption class="dsc-cp">Replay of the 56 spawns in the 2026-10-15 trial. Totals measured, order interleaved.</figcaption><div class="dsc-bt"><button type="button" class="dsc-rp" hidden><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 12a8 8 0 1 0 2.4-5.7M4 4v4h4"/></svg>Replay</button><button type="button" class="dsc-pz" data-pause="Pause replay" data-play="Play replay" hidden><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path class="dsc-pi" d="M8 5v14M16 5v14"/><path class="dsc-pp" d="M7 5v14l12-7z"/></svg><span class="dsc-bl">Pause replay</span></button></div></div>`;
 
 export function RoutingViz() {
-  const ref = useRef<HTMLElement>(null);
   const initialized = useRef(false);
 
   useEffect(() => {
     if (initialized.current) return;
     initialized.current = true;
 
-    // ds-chat.js already loaded by DsChat component — just trigger its init on this figure
-    // The script looks for figure.dsc elements and initializes them
-    const fig = ref.current;
-    if (!fig) return;
+    // dsc-anim.js runs with `defer` and calls document.getElementById('dsc')
+    // before React hydrates the figure. Inject dsc-init.js (only the dsc IIFE)
+    // after mount so the animation finds the element in the DOM.
+    const script = document.createElement('script');
+    script.src = '/components/dsc-init.js?t=' + Date.now();
+    script.defer = false;
+    document.body.appendChild(script);
 
-    // Dispatch a custom event or wait for ds-chat.js to pick up the element
-    // ds-chat.js uses a MutationObserver or direct query on DOMContentLoaded
-    // Re-trigger initialization if the script is already loaded
-    const tryInit = () => {
-      // @ts-expect-error: ds-chat custom element may expose an init method
-      if (typeof window.__dscInit === 'function') {
-        // @ts-expect-error
-        window.__dscInit(fig);
-      }
+    return () => {
+      // cleanup: remove the extra script tag on unmount (SPA navigation)
+      script.remove();
     };
-
-    tryInit();
-    // Also try after a short delay in case the script loads after mount
-    setTimeout(tryInit, 500);
   }, []);
 
   return (
     <figure
-      ref={ref as React.RefObject<HTMLElement>}
       className="dsc"
       id="dsc"
       data-seq="mmsmmsmmsmmsmmsmmsmmsmmsmmsmfsmmsmmsmmsmmsmmsmmsmmsmmsms"
