@@ -1,0 +1,134 @@
+---
+title: "Claude Code token optimization: levers ranked by evidence"
+description: "A map of the levers that cut Claude Code token usage: model choice, subagents, prompt cache, context and hooks. What Anthropic documents and what is unproven."
+order: 4
+---
+
+# Claude Code token optimization: the levers, ranked by evidence
+
+## Where Claude Code tokens actually go
+
+Claude Code sends your whole conversation with every request. Prompt caching bills the re-read at a cheaper cached rate, but the context keeps growing, and a long session keeps paying for it. Anthropic's cost page names the usual reasons a session uses more than your activity suggests.
+
+- Long context: a one-line question late in a long session still draws usage for the whole conversation.
+- Cache misses: the first message after a break longer than the cache lifetime reprocesses the full context.
+- Subagents: every subagent sends its own requests on top of the main conversation's.
+- Compaction and scheduled tasks: both read or resend large contexts.
+
+Look at your own numbers before you change anything. The /usage command shows a session block and, on a subscription, a breakdown that flags behaviors above 10% of recent usage. The dollar figure there is a local list-price estimate, not an invoice.
+
+## Token optimization levers Anthropic documents
+
+Anthropic's page is the source of truth for this list. Every row below comes from it, and each one works without installing anything.
+
+| Lever | What the docs say | What you do |
+| --- | --- | --- |
+| Clear between tasks | Stale context wastes tokens on every later message | Run /clear when you switch to unrelated work |
+| Choose the model | Sonnet handles most coding tasks; Opus is for complex decisions; haiku fits simple subagents | Use /model, /config, or model: haiku on a subagent |
+| Trim MCP overhead | Tool definitions are deferred by default; CLI tools add no per-tool listing | Disable unused servers in /mcp |
+| Code intelligence plugins | Symbol navigation replaces a grep plus several file reads | Install a plugin for your language |
+| Hooks and skills | A hook can return only the matching lines of a large log | Preprocess data before Claude sees it |
+| Effort and thinking | Thinking tokens are billed as output tokens | Lower the effort level for simple tasks |
+| Subagents for verbose work | Verbose output stays in the subagent's context | Delegate test runs, doc fetches and log reading |
+
+## Subagents: the lever that is easy to forget
+
+Delegating verbose work keeps your main context small. The docs add a caveat: the subagent's own requests still draw on your usage, so the model a subagent runs on matters.
+
+By the docs, a subagent with no pinned model follows the main conversation's model. A rename and an architecture review can then run on the same expensive model. You can pin one model per agent definition, or one model for every subagent. Neither choice looks at the task.
+
+## The prompt cache: when a break costs you
+
+On a Claude subscription, the main conversation asks for a one-hour cache. With an API key or a cloud provider the default is five minutes. Subagents get five minutes unless you choose a longer time. Once the cache expires, the next message pays to rebuild it.
+
+Since v2.1.251, /usage has a Prompt cache (main) line that shows misses and whether the cache is warm.
+
+## Giving the model less, better context
+
+Anthropic suggests code intelligence plugins, a skill that describes your codebase, and specific prompts. Downshift adds an opt-in indexer, DCI, that packs only the symbols a change touches under a byte budget. It is off until you enable it. Its latency and output size are measured. Answer quality is not.
+
+## What Downshift automates, and what it does not
+
+Downshift is a single Go binary that runs as hooks inside your coding agent. It does not replace the levers above. It automates the one choice the list leaves manual: which model a subagent runs on, per task.
+
+| Part | What it does | Status |
+| --- | --- | --- |
+| Routing | Scores each delegated task locally and rewrites the subagent's model, only when confident | Verified on Claude Code |
+| Hold when unsure | An unconfident downshift keeps the model you asked for | Implemented |
+| cache-tax | Prices a cold cache before a send, and offers /keepwarm. A third-party mod by Karan Bansal (MIT), bundled | Needs Claude Code 2.1.287 or later; warming spends usage |
+| DCI | Packs relevant code under a byte cap | Opt-in; quality not validated |
+| Output compaction | Measures how much tool output could be compacted | Measures only on Claude Code; saves no tokens there |
+
+It does not decide whether to delegate, and it does not change how Anthropic's cache works.
+
+## Evidence: what is measured and what is not
+
+- One controlled trial on 2026-10-15, Claude Code, mechanical delegated tasks: $0.67 per run in the control arm, $0.59 routed, at list price. That is about 12% estimated saving, from the earlier trial. A later four-arm run (2026-10-21, 46 runs, mechanical tasks) measured about 24% fewer tokens per accepted run with routing, 95% interval +2.1% to +46.7%.
+- Checks passed 12/12 in both arms. One operator, three runs per cell.
+- On natural complex tasks, one benchmark applied 0 downshifts and another 3 of 34, so nothing is attributable yet.
+- About 1 in 10 spawns is left unrouted as a control group.
+- Nobody has measured how these levers combine in this setup, and Downshift has not either.
+
+## Real routing decisions, excerpt
+
+Captured from downshift try on 2026-10-19, assuming claude-opus-5-5 as the current model. The gap is a list-price estimate for one call between two models, not a session or monthly saving. Held means the requested model runs.
+
+| Task | Tier | Model move | Estimated gap | Outcome | Why |
+| --- | --- | --- | --- | --- | --- |
+| rename the userId variable to accountId | small | opus -&gt; haiku | ~75% cheaper (est.) | Rewritten | trivial task, no risk, confident |
+| refactor the checkout module | mid | opus -&gt; sonnet | ~50% cheaper (est.) | Rewritten | medium task, no risk, confident |
+| migrate the payment webhook to the new auth scheme | frontier | stays on opus | none | Stays on frontier | complex task, touches a risk area, confident |
+| do the thing | mid | opus -&gt; sonnet | not applied | Held | medium task, no risk, unsure, no clear signal |
+
+Source: downshift try output, captured 2026-10-19 (reproduce with the command shown)
+
+Honest status
+
+Verified on Claude Code only. Codex and Cursor are functional, OpenCode is beta. The headline figure is about 24% fewer tokens per accepted run with routing (95% interval +2.1% to +46.7%; 16% per run; 46 runs, one operator, mechanical delegated tasks, 2026-10-21). An earlier list-price trial on 2026-10-15 showed about 12% (checks passed 12/12 in both arms). On natural complex tasks nothing is attributable yet.
+
+## Frequently asked questions
+
+### What should I try first, without installing anything?
+
+Run /usage and read the plan breakdown. Use /clear between unrelated tasks. Set model: haiku on subagents that do simple work, as the docs suggest. Then read the Prompt cache line before you change anything else.
+
+### Do these levers add up?
+
+Not measured. Downshift has measured only its own routing, in one trial, and did not test it combined with the other levers.
+
+### Does Downshift send my prompts anywhere?
+
+No. Prompts are evaluated in memory and never persisted. Local telemetry holds counts, hashes and timings.
+
+## Install
+
+Run downshift setup --dry-run first to preview every change. downshift setup --undo restores your backups.
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/tiagovilasboas/downshift/main/install.sh | sh && downshift setup
+```
+
+Claude Code plugin
+
+```text
+/plugin install downshift --marketplace tiagovilasboas/downshift
+```
+Start with DownshiftGitHub
+## Related guides
+
+- [Why Claude Code token usage climbs, and how to see it](/guides/claude-code-token-usage/)
+- [Claude Code subagent model: which one does a subagent run on?](/guides/claude-code-subagent-models/)
+- [When Claude Code's prompt cache goes cold, and what to do](/guides/claude-code-prompt-cache/)
+- [Claude Code model routing: choosing the model per task](/guides/claude-code-model-routing/)
+- [Claude Code context packing for relevant code, opt-in](/guides/claude-code-context-packing/)
+- [Como economizar tokens no Claude Code, sem mitoPortuguês](/pt-br/guias/economizar-tokens-claude-code/)
+
+## Sources
+
+1. **Anthropic docs**measured [code.claude.com/docs/en/costs](https://code.claude.com/docs/en/costs) Reduce token usage list, /usage, why usage climbs in a long session (fetched 2026-10-19)
+2. **Anthropic docs**measured [code.claude.com/docs/en/prompt-caching](https://code.claude.com/docs/en/prompt-caching) TTL defaults, subagents and the cache (fetched 2026-10-19)
+3. **Anthropic docs**measured [code.claude.com/docs/en/sub-agents](https://code.claude.com/docs/en/sub-agents) model resolution for subagents (fetched 2026-10-19)
+4. **Downshift repo**measured [docs/evidence/subagent-routing-ab-2026-10-15.md](https://github.com/tiagovilasboas/downshift/blob/main/docs/evidence/subagent-routing-ab-2026-10-15.md) trial figures, b2 and b6 counts, 12/12 checks
+5. **Downshift repo**measured [README.md](https://github.com/tiagovilasboas/downshift/blob/main/README.md) control group share, prompt privacy, DCI opt-in, honest scope of output compaction
+6. **Downshift repo**measured [hooks/cache-tax/README.md](https://github.com/tiagovilasboas/downshift/blob/main/hooks/cache-tax/README.md) upstream credit, requirements, keep-warm spends usage
+7. **Downshift CLI output**measured downshift try and downshift dci output, captured 2026-10-19 (reproduce with the commands shown) routing decisions

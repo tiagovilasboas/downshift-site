@@ -1,0 +1,116 @@
+---
+title: "Claude Code usage limit running out fast? Where it goes"
+description: "Why Claude Code's 5-hour and weekly limits run out fast: subagents, cold cache, long context. How to read /usage and what to change, per Anthropic."
+order: 2
+---
+
+# Claude Code usage limit running out fast: where the usage goes
+
+## The limit comes in two windows: session and weekly
+
+In the costs documentation, subscription usage is counted in windows. For Team and Enterprise it describes a rolling five-hour window and a weekly one, and each person's allowance is also shared with Claude chat and Cowork. For Pro and Max, the documentation I read does not detail that sharing, so check Anthropic's Help Center, which I did not verify.
+
+This page gives no token quotas, because the documentation does not publish them and I will not invent them.
+
+## What costs more than it looks
+
+- Long context: Claude Code sends the whole conversation on every request. A one-line question in a session open all day costs the accumulated context.
+- Cold cache: the first message after a pause longer than the cache lifetime reprocesses the whole context. On a subscription, the main conversation asks for a one-hour cache. With an API key or a cloud provider, the default is five minutes.
+- Subagents: each subagent, and each agent in a workflow, sends its own requests on top of the main conversation's.
+- Scheduled tasks and messages between sessions: they fire while the session is idle and send the whole context again.
+- Compaction: /compact reads the conversation it is about to summarise, so compacting a large context is already a large request.
+
+## How to read /usage
+
+On Pro, Max, Team and Enterprise plans, /usage shows a breakdown of what counts toward the limit. It attributes recent usage to skills, subagents, plugins and MCP servers, and flags behaviors such as long context or cache misses when one passes 10%. The values come from this machine's local history, so other devices and claude.ai are not included.
+
+The Prompt cache (main) line, from v2.1.251 on, shows the total of misses and whether the cache is warm. It covers only the main conversation, not subagents.
+
+If the breakdown shows subagents as a large slice, the next step is to see which model they run on. If it shows cache misses, look at pauses and model switches before any other change.
+
+## Switching models does not unlock the shared limit
+
+According to the documentation, the session and weekly limit messages indicate a window shared by all models, so switching with /model does not give access back. After a specific message, such as the Opus limit, switching to a model from another family lets you continue.
+
+## What you can change
+
+- Run /clear between unrelated tasks, and compact at natural pauses.
+- Turn off MCP servers you do not use and lower the effort on simple tasks.
+- Ask for model: haiku on subagents that do simple work, as Anthropic suggests.
+- Avoid switching models mid-task, since each model has its own cache.
+- Change one thing at a time and run /usage again to see the effect.
+
+## Where subagent routing fits
+
+Downshift is a hook that picks the model of each subagent per task. It attacks one cause on the list, the subagent that inherits the expensive model, and none of the others. Its numbers are at list price. The effect on a subscription's 5-hour and weekly windows was not measured.
+
+Even the measured result is narrow: about 24% fewer tokens per accepted run on delegated mechanical tasks (95% interval +2.1% to +46.7%; one operator, 46 runs, 2026-10-21), after an earlier list-price trial that showed about 12%. On complex natural tasks, one benchmark applied 0 downshifts and another 3 of 34. There is nothing attributable yet, and I do not promise the limit will go further.
+
+## Where Compactor fits
+
+Compactor (`downshift compact`) addresses output size, not the conversation. When the agent runs a routine command such as go test or git status, it removes the repeated noise of a clean run before it enters the context. Errors, stack traces and failing exits stay untouched. It is not the /compact command, which summarises your conversation.
+
+Its saving is measured in bytes. How much that stretches a subscription window was not measured, so this guide does not claim it.
+
+## The only controlled trial, and its limits
+
+Claude Code, 2026-10-15, delegated mechanical tasks, cost per run at list price. It does not measure subscription usage windows.
+
+| Group | Cost per run | Checks passed | Note |
+| --- | --- | --- | --- |
+| Control (no routing) | $0.67 | 12/12 | Same prompts, same model |
+| Routed | $0.59 | 12/12 | About 12% estimated saving (earlier trial, 2026-10-15) |
+
+One operator, three runs per cell. About 1 in 10 spawns is left unrouted as a control group.
+
+Source: docs/evidence/subagent-routing-ab-2026-10-15.md
+
+Honest status
+
+Verified only on Claude Code. Codex and Cursor work, OpenCode is in beta. The headline figure is roughly 24% fewer tokens per accepted run with routing (95% interval +2.1% to +46.7%; 16% per run; 46 runs, one operator, delegated mechanical tasks, 2026-10-21). An earlier list-price trial on 2026-10-15 showed about 12% (checks passed 12/12 in both groups); on complex natural tasks there is nothing attributable yet.
+
+## Frequently asked questions
+
+### Why does my limit run out when I asked few questions?
+
+Every request resends the whole context, and subagents and cold cache add more requests. /usage points to any behavior above 10% of recent usage.
+
+### Does switching models give me access back after the weekly limit?
+
+No. Per the documentation, the session and weekly windows are shared across models. Only a model-specific limit message, such as the Opus one, lets you continue on another family.
+
+### Does Downshift raise my limit?
+
+That is not measured. The latest controlled run (2026-10-21, one operator, 46 runs) showed about 24% fewer tokens per accepted run with routing on mechanical tasks (95% interval +2.1% to +46.7%); an earlier trial showed about 12% at list price. The effect on subscription windows was not measured.
+
+### Is Compactor the same as the /compact command?
+
+No. /compact summarises your conversation. Compactor (downshift compact) never touches the conversation: it only shortens the clean output of routine commands. Its saving is reported in bytes, not in subscription usage.
+
+## Install
+
+Run downshift setup --dry-run first to preview every change. downshift setup --undo restores your backups.
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/tiagovilasboas/downshift/main/install.sh | sh && downshift setup
+```
+
+Claude Code plugin
+
+```text
+/plugin install downshift --marketplace tiagovilasboas/downshift
+```
+Start with DownshiftGitHub
+## Related guides
+
+- [Why Claude Code token usage climbs, and how to see it](/guides/claude-code-token-usage/)
+- [Which model each Claude Code subagent runs on](/guides/claude-code-subagent-models/)
+- [O limite de uso do Claude Code acaba rápidoPortuguês](/pt-br/guias/limite-de-uso-claude-code/)
+
+## Sources
+
+1. **Anthropic docs**measured [code.claude.com/docs/en/costs](https://code.claude.com/docs/en/costs) session and weekly windows, /usage, why usage grows, model switching and limits (fetched 2026-10-19)
+2. **Anthropic docs**measured [code.claude.com/docs/en/prompt-caching](https://code.claude.com/docs/en/prompt-caching) TTL by access type, subagents and cache (fetched 2026-10-19)
+3. **Anthropic Help Center**not verified limit sharing for Pro and Max not verified; the documentation I read states this only for Team and Enterprise
+4. **Downshift repo**measured [docs/evidence/subagent-routing-ab-2026-10-15.md](https://github.com/tiagovilasboas/downshift/blob/main/docs/evidence/subagent-routing-ab-2026-10-15.md) controlled trial, b2 and b6
+5. **Downshift**not verified effect on the 5-hour and weekly windows not measured

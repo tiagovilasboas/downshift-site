@@ -1,0 +1,134 @@
+---
+title: "Claude Code PreToolUse hook that rewrites a subagent model"
+description: "How a Claude Code PreToolUse hook can change a tool call's input before it runs, so it can set a subagent's model. Payload, updatedInput, exit codes, testing."
+order: 8
+---
+
+# Rewriting a subagent's model with a PreToolUse hook
+
+## What a PreToolUse hook can do
+
+PreToolUse fires before a tool call executes and can block it. The hook reads a JSON payload on stdin and answers with JSON on stdout. The permissionDecision field takes allow, deny, ask or defer. The updatedInput field, placed under hookSpecificOutput, replaces the tool's arguments before the tool runs.
+
+Almost every public example I found uses this to block a Bash command. Rewriting input is the other half, and it is what lets a hook change which model a subagent uses.
+
+## Which tool name fires for subagent spawns
+
+The hooks matcher filters on tool_name. Letters, digits, underscores, hyphens, commas and pipes make an exact list, so Agent|Task matches both names. Downshift's plugin registers exactly that matcher.
+
+Here is what I could not confirm. The part of Anthropic's hooks page I read does not say whether the spawn tool fires PreToolUse, or whether updatedInput can change a subagent's model. The page is 273,658 characters and I read the first 100,000. The evidence is from use: Downshift's evidence file records the rewrite on the desktop app with the Agent tool on 2026-10-06, and issue #95769 reports the same hook on Task. Check your own version.
+
+## A minimal hook that sets only model
+
+This sketch follows the pattern in Anthropic's cost page, which merges a change into the existing input. It always answers haiku, so it shows the mechanism and is not a routing policy.
+
+```json
+{
+  "hooks": {
+    "PreToolUse": [
+      { "matcher": "Agent|Task",
+        "hooks": [ { "type": "command", "command": "~/.claude/hooks/subagent-model.sh" } ] }
+    ]
+  }
+}
+```
+
+```bash
+#!/bin/bash
+input=$(cat)
+echo "$input" | jq '{hookSpecificOutput: {hookEventName: "PreToolUse", permissionDecision: "allow", updatedInput: (.tool_input + {model: "haiku"})}}'
+```
+
+## Keep every sibling field intact
+
+updatedInput replaces the arguments, so send the whole object back. The jq expression above does that by adding model to the original tool_input. Downshift mutates only model, and reasoning_effort where the harness takes it.
+
+The value matters too. On 2026-10-06 the first Downshift build wrote a full model id. Claude Code validated the field against the family names and refused it with the message model: expected one of "sonnet" | "opus" | "haiku" | "fable". The spawn failed instead of running unchanged. After the fix, the child ran on claude-haiku-4-5 under a Sonnet 5.5 parent.
+
+## Fail-open: what happens on errors
+
+- Exit 0 with no output means no decision, and the call continues through the normal permission flow.
+- Exit 2 blocks the call, even if the JSON says allow.
+- Other exit codes are non-blocking: the action proceeds and a hook error notice appears.
+- A command hook that times out does not block unless you set onFailure to block.
+
+Downshift follows the same posture. Its runner caps the payload at 1 MiB, times out stdin at 2 seconds and turns any panic into an unchanged spawn.
+
+## Test it with a debug log
+
+Start Claude Code with claude --debug-file ./claude-debug.txt and trigger a spawn. When a hook rewrites input, the log has a modified tool input keys line. Anthropic documents that for a Bash hook, and I expect the same line for a spawn.
+
+```bash
+downshift claude-code < examples/claude-code-pretooluse-task.json
+downshift try "rename the userId variable to accountId"
+```
+
+## Why a deterministic hook beats an LLM call here
+
+Keep the script quiet. Stdout must be a single JSON object, or Claude Code treats plain text as context, not a decision. A model call in the spawn path adds tokens and seconds to every delegation. Downshift scores the task text locally with weighted signals, so the decision takes milliseconds and costs no tokens. The trade-off is accuracy. A scored classifier misses, and its safety valve is to abstain and keep the model you asked for.
+
+## Limits
+
+Claude Code is the only harness where a rewrite has been observed, in one session with two spawns. Codex and Cursor are functional, OpenCode is beta, and Antigravity and KiroCrew are experimental. A harness can ignore a rewrite, which no hook can prevent.
+
+## What the hook decided
+
+Captured from downshift try on 2026-10-19, assuming claude-opus-5-5 as the current model. The gap is a list-price estimate for one call between two models, not a session or monthly saving. Held means the requested model runs.
+
+| Task | Tier | Model move | Estimated gap | Outcome | Why |
+| --- | --- | --- | --- | --- | --- |
+| rename the userId variable to accountId | small | opus -&gt; haiku | ~75% cheaper (est.) | Rewritten | trivial task, no risk, confident |
+| run the unit tests and report the result | mid | opus -&gt; sonnet | not applied | Held | medium task, no risk, unsure, no clear signal |
+
+On the rewritten row the hook changed only model. On the held row it let the spawn through as asked, and the CLI prints: not rewritten: held by a guardrail.
+
+Source: downshift try output, captured 2026-10-19 (reproduce with the command shown)
+
+Honest status
+
+Verified on Claude Code only. Codex and Cursor are functional, OpenCode is beta. The headline figure is about 24% fewer tokens per accepted run with routing (95% interval +2.1% to +46.7%; 16% per run; 46 runs, one operator, mechanical delegated tasks, 2026-10-21). An earlier list-price trial on 2026-10-15 showed about 12% (checks passed 12/12 in both arms). On natural complex tasks nothing is attributable yet.
+
+## Frequently asked questions
+
+### Can a hook change a subagent's model?
+
+On Claude Code, one operator observed it in one session with two spawns. The part of the hooks docs I read does not confirm it, so test on your version.
+
+### Does a hook error block my subagent?
+
+Not by default. Per the docs, only exit 2 blocks, and a timeout blocks only with onFailure set to block.
+
+### What happens if I write a full model id?
+
+On 2026-10-06, Claude Code rejected the rewrite and failed the spawn. Use the family names: sonnet, opus, haiku or fable.
+
+## Install
+
+Run downshift setup --dry-run first to preview every change. downshift setup --undo restores your backups.
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/tiagovilasboas/downshift/main/install.sh | sh && downshift setup
+```
+
+Claude Code plugin
+
+```text
+/plugin install downshift --marketplace tiagovilasboas/downshift
+```
+Start with DownshiftGitHub
+## Related guides
+
+- [Claude Code subagent model: which one does a subagent run on?](/guides/claude-code-subagent-models/)
+- [Claude Code model routing: choosing the model per task](/guides/claude-code-model-routing/)
+- [Claude Code Router or Downshift: a gateway and a hook solve different problems](/guides/claude-code-router-vs-downshift/)
+
+## Sources
+
+1. **Anthropic docs**unverified [code.claude.com/docs/en/hooks](https://code.claude.com/docs/en/hooks) PreToolUse fields, matcher syntax, exit codes; first 100,000 of 273,658 characters; spawn tool and model rewrite not confirmed (fetched 2026-10-19)
+2. **Anthropic docs**measured [code.claude.com/docs/en/costs](https://code.claude.com/docs/en/costs) hook example that merges updatedInput; --debug-file and modified tool input keys line (fetched 2026-10-19)
+3. **GitHub issue**measured [github.com/anthropics/claude-code/issues/95769](https://github.com/anthropics/claude-code/issues/95769) written by the Downshift author; one operator's report
+4. **Downshift repo**measured [docs/evidence/claude-code-rewrite-honored-2026-10-06.md](https://github.com/tiagovilasboas/downshift/blob/main/docs/evidence/claude-code-rewrite-honored-2026-10-06.md) schema error, fix, honored rewrite, one session and two spawns
+5. **Web search**measured claude code hooks PreToolUse examples results on 2026-10-19 showed Bash-blocking examples and none about rewriting subagent input; WebSearch is not a Google SERP
+6. **Downshift repo**measured [hooks/hooks.json](https://github.com/tiagovilasboas/downshift/blob/main/hooks/hooks.json) matcher Agent|Task
+7. **Downshift repo**measured [docs/reference/capability-matrix.md](https://github.com/tiagovilasboas/downshift/blob/main/docs/reference/capability-matrix.md) fail-open runner limits, harness status
+8. **Downshift CLI output**measured downshift try and downshift dci output, captured 2026-10-19 (reproduce with the commands shown) rename and held rows

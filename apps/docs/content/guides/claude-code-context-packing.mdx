@@ -1,0 +1,128 @@
+---
+title: "Claude Code context packing: send only the relevant code"
+description: "Give Claude Code less but better code context: symbol-level packing under a byte budget, opt-in. What is measured (latency, bytes) and what is not (quality)."
+order: 5
+---
+
+# Claude Code context packing for relevant code, opt-in
+
+## The problem: exploration reads cost tokens
+
+In an unfamiliar codebase, Claude often runs a search, then reads several candidate files to find the right function. Each read adds to the context that every later request resends. Anthropic's cost page says vague prompts trigger broad scanning, and specific ones let Claude work with minimal reads.
+
+## What Anthropic suggests
+
+- Code intelligence plugins: a single go-to-definition call replaces a grep followed by reading several files, and installed language servers report type errors after edits.
+- Skills: a codebase overview skill gives Claude the structure without exploring.
+- Specific prompts, and plan mode before a complex change.
+
+Try these first. They are documented and need no extra binary.
+
+## What DCI does: context packing in three steps
+
+DCI is Downshift's code intelligence layer. It indexes the repository in-process, ranks candidates with BM25 and packs only the selected symbols under a byte cap. The default budget is 3500 bytes, adjustable from 512 to 16384. It is off until you run downshift dci enable.
+
+Languages: Go through the AST, and TypeScript, JavaScript, Python, Rust, PHP, Java and C# by pattern matching. Pattern matching is less precise than a parser, so I would expect more misses outside Go.
+
+## A real run on this repository
+
+Downshift's own repository was the target. The command was downshift dci inspect "where is the tier floor applied".
+
+| Measure | Result |
+| --- | --- |
+| Files indexed | 927 |
+| Candidates | 480 |
+| Files selected | 3 |
+| Symbols selected | 8 |
+| Packed output | 1,869 bytes |
+| Index build | 402 ms |
+| Retrieval | 5 ms |
+| Packing | 0 ms |
+
+The index build took 402 ms in that run. Retrieval took 5 ms and packing 0 ms.
+
+## Impact radius for a change
+
+downshift dci impact --json Route lists the callers a change to Route could reach. On this repository it returned four: runTryReport in cmd/downshift/try.go, Handle in the Claude Code adapter, Handle in the Codex adapter and TestClassifierStability, a test. That is the set an agent should check before it edits the function.
+
+## Active and observe modes
+
+In active mode DCI injects the packed context into the prompt. In observe mode it only records telemetry, so you can see what it would have selected. Start with observe if you want evidence on your own code before it touches a prompt.
+
+To see what it would pick, run dci inspect on a few prompts whose answers you already know, then compare the selected files with the ones you would have opened. downshift stats --dci summarizes DCI telemetry over time.
+
+## Where it overlaps with code intelligence plugins
+
+An LSP-based plugin answers definition and reference questions on demand, one call at a time. DCI ranks and packs a slice of code before the model starts. They are different mechanisms and can be used together. I have not compared them, and no combined measurement exists. If a plugin already removes most of your wasted reads, DCI may add little.
+
+The honest test is your own repository: count the file reads in a session with and without it, and check that the answers stayed as good.
+
+## What is measured and what is not
+
+Read this before you enable it
+
+Latency and bytes are measured. Answer quality is not. Downshift has not measured a token saving from DCI, and I will not claim one.
+
+A smaller context is not proof of a better answer. It could drop a file that mattered. Compare results on your own tasks, and treat DCI as a way to send less, which you still have to validate.
+
+## A real DCI inspection and impact query
+
+Run on Downshift's own repository on 2026-10-19. Default budget 3500 bytes.
+
+```bash
+downshift dci inspect "where is the tier floor applied"
+downshift dci impact --json Route
+```
+
+| Query | Output |
+| --- | --- |
+| dci inspect | 927 files indexed, 480 candidates, 3 files and 8 symbols selected, 1,869 output bytes; index 402 ms, retrieval 5 ms, pack 0 ms |
+| dci impact Route | 4 callers: runTryReport, Handle (Claude Code), Handle (Codex), TestClassifierStability |
+
+Source: downshift dci inspect and impact output, captured 2026-10-19
+
+Honest status
+
+Verified on Claude Code only. Codex and Cursor are functional, OpenCode is beta. The headline figure is about 24% fewer tokens per accepted run with routing (95% interval +2.1% to +46.7%; 16% per run; 46 runs, one operator, mechanical delegated tasks, 2026-10-21). An earlier list-price trial on 2026-10-15 showed about 12% (checks passed 12/12 in both arms). On natural complex tasks nothing is attributable yet.
+
+## Frequently asked questions
+
+### Does DCI cut my token bill?
+
+Not shown. Only latency and bytes are measured. No token saving has been measured.
+
+### Is DCI on by default?
+
+No. It is opt-in: downshift dci enable turns it on, and observe mode records without injecting.
+
+### Which languages does it index?
+
+Go through the AST, and TypeScript, JavaScript, Python, Rust, PHP, Java and C# by pattern.
+
+## Install
+
+Run downshift setup --dry-run first to preview every change. downshift setup --undo restores your backups.
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/tiagovilasboas/downshift/main/install.sh | sh && downshift setup
+```
+
+Claude Code plugin
+
+```text
+/plugin install downshift --marketplace tiagovilasboas/downshift
+```
+Start with DownshiftGitHub
+## Related guides
+
+- [Claude Code token optimization: the levers, ranked by evidence](/guides/claude-code-token-optimization/)
+- [Why Claude Code token usage climbs, and how to see it](/guides/claude-code-token-usage/)
+- [Claude Code model routing: choosing the model per task](/guides/claude-code-model-routing/)
+
+## Sources
+
+1. **Anthropic docs**measured [code.claude.com/docs/en/costs](https://code.claude.com/docs/en/costs) code intelligence plugins, skills, specific prompts, plan mode (fetched 2026-10-19)
+2. **Downshift repo**measured [README.md](https://github.com/tiagovilasboas/downshift/blob/main/README.md) DCI scope, byte cap, languages, measured so far
+3. **Downshift repo**measured [docs/reference/capability-matrix.md](https://github.com/tiagovilasboas/downshift/blob/main/docs/reference/capability-matrix.md) DCI status
+4. **Downshift CLI output**measured downshift try and downshift dci output, captured 2026-10-19 (reproduce with the commands shown) dci inspect and dci impact on this repository
+5. **Downshift**unverified token saving or answer quality from DCI not measured

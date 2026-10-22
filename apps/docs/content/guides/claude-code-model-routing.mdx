@@ -1,0 +1,123 @@
+---
+title: "Claude Code model routing: Opus vs Sonnet vs Haiku per task"
+description: "Which Claude Code model fits which task: renames and file lists, refactors, architecture, risky changes. A decision table and where automatic routing helps."
+order: 3
+---
+
+# Claude Code model routing: choosing the model per task
+
+## What Anthropic recommends
+
+The cost page says Sonnet handles most coding tasks well and costs less than Opus, and that Opus is for complex architectural decisions or multi-step reasoning. For simple subagent tasks, it suggests model: haiku in the subagent configuration. Current prices are on Anthropic's pricing page, so I do not repeat them here.
+
+## A decision table by task type
+
+This table uses Downshift's three tiers, small, mid and frontier, and the decisions its classifier printed. It is a starting rule from one tool, not Anthropic's guidance.
+
+| Task | Tier | Why the classifier chose it |
+| --- | --- | --- |
+| Rename a variable, list files, fix a typo | small | Trivial, no risk, confident |
+| Refactor a module | mid | Medium task, no risk, confident |
+| Migrate a payment webhook | frontier | Complex, touches a risk area |
+| Design a billing architecture | frontier | Complex, no risk |
+| A vague request such as "do the thing" | held | No clear signal, so the model you asked for runs |
+
+## opusplan and its cache cost
+
+The opusplan setting resolves to Opus in plan mode and Sonnet during execution. Anthropic's caching docs point out that each model has its own cache, so every plan-mode toggle is a model switch and starts a fresh cache. Switching models mid-session reads the whole conversation with no cache hits. Pick the model at the top of a session and save switches for natural breaks.
+
+## Does Claude Code select a model automatically?
+
+I found no per-task classifier described in the three Anthropic pages read for this guide: costs, sub-agents and prompt caching. opusplan switches by mode, not by task. The automatic fallback to another model happens when a safety classifier flags a request, which is a different thing. Anthropic may document something elsewhere, and the docs change often.
+
+## Model routing by hand, by rule or by classifier
+
+- By hand: you pick with /model. It costs nothing, but subagents are easy to forget.
+- By rule: pin a model per agent file. It is predictable, and blind to the task.
+- By classifier: a hook scores each task and picks. It adapts per task, and it can be wrong.
+
+Downshift's classifier is scored regex signals in English and Portuguese, with no LLM call. On blind test splits its tier accuracy was 40 to 53% in the repository's 2026-10-17 report, and most misses were abstentions that keep your model. That is why the next section matters.
+
+## Apply it by hand, without any tool
+
+- Put model: haiku in the agent files for mechanical work, such as reading logs or listing files.
+- Leave the field out, or use inherit, on agents that review or design, so they follow your main model.
+- Choose the main model at the start of a session, and compact at natural breaks instead of switching.
+- Read /usage after a day of work and see which agents carry the cost.
+
+This is the static version of routing. It needs no tool, and it works until one agent has to handle both a rename and a design question.
+
+## Why hold when unsure matters
+
+A router that guesses cheap on a vague task can lose you more than it saves. Downshift's rule is that doubt never spends money: an unconfident downshift keeps the model the spawn asked for. In the captured run, four of the eight tasks below were held, including a plain "do the thing".
+
+## Risk areas that should not downshift
+
+Payments, authorization, secrets, cryptography, personal data and destructive operations are protected categories. A task that touches one is kept off the small tier. In the captured run, migrating a payment webhook stayed on opus, and rotating production secrets was held.
+
+## Real routing decisions, unedited
+
+Captured from downshift try on 2026-10-19, assuming claude-opus-5-5 as the current model. The gap is a list-price estimate for one call between two models, not a session or monthly saving. Held means the requested model runs.
+
+| Task | Tier | Model move | Estimated gap | Outcome | Why |
+| --- | --- | --- | --- | --- | --- |
+| rename the userId variable to accountId | small | opus -&gt; haiku | ~75% cheaper (est.) | Rewritten | trivial task, no risk, confident |
+| refactor the checkout module | mid | opus -&gt; sonnet | ~50% cheaper (est.) | Rewritten | medium task, no risk, confident |
+| migrate the payment webhook to the new auth scheme | frontier | stays on opus | none | Stays on frontier | complex task, touches a risk area, confident |
+| design a new multi-tenant billing architecture | frontier | stays on opus | none | Stays on frontier | complex task, no risk, confident |
+| run the unit tests and report the result | mid | opus -&gt; sonnet | not applied | Held | medium task, no risk, unsure, no clear signal |
+| rotate the production API secrets | mid | opus -&gt; sonnet | not applied | Held | medium task, touches a risk area, unsure |
+| update the login session handling | mid | opus -&gt; sonnet | not applied | Held | medium task, no risk, unsure, no clear signal |
+| do the thing | mid | opus -&gt; sonnet | not applied | Held | medium task, no risk, unsure, no clear signal |
+
+Read the gap column as the price difference between two models for one call at list price. It is not what a session saves.
+
+Source: downshift try output, captured 2026-10-19 (reproduce with the command shown)
+
+Honest status
+
+Verified on Claude Code only. Codex and Cursor are functional, OpenCode is beta. The headline figure is about 24% fewer tokens per accepted run with routing (95% interval +2.1% to +46.7%; 16% per run; 46 runs, one operator, mechanical delegated tasks, 2026-10-21). An earlier list-price trial on 2026-10-15 showed about 12% (checks passed 12/12 in both arms). On natural complex tasks nothing is attributable yet.
+
+## Frequently asked questions
+
+### Is Haiku good enough for subagent work?
+
+Anthropic suggests it for simple subagent tasks. Quality depends on the task. Downshift's one trial checked mechanical tasks only and does not show same quality.
+
+### Should I switch models in the middle of a session?
+
+Avoid it when you can. Each model has its own cache, and a switch recomputes the whole request.
+
+### Does Downshift change my main session model?
+
+Routing acts on subagent spawns. Setup can also offer a main-session policy such as opusplan, set only when unset. That saving is estimated, not measured.
+
+## Install
+
+Run downshift setup --dry-run first to preview every change. downshift setup --undo restores your backups.
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/tiagovilasboas/downshift/main/install.sh | sh && downshift setup
+```
+
+Claude Code plugin
+
+```text
+/plugin install downshift --marketplace tiagovilasboas/downshift
+```
+Start with DownshiftGitHub
+## Related guides
+
+- [Claude Code subagent model: which one does a subagent run on?](/guides/claude-code-subagent-models/)
+- [Rewriting a subagent's model with a PreToolUse hook](/guides/claude-code-pretooluse-hook-subagent-model/)
+- [When Claude Code's prompt cache goes cold, and what to do](/guides/claude-code-prompt-cache/)
+- [Claude Code Router or Downshift: a gateway and a hook solve different problems](/guides/claude-code-router-vs-downshift/)
+
+## Sources
+
+1. **Anthropic docs**measured [code.claude.com/docs/en/costs](https://code.claude.com/docs/en/costs) Choose the right model (fetched 2026-10-19)
+2. **Anthropic docs**measured [code.claude.com/docs/en/prompt-caching](https://code.claude.com/docs/en/prompt-caching) model switching, opusplan, automatic model fallback (fetched 2026-10-19)
+3. **Downshift repo**measured [docs/reference/capability-matrix.md](https://github.com/tiagovilasboas/downshift/blob/main/docs/reference/capability-matrix.md) blind-split tier accuracy 40 to 53% and abstentions, risk categories, opusplan policy not validated everywhere
+4. **Downshift repo**measured [README.md](https://github.com/tiagovilasboas/downshift/blob/main/README.md) doubt never spends money, no LLM call
+5. **Downshift CLI output**measured downshift try and downshift dci output, captured 2026-10-19 (reproduce with the commands shown) eight routing decisions
+6. **Anthropic docs**unverified no per-task selector found absence in three pages is not proof that none exists

@@ -1,0 +1,140 @@
+---
+title: "Claude Code subagent models: how the model is chosen"
+description: "How Claude Code picks a subagent's model: per-call parameter, frontmatter, CLAUDE_CODE_SUBAGENT_MODEL and the main model. Precedence, pitfalls, an example."
+order: 6
+---
+
+# Claude Code subagent model: which one does a subagent run on?
+
+## The order Claude Code resolves the subagent model
+
+This is the order in the sub-agents docs on 2026-10-19.
+
+| Priority | Source | Note |
+| --- | --- | --- |
+| 1 | The model parameter Claude passes when it starts the subagent | Chosen per call |
+| 2 | The model field in the subagent definition | inherit selects the main conversation's model |
+| 3 | CLAUDE_CODE_SUBAGENT_MODEL | An alias or a full model id |
+| 4 | The main conversation's model | The fallback |
+
+The order changed in v2.1.251. Before that, the environment variable came first and overrode both the per-call parameter and the frontmatter. Older guides still describe that order.
+
+In practice, the setting closest to the call wins. What Claude passes for one call beats the agent file, and the agent file beats a session-wide variable. The main model is the last resort.
+
+## Frontmatter: inherit, alias or full id
+
+The model field accepts the aliases sonnet, opus, haiku and fable, a full model id such as claude-opus-5-5, or inherit. Anthropic's cost page suggests model: haiku for simple subagent tasks.
+
+```markdown
+---
+name: log-reader
+description: Reads logs and reports errors
+model: haiku
+---
+```
+
+## CLAUDE_CODE_SUBAGENT_MODEL and the FORCE flag
+
+The environment variable sets one model for every subagent that nothing else assigns. Since v2.1.257, adding CLAUDE_CODE_SUBAGENT_MODEL_FORCE=1 applies it to every subagent and overrides definitions and per-call choices. While FORCE is on, Claude cannot pass a model.
+
+```json
+{
+  "env": {
+    "CLAUDE_CODE_SUBAGENT_MODEL": "haiku",
+    "CLAUDE_CODE_SUBAGENT_MODEL_FORCE": "1"
+  }
+}
+```
+
+## Built-in agents: Explore, Plan, general-purpose
+
+- Explore is read-only. Its model is the main conversation's model, with exceptions when the main model is Fable. To run it cheaper, define a subagent named Explore with model: haiku. Setting CLAUDE_CODE_SUBAGENT_MODEL alone does not change it.
+- Plan is read-only and inherits the main model unless the environment variable with FORCE overrides it.
+- General-purpose uses CLAUDE_CODE_SUBAGENT_MODEL if set and nothing else assigns a model. Otherwise it uses the main model.
+
+## Effort is separate from model
+
+A subagent definition can set effort to low, medium, high, xhigh or max, and the available levels depend on the model. From v2.1.292, Claude can also pass an effort per call. The CLAUDE_CODE_EFFORT_LEVEL environment variable overrides both.
+
+## Why a subagent may still run on the parent's model
+
+- Nothing assigns a model, so rule 4 applies.
+- CLAUDE_CODE_SUBAGENT_MODEL_FORCE is on, or the variable is set without the model you expected.
+- The built-in Explore agent follows its own listed rule, not the environment variable.
+
+People also report fallbacks that these rules do not explain. Issue #43869 says all mechanisms resolve to the parent model, and issue #100082 reports frontmatter model ignored, with 1,149 of 1,371 subagents on the parent's Opus. Both were open on 2026-10-19. They are user reports, and I make no claim about their cause.
+
+## Static choice versus per-task choice
+
+Frontmatter and the environment variable are static: one answer for an agent or a whole session. A rename and an architecture review that go through the same agent get the same model. A PreToolUse hook can set the per-call model instead, so it can differ per task. Downshift does this on Claude Code, and in one session it was observed to take effect on two spawns.
+
+Two limits. Downshift treats a pinned model as an explicit choice and leaves it alone, so it only routes subagents whose model is not pinned. And with FORCE on, Anthropic says Claude cannot pass a model, so I expect a rewrite not to win there. I have not tested that.
+
+## Check what actually ran
+
+/tasks shows each subagent's model and any effort level (v2.1.242 and later). Downshift's downshift try "&lt;task&gt;" previews its decision before a spawn, and downshift session --tree lists the subagents of a session with their cost on Claude Code.
+
+If the model shown is not the one you expected, walk the order from the top and stop at the first rule that applies. That rule is in charge.
+
+## What a per-task choice looks like
+
+Captured from downshift try on 2026-10-19, assuming claude-opus-5-5 as the current model. The gap is a list-price estimate for one call between two models, not a session or monthly saving. Held means the requested model runs.
+
+| Task | Tier | Model move | Estimated gap | Outcome | Why |
+| --- | --- | --- | --- | --- | --- |
+| rename the userId variable to accountId | small | opus -&gt; haiku | ~75% cheaper (est.) | Rewritten | trivial task, no risk, confident |
+| refactor the checkout module | mid | opus -&gt; sonnet | ~50% cheaper (est.) | Rewritten | medium task, no risk, confident |
+| migrate the payment webhook to the new auth scheme | frontier | stays on opus | none | Stays on frontier | complex task, touches a risk area, confident |
+
+The payment webhook stays on opus because it touches a risk area. The other two move down one tier or two.
+
+Source: downshift try output, captured 2026-10-19 (reproduce with the command shown)
+
+Honest status
+
+Verified on Claude Code only. Codex and Cursor are functional, OpenCode is beta. The headline figure is about 24% fewer tokens per accepted run with routing (95% interval +2.1% to +46.7%; 16% per run; 46 runs, one operator, mechanical delegated tasks, 2026-10-21). An earlier list-price trial on 2026-10-15 showed about 12% (checks passed 12/12 in both arms). On natural complex tasks nothing is attributable yet.
+
+## Frequently asked questions
+
+### Does model: haiku in frontmatter beat CLAUDE_CODE_SUBAGENT_MODEL?
+
+Since v2.1.251, yes, unless CLAUDE_CODE_SUBAGENT_MODEL_FORCE=1 is set. Before that version the environment variable won.
+
+### Will Downshift override a model I pinned in an agent file?
+
+No. A pinned model is an explicit choice, and model: inherit behaves like no model. Omit the field if you want per-task routing.
+
+### Why does my subagent still run on Opus?
+
+Check, in order: the model field, the environment variable and FORCE, and whether the agent is a built-in such as Explore. If all are clear and it still follows the parent, issue #43869 shows you are not alone.
+
+## Install
+
+Run downshift setup --dry-run first to preview every change. downshift setup --undo restores your backups.
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/tiagovilasboas/downshift/main/install.sh | sh && downshift setup
+```
+
+Claude Code plugin
+
+```text
+/plugin install downshift --marketplace tiagovilasboas/downshift
+```
+Start with DownshiftGitHub
+## Related guides
+
+- [Claude Code model routing: choosing the model per task](/guides/claude-code-model-routing/)
+- [Rewriting a subagent's model with a PreToolUse hook](/guides/claude-code-pretooluse-hook-subagent-model/)
+- [Claude Code token optimization: the levers, ranked by evidence](/guides/claude-code-token-optimization/)
+- [Qual modelo cada subagente usa no Claude CodePortuguês](/pt-br/guias/modelo-do-subagente-claude-code/)
+
+## Sources
+
+1. **Anthropic docs**measured [code.claude.com/docs/en/sub-agents](https://code.claude.com/docs/en/sub-agents) model resolution order, FORCE, built-in agents, effort; the last 11,177 characters of the page were not read (fetched 2026-10-19)
+2. **Anthropic docs**measured [code.claude.com/docs/en/costs](https://code.claude.com/docs/en/costs) model: haiku for simple subagent tasks (fetched 2026-10-19)
+3. **GitHub issues**measured [github.com/anthropics/claude-code/issues/43869](https://github.com/anthropics/claude-code/issues/43869) open on 2026-10-19; user report, cause not established
+4. **GitHub issues**measured [github.com/anthropics/claude-code/issues/100082](https://github.com/anthropics/claude-code/issues/100082) open on 2026-10-19; user report, cause not established
+5. **Downshift repo**measured [docs/guides/subagents.md](https://github.com/tiagovilasboas/downshift/blob/main/docs/guides/subagents.md) a subagent is routable only when its model is not pinned
+6. **Downshift repo**measured [docs/evidence/claude-code-rewrite-honored-2026-10-06.md](https://github.com/tiagovilasboas/downshift/blob/main/docs/evidence/claude-code-rewrite-honored-2026-10-06.md) rewrite observed, one session, two spawns
+7. **Downshift CLI output**measured downshift try and downshift dci output, captured 2026-10-19 (reproduce with the commands shown) routing decisions

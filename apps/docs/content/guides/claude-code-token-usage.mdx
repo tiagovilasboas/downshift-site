@@ -1,0 +1,118 @@
+---
+title: "Claude Code token usage: where tokens go and how to see it"
+description: "Where Claude Code tokens go: context, cache misses, subagents. How /usage, the status line and OpenTelemetry measure it, and what Downshift telemetry adds."
+order: 1
+---
+
+# Why Claude Code token usage climbs, and how to see it
+
+## The two things that grow: context and subagents
+
+Each request carries the system prompt, project context, every earlier message and every tool result. Caching makes the re-read cheaper, not free. Two things make the bill grow faster than your typing.
+
+- Context grows with every turn. Anthropic notes that a one-line question in a session open all day still draws usage for the whole conversation.
+- Subagents add requests. Each one sends its own requests on top of the main conversation's, with its own context window.
+
+Cache misses and scheduled tasks sit on top of those two. They change how often the full context is paid for, not how big it is.
+
+## Measure token usage with /usage: attribution and flags
+
+The Session block at the top of /usage lists token counts and a dollar figure. Claude Code computes that figure locally from token counts at list price, so it is an estimate. On Pro and Max, usage is included in the plan, so the session cost is not a billing number.
+
+On a subscription, /usage also shows a plan usage breakdown. It attributes recent usage to skills, subagents, plugins and individual MCP servers, and flags behaviors such as long context or cache misses when one accounts for 10% or more. Press d or w for the last 24 hours or 7 days. The figures come from local history on this machine, so other devices and claude.ai are not included.
+
+## The prompt cache line and what a miss means
+
+From v2.1.251, /usage adds a Prompt cache (main) line after the first response. It shows the request count, the share of input tokens served from cache, the misses and whether the cache is warm. From v2.1.260 it can name a likely cause, such as changed tool definitions.
+
+The line covers the main conversation only. Subagent requests are not in it.
+
+## Status line and OpenTelemetry for continuous numbers
+
+A status line script can read cache_creation_input_tokens and cache_read_input_tokens from the current_usage object, plus the prompt_cache object. A high read-to-creation ratio means the cache is working. If creation stays high turn after turn, something in the prefix keeps changing.
+
+For a team, the OpenTelemetry exporter reports cache read and creation tokens per user and session.
+
+## Third-party usage tools
+
+Third-party tools read the same local session data and aggregate it over days or months. ccusage had 19,066 GitHub stars on 2026-10-19. Stars show reach, not accuracy, and I did not verify its output against an invoice. Check each tool's README for what it counts and how it prices cache tokens.
+
+## Five-hour and weekly limits: what drains them
+
+On a subscription, the session and weekly limits are usage windows shared across models. Anthropic's cost page says that switching with /model does not restore access after a session or weekly limit. It does help after a model-specific limit, such as an Opus limit.
+
+The causes of fast drain are the ones above: long context, a cold cache after a break, scheduled tasks and subagents.
+
+## Where Downshift telemetry fits
+
+Downshift writes a local, prompt-free log, events.jsonl, with counts, hashes and timings. downshift stats summarizes routing decisions, and downshift session --tree shows subagents and observed token counts on Claude Code. downshift report compares routed and control groups in tokens per completed task. It requires at least 20 completed tasks per group and prints no dollar amounts.
+
+Downshift records child token usage on Claude Code only. Its current stats and report output contains no dollar amounts. The 2026-10-15 controlled trial below retains historical list-price estimates; those are not current report output.
+
+## A diagnosis checklist
+
+1. Run /usage. Note the biggest attribution share and any behavior flag.
+2. Read the Prompt cache line. Many misses point to model switches, tool changes or long breaks.
+3. Check whether subagents are a large share. If so, look at which model they run on.
+4. Run /clear between unrelated tasks and compact at natural breaks.
+5. Change one thing at a time and read /usage again.
+
+## A measured trial, with its limits
+
+The one controlled comparison Downshift has published. Claude Code, 2026-10-15, mechanical delegated tasks, list-price cost per run.
+
+| Arm | Cost per run | Checks passed | Note |
+| --- | --- | --- | --- |
+| Control (no routing) | $0.67 | 12/12 | Same prompts, same model |
+| Routed | $0.59 | 12/12 | About 12% estimated saving (earlier trial, 2026-10-15) |
+
+One operator, three runs per cell. About 1 in 10 spawns is left unrouted as a control group, which is what lets downshift report compare the two arms on real usage.
+
+Source: docs/evidence/subagent-routing-ab-2026-10-15.md
+
+Honest status
+
+Verified on Claude Code only. Codex and Cursor are functional, OpenCode is beta. The headline figure is about 24% fewer tokens per accepted run with routing (95% interval +2.1% to +46.7%; 16% per run; 46 runs, one operator, mechanical delegated tasks, 2026-10-21). An earlier list-price trial on 2026-10-15 showed about 12% (checks passed 12/12 in both arms). On natural complex tasks nothing is attributable yet.
+
+## Frequently asked questions
+
+### Is the /usage dollar figure my bill?
+
+No. Claude Code computes it locally at list price. For authoritative billing, use the Usage page in the Claude Console. On Pro and Max, usage is included in the plan.
+
+### Does /usage show what my subagents cost?
+
+The plan breakdown attributes a share to subagents. The Prompt cache line covers the main conversation only. Downshift's session view adds observed per-subagent token counts on Claude Code.
+
+### Does Downshift read my prompts to measure usage?
+
+No. Task text stays in memory for scoring and is never stored. The log holds counts, hashes and timings.
+
+## Install
+
+Run downshift setup --dry-run first to preview every change. downshift setup --undo restores your backups.
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/tiagovilasboas/downshift/main/install.sh | sh && downshift setup
+```
+
+Claude Code plugin
+
+```text
+/plugin install downshift --marketplace tiagovilasboas/downshift
+```
+Start with DownshiftGitHub
+## Related guides
+
+- [Claude Code token optimization: the levers, ranked by evidence](/guides/claude-code-token-optimization/)
+- [When Claude Code's prompt cache goes cold, and what to do](/guides/claude-code-prompt-cache/)
+- [Claude Code subagent model: which one does a subagent run on?](/guides/claude-code-subagent-models/)
+- [O limite de uso do Claude Code acaba rápido: de onde vem o consumoPortuguês](/pt-br/guias/limite-de-uso-claude-code/)
+
+## Sources
+
+1. **Anthropic docs**measured [code.claude.com/docs/en/costs](https://code.claude.com/docs/en/costs) /usage, plan breakdown, prompt cache line, limits, why usage climbs (fetched 2026-10-19)
+2. **Anthropic docs**measured [code.claude.com/docs/en/prompt-caching](https://code.claude.com/docs/en/prompt-caching) status line fields, Check cache performance (fetched 2026-10-19)
+3. **GitHub API**measured [github.com/ccusage/ccusage](https://github.com/ccusage/ccusage) ccusage star count 19,066 on 2026-10-19, rechecked via GitHub API; feature details not verified [U]
+4. **Downshift repo**measured [docs/evidence/subagent-routing-ab-2026-10-15.md](https://github.com/tiagovilasboas/downshift/blob/main/docs/evidence/subagent-routing-ab-2026-10-15.md) trial figures
+5. **Downshift repo**measured [docs/reference/capability-matrix.md](https://github.com/tiagovilasboas/downshift/blob/main/docs/reference/capability-matrix.md) report needs measurable completion; usage per subagent on Claude Code transcript only

@@ -1,0 +1,119 @@
+---
+title: "Claude Code prompt cache: TTL, cold sends and keeping warm"
+description: "How Claude Code prompt caching works: the 5-minute and 1-hour TTL, what invalidates the cache, what a cold send costs and when keeping it warm is worth a ping."
+order: 7
+---
+
+# When Claude Code's prompt cache goes cold, and what to do
+
+## How the prompt cache is organized
+
+Claude Code resends the full context on every request. The API caches by matching the start of the request, the prefix, against content it recently processed. The match is exact, so a change anywhere in the prefix recomputes everything after it. Rarely changing content goes first: system prompt, then project context, then the conversation.
+
+## TTL: five minutes or one hour, and who gets which
+
+| Request bucket | Claude subscription, within plan usage | API key, usage credits or cloud provider |
+| --- | --- | --- |
+| Main conversation | One hour | Five minutes |
+| Subagents, compaction and other requests | Five minutes (a few server-controlled helper requests get one hour) | Five minutes |
+
+You can choose a TTL yourself with the promptCacheTtl and subagentPromptCacheTtl settings, from v2.1.242. A longer TTL charges a higher rate for cache writes, so it pays off only when you really leave the session idle.
+
+## Actions that invalidate the cache
+
+- Switching models, because each model has its own cache.
+- Changing effort level on most models.
+- Turning on fast mode.
+- Adding or removing MCP tool definitions, when tool search does not defer them.
+- Compacting the conversation, and resuming after a break longer than the TTL.
+- Upgrading Claude Code.
+
+Spawning a subagent, editing CLAUDE.md mid-session, changing permission mode and running /rewind keep the cache.
+
+## What a cold send costs
+
+The next request reads the whole context as uncached input and writes it back to the cache at the cache-write rate. The cost scales with context size. In cache-tax's own example, one cold send re-writes 200,502 tokens, priced at $4.01 with the mod's September 2026 price table. That is the mod's example, not a typical bill.
+
+## See it: /usage and the status line
+
+From v2.1.251, /usage adds a Prompt cache (main) line with the hit share, the misses and whether the cache is warm. A status line script can read the same numbers from the prompt_cache object. Use them to find out whether misses are your problem before you pay to fix them.
+
+## cache-tax and /keepwarm
+
+cache-tax is a Claude Code mod by Karan Bansal, MIT licensed. Downshift bundles a vendored copy, and the upstream repository is karanb192/cache-tax, which had 212 stars on 2026-10-19. Downshift did not build it.
+
+- Cold-send guard: when the context is at least 50,000 tokens and the last request is more than an hour old, an ordinary message is held once with its estimated rewrite price. Send it again and it goes through.
+- /keepwarm: you arm it. After 50 idle minutes inside the window, one tool-less fork reads the cache so it is not rewritten.
+- It needs Claude Code 2.1.287 or later, and a one-hour cache for the keep-warm timer.
+- A ping spends usage. It is billed at list price on an API key and counts toward plan windows on a subscription.
+
+## Does routing subagents break the cache?
+
+Per Anthropic, a subagent starts its own conversation with its own system prompt and tools. Its first request does not read the parent's cache, and it warms a cache of its own. The parent's cache is unaffected, because the call and result just append to the conversation. Each model has its own cache, so a subagent on a different model warms its own.
+
+That is the documented mechanism. Downshift has not measured cache-hit effects of routing, so I will not claim either a gain or a loss.
+
+## When not to keep warm
+
+Skip the ping when the break is short, when you will compact or start fresh anyway, or when you are on a plan where the extra usage matters. A /compact at a natural break between tasks is often cheaper than paying to hold a cache you will not use. Claude Code can also compact an idle one-hour session shortly before expiry, and idleCompaction, from v2.1.290, turns that off.
+
+## What cache-tax does, as Downshift documents it
+
+No live capture here. These are the two behaviors from Downshift's own product facts.
+
+| Situation | What happens |
+| --- | --- |
+| Cold send on a 50k+ context | Held once, with the estimated rewrite price, so you decide |
+| /keepwarm armed before a break | Keeps the cache alive through the break; warming spends usage |
+
+Output compaction is a separate matter. A Claude Code hook cannot rewrite tool output in flight, so Downshift's native compressor measures bytes and saves no tokens there.
+
+Source: README.md, cache-tax and output compaction sections
+
+Honest status
+
+Verified on Claude Code only. Codex and Cursor are functional, OpenCode is beta. The headline figure is about 24% fewer tokens per accepted run with routing (95% interval +2.1% to +46.7%; 16% per run; 46 runs, one operator, mechanical delegated tasks, 2026-10-21). An earlier list-price trial on 2026-10-15 showed about 12% (checks passed 12/12 in both arms). On natural complex tasks nothing is attributable yet.
+
+## Frequently asked questions
+
+### Why was my first message after a break slow and expensive?
+
+The cache expired. After the TTL, the next request recomputes the full input and writes it back to the cache.
+
+### Does /keepwarm cost anything?
+
+Yes. A ping is a cache read plus a few uncached tokens and one short answer, billed at list price on an API key and counted in plan windows on a subscription.
+
+### Is cache-tax Downshift's code?
+
+No. It is Karan Bansal's MIT mod, vendored and bundled. Downshift carries a colour-only local patch.
+
+## Install
+
+Run downshift setup --dry-run first to preview every change. downshift setup --undo restores your backups.
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/tiagovilasboas/downshift/main/install.sh | sh && downshift setup
+```
+
+Claude Code plugin
+
+```text
+/plugin install downshift --marketplace tiagovilasboas/downshift
+```
+Start with DownshiftGitHub
+## Related guides
+
+- [Why Claude Code token usage climbs, and how to see it](/guides/claude-code-token-usage/)
+- [Claude Code token optimization: the levers, ranked by evidence](/guides/claude-code-token-optimization/)
+- [Claude Code model routing: choosing the model per task](/guides/claude-code-model-routing/)
+- [Claude Code subagent model: which one does a subagent run on?](/guides/claude-code-subagent-models/)
+
+## Sources
+
+1. **Anthropic docs**measured [code.claude.com/docs/en/prompt-caching](https://code.claude.com/docs/en/prompt-caching) prefix match, TTL table, invalidators, subagents and the cache, idleCompaction, Check cache performance (fetched 2026-10-19)
+2. **Anthropic docs**measured [code.claude.com/docs/en/costs](https://code.claude.com/docs/en/costs) Prompt cache (main) line (fetched 2026-10-19)
+3. **Downshift repo**measured [hooks/cache-tax/README.md](https://github.com/tiagovilasboas/downshift/blob/main/hooks/cache-tax/README.md) behavior, requirements, 200,502 tokens at $4.01 example, keep-warm spends usage, upstream and licence
+4. **GitHub API**measured [github.com/karanb192/cache-tax](https://github.com/karanb192/cache-tax) 212 stars and MIT on 2026-10-19
+5. **Downshift repo**measured [README.md](https://github.com/tiagovilasboas/downshift/blob/main/README.md) honest scope of output compaction
+6. **Downshift**unverified cache effect of routing not measured by Downshift

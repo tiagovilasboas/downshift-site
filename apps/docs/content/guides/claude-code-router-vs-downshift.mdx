@@ -1,0 +1,117 @@
+---
+title: "Claude Code Router vs Downshift: gateway or hook, compared"
+description: "Claude Code Router is a local gateway to many providers; Downshift is a hook that picks among the session's own models. How they differ and when to pick each."
+order: 9
+---
+
+# Claude Code Router or Downshift: a gateway and a hook solve different problems
+
+## The short answer
+
+If you want Claude Code to talk to other providers, rotate keys, fail over or log every request, a gateway is the right shape. If you want delegated subagents to stop inheriting your most expensive model, and you want that decided per task, a hook is. They can run side by side.
+
+Facts below come from each project's README and GitHub on 2026-10-19. Benchmarks and claims belong to their authors.
+
+As I read the two READMEs, neither does the other's job. A gateway cannot size a subagent by task unless you write the rule, and a hook cannot reach a provider your session does not have.
+
+## How Claude Code Router and Downshift each work
+
+- Claude Code Router describes itself as a local model gateway and control plane. Agents connect to one local endpoint, which listens on 127.0.0.1:3456 by default, and CCR applies routing rules, retries and fallbacks behind it.
+- Downshift is a single Go binary with no daemon. It registers as a PreToolUse hook, scores the subagent's task text locally and rewrites only the model field, plus reasoning_effort where the harness takes it.
+
+## What each can route to
+
+CCR lists many protocols and providers, including Anthropic Messages, OpenAI, Gemini, OpenRouter and DeepSeek, and supports Claude Code and other agents. Downshift routes only among the models in your session's catalog, such as haiku, sonnet and opus on Claude Code. It never writes a model id from another harness.
+
+## Decision rules: configured or scored
+
+CCR routing is configured: conditions on headers and bodies, prefixes, rewrites and ordered fallbacks. Downshift's rules are built in: a classifier scores the task into a tier, risk floors apply, and guardrails hold any change the evidence does not support. You can raise the floor per project, never lower it. Downshift has no LLM in its decision. How CCR decides depends on how you configure it.
+
+## Failure modes
+
+For Downshift, any error, panic or timeout leaves the spawn unchanged, and doubt keeps your model. The cost of that safety is that it routes less. In the controlled trial it applied 0 downshifts on one benchmark of natural tasks and 3 of 34 on another. A gateway keeps requests running through retries and fallbacks. Its failure modes are the provider's and the network's, which suits a different goal.
+
+## Setup effort and what each touches
+
+|  | Claude Code Router | Downshift |
+| --- | --- | --- |
+| Mechanism | Local gateway and control plane | PreToolUse hook, no daemon |
+| Routes to | Providers you configure | Models already in your session |
+| Extra provider account | Only if you route to other providers | No |
+| Where the agent connects | A local endpoint (127.0.0.1:3456 by default) | Unchanged: it is a hook |
+| Licence | MIT | Apache-2.0 |
+| Stars on 2026-10-19 | 37,753 | 6 |
+| Maturity | Large user base; last push 2026-10-10 | Beta, v0.1.0-beta.14 |
+| Harnesses verified | Lists Claude Code and other agents; not assessed here | Claude Code only |
+| Savings evidence | Not assessed here | Two controlled runs on mechanical tasks: about 24% fewer tokens per accepted run (2026-10-21, one operator); earlier trial about 12% at list price |
+
+Stars show attention, not fit. Third-party posts disagree about whether CCR is still maintained, so check its repository, which showed a push on 2026-10-10.
+
+## When to use both, or neither
+
+Use both if you want other providers for the main session through a gateway and per-task sizing for subagents through a hook. Whether the two interact cleanly is untested here. Use neither if your subagents already pin a model per agent file and that is enough.
+
+## Other routers worth a look
+
+- ccproxy (355 stars): hook and proxy mods for Claude Code.
+- model-matchmaker (168 stars): a local hook for Cursor and Claude Code that routes prompts to a tier.
+- claude-code-model-router-hook (105 stars): Claude Code hooks that switch tier by complexity.
+
+## What a hook decides, per task
+
+Captured from downshift try on 2026-10-19, assuming claude-opus-5-5 as the current model. The gap is a list-price estimate for one call between two models, not a session or monthly saving. Held means the requested model runs.
+
+| Task | Tier | Model move | Estimated gap | Outcome | Why |
+| --- | --- | --- | --- | --- | --- |
+| rename the userId variable to accountId | small | opus -&gt; haiku | ~75% cheaper (est.) | Rewritten | trivial task, no risk, confident |
+| migrate the payment webhook to the new auth scheme | frontier | stays on opus | none | Stays on frontier | complex task, touches a risk area, confident |
+| run the unit tests and report the result | mid | opus -&gt; sonnet | not applied | Held | medium task, no risk, unsure, no clear signal |
+
+Source: downshift try output, captured 2026-10-19 (reproduce with the command shown)
+
+Honest status
+
+Verified on Claude Code only. Codex and Cursor are functional, OpenCode is beta. The headline figure is about 24% fewer tokens per accepted run with routing (95% interval +2.1% to +46.7%; 16% per run; 46 runs, one operator, mechanical delegated tasks, 2026-10-21). An earlier list-price trial on 2026-10-15 showed about 12% (checks passed 12/12 in both arms). On natural complex tasks nothing is attributable yet.
+
+## Frequently asked questions
+
+### Does Downshift need another provider account?
+
+No. It chooses among the models your session already has, so it adds no provider.
+
+### Can I run Claude Code Router and Downshift together?
+
+They solve different problems, so it is plausible. I have not tested the combination.
+
+### Which one saves more money?
+
+I cannot compare them. They were not measured on the same tasks. Downshift's own figure is about 24% fewer tokens per accepted run in its latest controlled run on mechanical tasks (2026-10-21, one operator, 46 runs), after about 12% at list price in an earlier trial.
+
+## Install
+
+Run downshift setup --dry-run first to preview every change. downshift setup --undo restores your backups.
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/tiagovilasboas/downshift/main/install.sh | sh && downshift setup
+```
+
+Claude Code plugin
+
+```text
+/plugin install downshift --marketplace tiagovilasboas/downshift
+```
+Start with DownshiftGitHub
+## Related guides
+
+- [Claude Code model routing: choosing the model per task](/guides/claude-code-model-routing/)
+- [Rewriting a subagent's model with a PreToolUse hook](/guides/claude-code-pretooluse-hook-subagent-model/)
+- [Claude Code subagent model: which one does a subagent run on?](/guides/claude-code-subagent-models/)
+
+## Sources
+
+1. **GitHub**measured [github.com/musistudio/claude-code-router](https://github.com/musistudio/claude-code-router) README and API on 2026-10-19: local gateway, MIT, 37,753 stars, last push 2026-10-10, default 127.0.0.1:3456
+2. **GitHub API**measured ccproxy, model-matchmaker, claude-code-model-router-hook star counts from the SEO plan, 2026-10-19; mechanisms from repository descriptions
+3. **Downshift repo**measured [README.md](https://github.com/tiagovilasboas/downshift/blob/main/README.md) single binary, no daemon, harness status, control group
+4. **Downshift repo**measured [docs/evidence/subagent-routing-ab-2026-10-15.md](https://github.com/tiagovilasboas/downshift/blob/main/docs/evidence/subagent-routing-ab-2026-10-15.md) 0 downshifts on b2, 3 of 34 on b6, about 12% on b5 (2026-10-15 trial)
+5. **Third-party reports**unverified maintenance status of CCR sources conflict; check the repository
+6. **Downshift CLI output**measured downshift try and downshift dci output, captured 2026-10-19 (reproduce with the commands shown) routing decisions
