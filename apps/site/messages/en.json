@@ -1,9 +1,6 @@
 {
-  "meta": {
-    "title": "Downshift: Claude Code routing, Compactor and DCI",
-    "description": "Free, local tool for Claude Code. Right model per subagent, shorter clean output, only the code a change touches. No extra AI."
-  },
   "nav": {
+    "skipToContent": "Skip to content",
     "problem": "The problem",
     "features": "What you get",
     "action": "See it in action",
@@ -13,7 +10,12 @@
     "harnesses": "Harnesses",
     "start": "Get started",
     "docs": "Docs",
+    "sponsor": "Sponsor",
     "github": "GitHub",
     "switchLang": "Ler em português"
+  },
+  "meta": {
+    "title": "Downshift: Claude Code routing, Compactor and DCI",
+    "description": "Free, local tool for Claude Code. Right model per subagent, shorter clean output, only the code a change touches. No extra AI."
   }
 }

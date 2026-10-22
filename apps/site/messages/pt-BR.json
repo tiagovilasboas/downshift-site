@@ -1,9 +1,6 @@
 {
-  "meta": {
-    "title": "Downshift: roteamento, Compact e DCI para Claude Code",
-    "description": "Ferramenta gratuita e local para Claude Code. Modelo certo por subagente, saída mais curta de comandos rotineiros, só o código que a mudança toca."
-  },
   "nav": {
+    "skipToContent": "Ir para o conteúdo",
     "problem": "O problema",
     "features": "O que você recebe",
     "action": "Veja em ação",
@@ -13,7 +10,12 @@
     "harnesses": "Harnesses",
     "start": "Comece agora",
     "docs": "Docs",
+    "sponsor": "Sponsor",
     "github": "GitHub",
     "switchLang": "Read in English"
+  },
+  "meta": {
+    "title": "Downshift: roteamento, Compact e DCI para Claude Code",
+    "description": "Ferramenta gratuita e local para Claude Code. Modelo certo por subagente, saída mais curta de comandos rotineiros, só o código que a mudança toca."
   }
 }
