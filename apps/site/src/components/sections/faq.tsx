@@ -37,7 +37,7 @@ const faqs: { q: string; a: string }[] = [
   },
   {
     q: 'How much does it save?',
-    a: 'In real use with routing and compactor combined, about 53% fewer tokens per completed task (KiroCrew harness, 2026-10-21, 6 control tasks — directional, not definitive). Routing alone: about 24% fewer tokens per accepted run in a four-arm Claude Code trial (46 runs, one operator, 2026-10-21; 16% per run, interval +2.1% to +46.7%). Compactor savings are on top of routing. Estimates are not invoices.',
+    a: 'In real use with routing and compactor combined, about 55% fewer tokens per completed task (38 routed vs 7 control tasks, multiple harnesses, 2026-10-23 — directional, control group still growing). Routing alone: about 24% fewer tokens per accepted run in a four-arm Claude Code trial (46 runs, one operator, 2026-10-21; 16% per run, interval +2.1% to +46.7%). Compactor savings are on top of routing. Estimates are not invoices.',
   },
   {
     q: 'Is Downshift related to the React downshift library?',

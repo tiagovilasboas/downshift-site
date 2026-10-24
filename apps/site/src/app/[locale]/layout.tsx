@@ -82,6 +82,9 @@ export default async function RootLayout({ children, params }: Props) {
 
         <Analytics />
         <SpeedInsights />
+        {/* Routing visualization animation script — controls figure#dsc */}
+        {/* eslint-disable-next-line @next/next/no-sync-scripts */}
+        <script src="/components/dsc-anim.js" defer></script>
       </body>
     </html>
   );
