@@ -20,8 +20,8 @@ const HARNESSES = [
     dot: '',
     level: 'Functional',
     rewrite: 'Emitted',
-    used: 'Unconfirmed; discarded on Free and legacy Pro',
-    compactor: 'Run the command directly',
+    used: 'Unconfirmed (P1.6); child end verified 2026-10-24 on 3.27.12',
+    compactor: 'Agent runs downshift compact; setup adds Shell hooks (unverified live)',
   },
   {
     name: 'OpenCode',

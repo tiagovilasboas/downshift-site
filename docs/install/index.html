@@ -186,17 +186,31 @@ downshift dci benchmark       # Run local performance and relevance benchmarks</
 <pre tabindex="0"><code class="language-bash">downshift stats --dci         # Display DCI-specific prompts, injections, and latencies</code></pre>
 <p>See <a href="https://github.com/tiagovilasboas/downshift/blob/main/docs/design/code-intelligence.md" rel="noopener">code-intelligence.md</a> for full architectural details.</p>
 <h2 id="install-cursor">Install (Cursor)</h2>
-<p><strong>Status: Functional.</strong> The rewrite is emitted on a real spawn; the harness applying it is unconfirmed, and it is discarded on Free and legacy Pro plans (<a href="https://github.com/tiagovilasboas/downshift/blob/main/docs/evidence/cursor-rewrite-honored-2026-10-10.md" rel="noopener">evidence</a>, <a href="https://github.com/tiagovilasboas/downshift/blob/main/docs/evidence/cursor-gap-diagnostic.md" rel="noopener">gap diagnostic</a>).</p>
-<p>Cursor's hook protocol mirrors Claude Code's — same <code>preToolUse</code> interception, <code>updated_input</code> to rewrite the subagent's model. Build the binary, then add the hook to <code>.cursor/hooks.json</code> (project level) or <code>~/.cursor/hooks.json</code> (global):</p>
+<p><strong>Status: Functional.</strong> The rewrite is emitted on a real spawn; the harness applying it is unconfirmed, and it is discarded on Free and legacy Pro plans (<a href="https://github.com/tiagovilasboas/downshift/blob/main/docs/evidence/cursor-rewrite-honored-2026-10-10.md" rel="noopener">evidence</a>, <a href="https://github.com/tiagovilasboas/downshift/blob/main/docs/evidence/cursor-gap-diagnostic.md" rel="noopener">gap diagnostic</a>). On Cursor 3.27.12, Task <code>preToolUse</code> often omits <code>model</code> and <code>model_id</code>; Downshift remembers the parent composer slug from earlier hooks (<a href="https://github.com/tiagovilasboas/downshift/blob/main/docs/internal/tasks/2026-10-24-cursor-live/spike.md" rel="noopener">probe notes</a>).</p>
+<p><strong>Fastest path:</strong> <code>downshift setup cursor --dry-run</code>, then <code>downshift setup cursor --yes</code>.</p>
+<p>Manual <code>~/.cursor/hooks.json</code> (project or global):</p>
 <pre tabindex="0"><code class="language-json">{
   &quot;version&quot;: 1,
   &quot;hooks&quot;: {
+    &quot;sessionStart&quot;: [
+      { &quot;command&quot;: &quot;downshift cursor-touch&quot; }
+    ],
+    &quot;beforeSubmitPrompt&quot;: [
+      { &quot;command&quot;: &quot;downshift cursor-touch&quot;, &quot;matcher&quot;: &quot;UserPromptSubmit&quot; }
+    ],
     &quot;preToolUse&quot;: [
-      { &quot;command&quot;: &quot;downshift cursor&quot;, &quot;matcher&quot;: &quot;Task&quot; }
+      { &quot;command&quot;: &quot;downshift cursor&quot;, &quot;matcher&quot;: &quot;Task&quot; },
+      { &quot;command&quot;: &quot;downshift cursor&quot;, &quot;matcher&quot;: &quot;Shell&quot; }
+    ],
+    &quot;beforeShellExecution&quot;: [
+      { &quot;command&quot;: &quot;downshift cursor&quot;, &quot;matcher&quot;: &quot;*&quot; }
+    ],
+    &quot;subagentStop&quot;: [
+      { &quot;command&quot;: &quot;downshift end cursor&quot; }
     ]
   }
 }</code></pre>
-<p>The <code>matcher: "Task"</code> scopes the hook to subagent spawns only. Cursor watches the config and reloads it on save.</p>
+<p><code>cursor-touch</code> writes <code>~/.downshift/cursor-composer-model.json</code> so Task routing has a baseline when the spawn payload is empty. <code>subagentStop</code> runs <code>end cursor</code> (child-end link verified on 3.27.12+). Full install guide: <a href="https://github.com/tiagovilasboas/downshift/blob/main/docs/guides/install.md#install-cursor" rel="noopener">docs/guides/install.md</a>.</p>
 <h2 id="install-codex">Install (Codex)</h2>
 <p><strong>Status: Functional.</strong> The rewrite is emitted on a real spawn; the harness applying it is inferred, not observed (<a href="https://github.com/tiagovilasboas/downshift/blob/main/docs/evidence/codex-rewrite-honored-2026-10-02.md" rel="noopener">evidence</a>).</p>
 <p>Codex spawns subagents through a reserved <code>spawn_agent</code> tool under <code>multi_agent_v2</code>. You can't put a model on the provider-visible call, but a <code>PreToolUse</code> hook can inject the model <strong>and</strong> <code>reasoning_effort</code> into the tool input before the child starts — which is exactly where <code>downshift</code> runs.</p>
