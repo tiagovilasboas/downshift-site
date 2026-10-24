@@ -1,2 +1,15 @@
+# Not part of the published site. The site is the static HTML at the repo root.
 ROADMAP*.md
+SPIKE*.md
 README.md
+.claude
+.github
+apps
+packages
+scripts
+tests
+brand
+package.json
+pnpm-lock.yaml
+pnpm-workspace.yaml
+turbo.json
