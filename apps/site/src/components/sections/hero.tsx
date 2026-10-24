@@ -8,8 +8,8 @@ const STATS = [
   {
     cls: 'q',
     prefix: 'up to',
-    value: '~53%',
-    label: 'fewer tokens per task in real use, routing and compactor combined (KiroCrew, 2026-10-21). Routing alone: ~24% in a four-arm Claude Code trial (46 runs, one operator, 2026-10-21).',
+    value: '~55%',
+    label: 'fewer tokens per completed task in real use, routing and compactor combined (38 routed vs 7 control, multiple harnesses, 2026-10-23). Routing alone: ~24% in a four-arm Claude Code trial (46 runs, one operator, 2026-10-21).',
   },
   { cls: '', prefix: '', value: '0', label: 'extra AI calls to decide' },
   { cls: '', prefix: 'about', value: '1 in 10', label: 'spawns left unrouted on purpose, as a control group' },
