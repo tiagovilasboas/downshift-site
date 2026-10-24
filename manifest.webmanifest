@@ -1,4 +1,5 @@
 {
+ "id": "/",
  "name": "Downshift",
  "short_name": "Downshift",
  "description": "Deterministic model router and token optimization for AI coding agents.",
@@ -26,5 +27,6 @@
    "type": "image/png",
    "purpose": "maskable"
   }
- ]
+ ],
+ "lang": "en"
 }
